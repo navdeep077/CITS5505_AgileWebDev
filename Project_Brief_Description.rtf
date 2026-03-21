@@ -1,0 +1,334 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2868
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;\f2\froman\fcharset0 Times-Roman;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red24\green24\blue24;\red235\green235\blue235;
+}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c12157\c12157\c12157;\cssrgb\c93725\c93725\c93725;
+}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww14820\viewh13720\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs48 \cf0 Brief description of the Web Application
+\f1\b0\fs24 \
+\
+
+\f0\b\fs36 1. Functionality description 
+\f1\b0\fs24 \
+\
+This web application aims to create a location-based social hub for coffee lovers. It includes two main functions: visualised coffee shop information and user-friendly social features.\
+\
+
+\f0\b Main function 1: 
+\f1\b0 \
+\
+The information visualisation function allows users to view nearby coffee shops' names, locations, overall ratings, and opening hours on a map.\
+\
+In addition to this basic information, clicking on a shop's page allows users to view its menu, prices, available coffee beans, dine-in options, and pet-friendly information.\
+\
+Users can rate each coffee at the shop. This allows users to filter nearby shops based on their preferred coffee type. Users can also share discount codes for promotions or special offers, which will be prominently displayed.\
+\
+
+\f0\b Main function 2:
+\f1\b0 \
+\
+The social features primarily involve sharing coffee-related content, coffee matchmaking, and coffee-themed gatherings.\
+\
+Each user has a personal coffee profile where they can post coffee-related content and rate coffee shops or specific coffees. User levels are awarded based on the number of active days, posts, and ratings.\
+\
+If two users have both rated the same coffee shop and reached a certain user level, they can invite each other to a coffee chat. Users who reach a certain level can also initiate coffee-themed gatherings, which all users can participate in and provide feedback on.\
+\
+\
+
+\f0\b\fs36 \expnd0\expndtw0\kerning0
+2. Functionality Design challenge 
+\f1\b0\fs24 \kerning1\expnd0\expndtw0 \
+\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \expnd0\expndtw0\kerning0
+To make this a social hub rather than just a directory, the system needs to handle three distinct types of data: Geospatial (maps), Relational (shops/coffees/users), and Event-based (gatherings).\
+- 
+\f0\b Dynamic Map Interface
+\f1\b0 : A real-time map that aggregates shop data and filters results based on user-specific preferences (e.g., "Show me shops with Gesha beans within 5km").\
+- 
+\f0\b Granular Rating Engine
+\f1\b0 : Instead of just rating a shop 5 stars, users rate specific beans or drinks (e.g., "The Ethiopia Yirgacheffe Pour-over"). This feeds the filter system.\
+- 
+\f0\b Gamification Engine
+\f1\b0 : A logic layer that tracks user activity (posts, ratings, daily logins) to calculate "Coffee Levels," which unlock social permissions.\
+- 
+\f0\b Privacy-First Matchmaking
+\f1\b0 : A secure system that only allows "Coffee Chat" invites once specific mutual criteria and level requirements are met.\
+- Community Board: A dedicated space for user-generated discount codes and event hosting.
+\f2 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1 \cf0 \kerning1\expnd0\expndtw0 \
+\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \expnd0\expndtw0\kerning0
+3. Main Pages List
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs28 \cf0 1. The "Brew Map" (Home page)
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 The primary landing page. A full-screen or split-screen map showing nearby coffee shops with toggle-able filters (Pet-friendly, Open Now, specific Coffee Types).\
+\pard\pardeftab720\partightenfactor0
+
+\fs28 \cf0 \
+
+\f0\b 2. Shop Detail Page
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 All the information for each shop.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0\cf0 {\listtext	\uc0\u8226 	}- Vital Info: Menu, prices, bean origins.\
+{\listtext	\uc0\u8226 	}- Amenities: Dine-in status, pet-friendliness.\
+{\listtext	\uc0\u8226 	}- Social Proof: Recent user reviews and active discount codes.\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs28 \cf0 3. User "Barista Profile"
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 The personal hub. Shows user level (e.g., "Novice Sipper" to "Master Roaster"), coffee history, saved shops, and a feed of their recent posts.\
+\pard\pardeftab720\partightenfactor0
+
+\fs28 \cf0 \
+
+\f0\b 4. The "Social Grounds" (Community)
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 A feed for coffee-related content and a list of upcoming "Coffee Gatherings" (group meetups) organised by high-level users.\
+\pard\pardeftab720\partightenfactor0
+
+\fs28 \cf0 \
+
+\f0\b 5. Matchmaking & Messages
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 A private area where users can manage "Coffee Chat" invitations and communicate with their matches.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \kerning1\expnd0\expndtw0 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs36 \cf0 4. User stories
+\f1\b0\fs24 \
+\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat4 \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clcbpat4 \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clcbpat4 \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clcbpat4 \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 \expnd0\expndtw0\kerning0
+ID
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 As a...
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 I want to...
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 So that...
+\f1\b0 \cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 01
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 New User
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 View a map of nearby shops with their ratings and hours\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can quickly find a place to get a caffeine fix right now.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 02
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Connoisseur
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Filter shops by a specific coffee type (e.g., Cold Brew or Pour-over)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I don't waste time going to a shop that doesn't serve my preference.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 03
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Pet Owner
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Toggle a "Pet Friendly" filter on the map\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can bring my dog along for my morning ritual.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 04
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Bargain Hunter
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 View and share discount codes on a shop's page\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can save money and help the community find deals.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 05
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Foodie
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 View a shop\'92s menu and prices before visiting\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can decide if the shop fits my budget and taste.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 06
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Active Contributor
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Earn experience points for posting reviews and photos\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can increase my user level and unlock social features.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 07
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Social Butterfly
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Invite a user to a "Coffee Chat" after seeing we both like the same shop\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can meet local people who share my specific taste in coffee.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 08
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Community Leader
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Initiate a "Coffee Gathering" event once I reach a high level\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can organise a group cupping or social meet-up for other fans.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 09
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Refined Taster
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Rate a specific bean origin at a shop rather than just the shop itself\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can provide more accurate data for other enthusiasts.\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \tamarb640 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth360\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1480\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4880\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr240 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth5760\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrs\brdrw20\brdrcf3 \clbrdrl\brdrs\brdrw20\brdrcf3 \clbrdrb\brdrs\brdrw20\brdrcf3 \clbrdrr\brdrs\brdrw20\brdrcf3 \clpadt320 \clpadl0 \clpadb320 \clpadr0 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 10
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf3 Safety-Conscious User
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 Only receive chat invites from users who have reached a certain level\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf3 I can feel more secure knowing the person is a verified, active community member.\cell \lastrow\row
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \kerning1\expnd0\expndtw0 \
+\
+}
