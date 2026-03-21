@@ -80,42 +80,76 @@ The system handles three types of data:
 
 ## 3. Main Pages list
 
-### 1. Brew Map (Home Page)
-The primary landing page. A full-screen or split-screen map showing nearby coffee shops with toggle-able filters.
-- Interactive map of nearby coffee shops  
+### 1. Welcome Portal (Login / Signup)
+- **Login:** Returning users ("Baristas") can quickly access their accounts  
+- **Registration:** Multi-step onboarding process  
+  - Select coffee preferences (e.g., *Light roast*, *Dark roast*)  
+  - Personalise recommendations from the start  
+
+---
+
+### 2. Brew Map (Home)
+- Primary landing page  
+- Dynamic map displaying nearby coffee shops  
 - Filters:
   - Pet-friendly  
   - Open now  
-  - Coffee type  
+  - Coffee type 
 
 ---
 
-### 2. Shop Detail Page
-All the information for each shop.
-- Menu and prices  
-- Selling bean origins
-- Amenities  
-- Reviews & discount codes  
+### 3. Shop Detail Page
+The **digital menu and information hub**
+
+- **Specs:** Menu, prices, available beans  
+- **Vibe:** Photos, pet-friendly status, Wi-Fi reliability  
+- **Ratings:**  
+  - Specific drink ratings  
+  - Active discount codes  
 
 ---
 
-### 3. User Barista Profile
-- User level (*Novice Sipper → Master Roaster*)  
-- Coffee history  
-- Saved shops  
-- Posts  
+### 4. Barista Profile
+Personal user dashboard
+
+- **Progress Bar:** Shows level and XP needed for next rank  
+- **History:** Rated coffees and posted content  
+- **Badges:** Earned through:
+  - Social activity  
+  - Visiting new locations  
 
 ---
 
-### 4. The Social Grounds
-- Community content feed  
-- Coffee gathering events  
+### 5. Social Grounds (Community Feed)
+The core social experience
+
+- **Discovery:** Feed of coffee photos and reviews  
+- **Events:** List of upcoming **Coffee Gatherings** (RSVP available)  
 
 ---
 
-### 5. Matchmaking & Messages
-- Manage Coffee Chat invites  
-- Private messaging  
+### 6. Matchmaking & Messaging
+
+- **Invitations:**  
+  - "Coffee Chat" requests  
+  - Triggered by shared preferences + level requirements  
+
+- **Private Chat:**  
+  - Secure messaging system  
+  - Used for organising meetups  
+
+---
+
+### 7. Shop Owner Dashboard *(Optional)*
+
+- Business owners can:
+  - Claim their shop  
+  - Update bean offerings  
+  - Post official discount codes  
+
+- Goal:  
+  - Improve accuracy of shop data  
+  - Encourage business-community interaction  
 
 ---
 
