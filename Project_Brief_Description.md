@@ -11,10 +11,12 @@ The application includes two main functions:
 - **Information Visualisation**
 - **Social Features**
 
+---
+
 ### Main Function 1: Information Visualisation
 
 Users can:
-- View nearby coffee shops on a map, including:
+- View nearby coffee shops as a **list**, including:
   - Name  
   - Location  
   - Ratings  
@@ -22,115 +24,119 @@ Users can:
 
 Clicking on a shop shows:
 - Menu and prices  
-- Available coffee beans  
 - Dine-in options  
 - Pet-friendly status  
 
 Additional features:
-- Rate **individual coffee types** (not just shops)
-- Filter shops by coffee type (e.g., *Cold Brew*, *Pour-over*)
-- Share and view discount codes  
+- Rate **coffee shops** (1–5 stars)
+- Filter shops by:
+  - Pet-friendly  
+  - Price range  
+- View available discount codes  
 
 ---
 
 ### Main Function 2: Social Features
 
 Users can:
-- Share coffee-related content  
-- Connect with like-minded users  
-- Join or host coffee events  
+- Share coffee-related content (posts/photos)  
+- Tag coffee shops in posts  
+- View a community feed  
 
 Key features:
-- Personal **coffee profile**
+- Personal **user profile**
 
 Social interactions:
-- Invite users to **Coffee Chat**
+- View posts from other users  
+- Engage with shared coffee experiences  
 
 ---
 
 ## 2. Functionality Design Challenges
 
 The system handles three types of data:
-- Geospatial (maps)
-- Relational (users, shops, coffees)
-- Event-based (gatherings)
+
+- **Structured data:** Coffee shops (stored in JSON)
+- **User-generated data:** Posts and ratings (stored locally)
+- **UI state management:** Rendering lists, filters, and interactions dynamically
 
 ---
 
-## 3. Main Pages list
+## 3. Main Pages List
 
 ### 1. Welcome Portal (Login / Signup)
-- **Login:** Returning users ("Baristas") can quickly access their accounts  
-- **Registration:** Multi-step onboarding process  
-  - Select coffee preferences (e.g., *Light roast*, *Dark roast*)  
-  - Personalise recommendations from the start  
+- **Login:** Users can access the application  
+- **Registration:** Simple onboarding process  
+  - Enter basic details  
+  - Select coffee preferences (optional)
 
 ---
 
-### 2. Brew Map (Home)
+### 2. Coffee Hub (Home Page)
 - Primary landing page  
-- Dynamic map displaying nearby coffee shops  
-- Filters:
-  - Pet-friendly  
-  - Open now  
-  - Coffee type 
+- Displays a list of **10–15 nearby coffee shops** (from JSON data)  
+
+Filters:
+- Pet-friendly  
+- Price range  
 
 ---
 
 ### 3. Shop Detail Page
-The **digital menu and information hub**
+The **information hub for each coffee shop**
 
-- **Specs:** Menu, prices, available beans  
-- **Vibe:** Photos, pet-friendly status, Wi-Fi reliability  
+- **Details:** Menu, price range  
+- **Features:** Pet-friendly, dine-in  
 - **Ratings:**  
-  - Specific drink ratings  
-  - Active discount codes  
+  - Users can rate the shop  
+  - View average ratings  
+- **Discounts:** Display available offers  
 
 ---
 
-### 4. Barista Profile
+### 4. User Profile
 Personal user dashboard
 
-- **Progress Bar:** Shows level and XP needed for next rank  
-- **History:** Rated coffees and posted content  
-- **Badges:** Earned through:
-  - Social activity  
-  - Visiting new locations  
+- View user information  
+- View previously created posts  
+- View ratings given  
 
 ---
 
-### 5. Social Grounds (Community Feed)
+### 5. Social Feed (Community Page)
 The core social experience
 
-- **Discovery:** Feed of coffee photos and reviews  
-- **Events:** List of upcoming **Coffee Gatherings** (RSVP available)  
+- View posts from users  
+- Users can:
+  - Create posts  
+  - Upload images (optional)  
+  - Tag a coffee shop  
 
 ---
 
 ## 4. User Stories
 
-| ID  | As a...                | I want to...                                         | So that... |
-|-----|------------------------|------------------------------------------------------|------------|
-| 01  | New User              | View nearby shops with ratings and hours            | I can quickly find coffee |
-| 02  | Connoisseur           | Filter shops by coffee type                         | I avoid unsuitable shops |
-|     |                       | *(Cold Brew, Pour-over)*                            |            |
-| 03  | Pet Owner             | Enable pet-friendly filter                          | I can bring my dog |
-| 04  | Bargain Hunter        | View/share discount codes                           | I save money |
-| 05  | Foodie                | View menus and prices                               | I choose based on budget |
-| 06  | Active Contributor    | Earn points from reviews/photos                     | I unlock features |
-| 07  | Social Butterfly      | Invite users to Coffee Chat                         | I meet similar people |
-|     |                       | *(based on shared preferences)*                     |            |
-| 08  | Community Leader      | Create Coffee Gathering events                      | I organise meetups |
-| 09  | Refined Taster        | Rate specific coffee beans                          | I provide detailed insights |
-|     |                       | *(not just shops)*                                  |            |
-| 10  | Safety-Conscious User | Restrict chat invites to qualified users            | I feel secure |
+| ID  | As a...             | I want to...                                  | So that... |
+|-----|---------------------|-----------------------------------------------|------------|
+| 01  | New User            | View nearby shops with ratings and hours      | I can quickly find coffee |
+| 02  | Coffee Lover        | Filter shops by pet-friendly or price         | I find suitable places |
+| 03  | Pet Owner           | Enable pet-friendly filter                    | I can bring my dog |
+| 04  | Bargain Hunter      | View discount codes                           | I save money |
+| 05  | Foodie              | View menus and prices                         | I choose based on budget |
+| 06  | User                | Rate coffee shops                             | I share my experience |
+| 07  | Social User         | Create and share posts                        | I express my coffee experiences |
+| 08  | Community Member    | View posts from others                        | I discover new places |
+| 09  | Reviewer            | Tag shops in posts                            | I connect content to locations |
+| 10  | Regular User        | View my profile and history                   | I track my activity |
 
 ---
 
 ## Summary
-This platform goes beyond a simple directory by combining:
-- Smart discovery (filters)
-- Deep coffee insights (granular ratings)
-- Social interaction (chat + events)
 
-Creating a **complete ecosystem for coffee enthusiasts**.
+This platform focuses on delivering a **simple and functional experience** by combining:
+
+- Smart discovery (list + filters)  
+- Useful insights (shop ratings & details)  
+- Social interaction (posts & community feed)  
+
+Creating a **practical and user-friendly ecosystem for coffee enthusiasts**.
