@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Coffee Hub Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- LEFT SIDE -->
+    <div class="left">
+        <h2 class="logo">☕ Coffee Hub</h2>
+        <h3>Welcome Back</h3>
+        <p class="subtitle">Find your perfect coffee spot</p>
+
+        <div class="tabs">
+            <button class="active">Login</button>
+            <button disabled>Signup</button>
+        </div>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right">
+        <img src="/static/images/login-image.jpeg" alt="coffee">
+    </div>
+
+</div>
+
+</body>
+
+<script>
+    if (window.location.search.includes("error")) {
+        window.history.replaceState({}, document.title, "/login");
+    }
+</script>
+</html>
