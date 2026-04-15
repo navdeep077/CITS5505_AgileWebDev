@@ -1,7 +1,7 @@
 # Coffee Social Hub Web Application
 
 ## Brief Description
-This web application is a **location-based social hub for coffee lovers**, combining interactive map features with social networking. It helps users discover nearby coffee shops while connecting with others who share similar coffee interests.
+This web application is a **location-based social hub for coffee lovers**. It helps users discover nearby coffee shops while connecting with others who share similar coffee interests.
 
 ---
 
@@ -42,11 +42,9 @@ Users can:
 
 Key features:
 - Personal **coffee profile**
-- Activity-based **level system**
 
 Social interactions:
-- Invite users to **Coffee Chat** (based on shared ratings + level)
-- High-level users can host **Coffee Gatherings**
+- Invite users to **Coffee Chat**
 
 ---
 
@@ -56,25 +54,6 @@ The system handles three types of data:
 - Geospatial (maps)
 - Relational (users, shops, coffees)
 - Event-based (gatherings)
-
-### Key Challenges
-
-- **Dynamic Map Interface**  
-  Real-time filtering (e.g., *“Gesha within 5km”*)
-
-- **Granular Rating Engine**  
-  Rate specific coffees (e.g., *Ethiopia Yirgacheffe Pour-over*)
-
-- **Gamification Engine**  
-  Tracks activity → assigns levels → unlocks features  
-
-- **Privacy-First Matchmaking**  
-  Controlled chat access based on rules  
-
-- **Community Board**  
-  Hub for:
-  - Discount codes  
-  - Event hosting  
 
 ---
 
@@ -128,31 +107,6 @@ The core social experience
 
 ---
 
-### 6. Matchmaking & Messaging
-
-- **Invitations:**  
-  - "Coffee Chat" requests  
-  - Triggered by shared preferences + level requirements  
-
-- **Private Chat:**  
-  - Secure messaging system  
-  - Used for organising meetups  
-
----
-
-### 7. Shop Owner Dashboard *(Optional)*
-
-- Business owners can:
-  - Claim their shop  
-  - Update bean offerings  
-  - Post official discount codes  
-
-- Goal:  
-  - Improve accuracy of shop data  
-  - Encourage business-community interaction  
-
----
-
 ## 4. User Stories
 
 | ID  | As a...                | I want to...                                         | So that... |
@@ -175,7 +129,7 @@ The core social experience
 
 ## Summary
 This platform goes beyond a simple directory by combining:
-- Smart discovery (maps + filters)
+- Smart discovery (filters)
 - Deep coffee insights (granular ratings)
 - Social interaction (chat + events)
 
