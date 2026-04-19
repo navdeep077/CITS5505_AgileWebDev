@@ -1,111 +1,161 @@
-/* ── User Profile Page Styles ─────────────────────── */
+/* ── PROFILE PAGE STYLES ──────────────────────────────── */
 
-:root {
-    --coffee-brown: #6F4E37;
-    --cream: #FDF5E6;
-    --text-dark: #333;
-    --light-gray: #eee;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--cream);
-    color: var(--text-dark);
-    margin: 0;
-    padding: 20px;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-/* Header Styles */
-.profile-header {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    margin-bottom: 30px;
-}
-
-.avatar img {
-    border-radius: 50%;
-    border: 3px solid var(--coffee-brown);
-}
-
-.user-info h1 {
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.bio {
-    color: #666;
-    font-style: italic;
-}
-
-.stats span {
-    margin-right: 15px;
-}
-
-/* Post Grid */
-.post-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
-}
-
-.post-card {
-    border: 1px solid var(--light-gray);
-    border-radius: 8px;
+/* 1. Hero Profile Section */
+.hero-profile {
+    background: linear-gradient(140deg, var(--espresso) 0%, var(--roast) 100%);
+    padding: 80px 0 60px;
+    color: var(--cream);
+    border-bottom: 3px solid var(--caramel);
+    position: relative;
     overflow: hidden;
 }
 
-.post-card img {
-    width: 100%;
-    display: block;
-}
-
-.post-details {
-    padding: 10px;
-    font-size: 0.9rem;
-}
-
-.tag {
-    font-weight: bold;
-    color: var(--coffee-brown);
-    display: block;
-    margin-bottom: 5px;
-}
-
-/* Review List */
-.review-card {
-    border-left: 4px solid var(--coffee-brown);
-    background: #f9f9f9;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 0 8px 8px 0;
-}
-
-.review-header {
-    display: flex;
-    justify-content: space-between;
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
     margin-bottom: 10px;
 }
 
-.shop-name {
-    font-weight: bold;
+.profile-img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 4px solid var(--caramel);
+    background: #fff;
+    object-fit: cover;
+    box-shadow: var(--shadow-lg);
 }
 
-.rating {
-    color: #d4a017;
+.lvl-badge {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--caramel);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border: 2px solid var(--espresso);
 }
 
-hr {
-    border: 0;
-    border-top: 1px solid var(--light-gray);
-    margin: 20px 0;
+.hero-profile h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.hero-sub {
+    color: var(--latte);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+}
+
+/* 2. User Introduction / Bio */
+.profile-bio-container {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.profile-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    /* Updated color for better readability */
+    color: var(--cream); 
+    font-weight: 400;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 3. Post Gallery */
+.post-masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.post-card-mini {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    height: 280px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(196, 122, 43, 0.1);
+}
+
+.post-card-mini:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.post-card-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-tag {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(transparent, rgba(26, 14, 0, 0.95));
+    padding: 30px 15px 12px;
+    color: var(--latte);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* 4. Review Cards */
+.review-item {
+    margin-bottom: 1.25rem;
+    padding: 1.5rem !important;
+    border-left: 5px solid var(--caramel) !important;
+    background: #fff;
+    transition: background 0.2s;
+}
+
+.review-item:hover {
+    background: #fcfcfc;
+}
+
+.stars {
+    color: var(--caramel);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+}
+
+.text-espresso {
+    color: var(--espresso);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* 5. Utility Layout */
+.section-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--caramel);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    color: var(--espresso);
+}
+
+@media (max-width: 768px) {
+    .hero-profile { padding: 60px 0 40px; }
+    .profile-img { width: 110px; height: 110px; }
+    .post-masonry { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
 }
