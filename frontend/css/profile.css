@@ -1,0 +1,111 @@
+/* ── User Profile Page Styles ─────────────────────── */
+
+:root {
+    --coffee-brown: #6F4E37;
+    --cream: #FDF5E6;
+    --text-dark: #333;
+    --light-gray: #eee;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--cream);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Header Styles */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.avatar img {
+    border-radius: 50%;
+    border: 3px solid var(--coffee-brown);
+}
+
+.user-info h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.bio {
+    color: #666;
+    font-style: italic;
+}
+
+.stats span {
+    margin-right: 15px;
+}
+
+/* Post Grid */
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.post-card {
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.post-card img {
+    width: 100%;
+    display: block;
+}
+
+.post-details {
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+.tag {
+    font-weight: bold;
+    color: var(--coffee-brown);
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Review List */
+.review-card {
+    border-left: 4px solid var(--coffee-brown);
+    background: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 0 8px 8px 0;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.shop-name {
+    font-weight: bold;
+}
+
+.rating {
+    color: #d4a017;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--light-gray);
+    margin: 20px 0;
+}
