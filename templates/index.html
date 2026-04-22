@@ -15,7 +15,7 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">Coffee Social Hub</a>
+            <a class="navbar-brand" href="{{ url_for('landing') }}">Coffee Social Hub</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -43,7 +43,7 @@
                         earn Barista XP, and connect with coffee lovers near you.
                     </p>
                     <div class="hero-cta">
-                        <a href="#" class="btn btn-primary-custom">Join as a Barista</a>
+                        <a href="{{ url_for('signup') }}" class="btn btn-primary-custom">Join as a Barista</a>
                         <a href="{{ url_for('brew') }}" class="btn btn-ghost">See the Brew Map</a>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                             <i class="bi bi-cup-hot"></i>
                         </div>
                         <div>
-                            <div class="shop-name">Blacklist Coffee Roasters</div>
+                            <div class="shop-name">Venn Coffee</div>
                             <div class="shop-meta">4.7 stars · Pet friendly · Open now</div>
                         </div>
                     </div>
@@ -141,7 +141,7 @@
                     </div>
                 </div>
                 <div class="text-center mt-5">
-                    <a href="#" class="btn btn-primary-custom">Get Started — It is Free</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-primary-custom">Get Started — It is Free</a>
                 </div>
             </div>
         </div>
