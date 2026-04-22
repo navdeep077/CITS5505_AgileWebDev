@@ -2,88 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Brew Map</title>
-
+    <title>Brew Map | Coffee Social Hub</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/brew.css">
-
-    <!-- Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
-
 <body>
 
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" href="landing.html">☕ Coffee Social Hub</a>
-
-        <ul class="navbar-nav ms-auto gap-3">
-            <li><a class="nav-link active" href="brew.html">Brew Map</a></li>
-            <li><a class="nav-link" href="#">Social Grounds</a></li>
-            <li><a class="btn btn-outline-nav" href="#">Log In</a></li>
-            <li><a class="btn btn-nav" href="#">Join Free</a></li>
-        </ul>
+        <a class="navbar-brand" href="index.html">Coffee Social Hub</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <li class="nav-item"><a class="nav-link active" href="brew.html">Brew Map</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Social Grounds</a></li>
+                <li class="nav-item"><a class="btn btn-nav" href="#">Login / Sign Up</a></li>
+            </ul>
+        </div>
     </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero hero-brew">
-    <div class="container text-center">
-        <h1>Brew Map ☕</h1>
-        <p class="hero-sub">Discover coffee shops around you</p>
+    <div class="container">
+        <h1>Brew Map</h1>
+        <p class="hero-sub">Discover coffee shops around Perth</p>
     </div>
 </section>
 
 <!-- MAIN -->
-<div class="container">
+<main class="container">
 
     <!-- FILTERS -->
     <div class="filters">
-        <button class="filter-chip">Open Now</button>
-        <button class="filter-chip">Pet Friendly</button>
-        <button class="filter-chip">Cold Brew</button>
-        <button class="filter-chip">Pour Over</button>
+        <button class="filter-chip active-filter" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="open">Open Now</button>
+        <button class="filter-chip" data-filter="pet">Pet Friendly</button>
+        <button class="filter-chip" data-filter="cold-brew">Cold Brew</button>
+        <button class="filter-chip" data-filter="pour-over">Pour Over</button>
+    </div>
+
+    <!-- NO RESULTS -->
+    <div id="no-results" style="display:none; text-align:center; padding:3rem 0; color:var(--muted);">
+        <i class="bi bi-search" style="font-size:2rem;"></i>
+        <p class="mt-2">No cafes match this filter. Try another one!</p>
     </div>
 
     <!-- SHOPS -->
-    <div class="row g-4">
+    <div class="row g-4" id="shop-grid">
 
-        <div class="col-md-4">
-            <div class="feature-card shop-card">
-                <h5>Single Origin Roasters</h5>
-                <p>📍 Subiaco</p>
-                <p>⭐ 4.8</p>
-                <p>⏰ Open 7:00 AM – 3:00 PM</p>
-
-                <button class="btn btn-outline-nav">View Details</button>
+        <div class="col-md-4 shop-item" data-open="true" data-pet="false" data-cold-brew="true" data-pour-over="false">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Blacklist Coffee Roasters</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Welshpool</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.8</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 7:00 AM – 3:00 PM</p>
+                <div class="mt-2"><span class="shop-tag">Cold Brew</span></div>
+                <a href="shop-blacklist.html" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="feature-card shop-card">
-                <h5>La Veen Coffee</h5>
-                <p>📍 Perth CBD</p>
-                <p>⭐ 4.6</p>
-                <p>⏰ Open 6:30 AM – 2:30 PM</p>
-
-                <button class="btn btn-outline-nav">View Details</button>
+        <div class="col-md-4 shop-item" data-open="true" data-pet="false" data-cold-brew="false" data-pour-over="true">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">La Veen Coffee</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Perth CBD</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.6</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 6:30 AM – 2:30 PM</p>
+                <div class="mt-2"><span class="shop-tag">Pour Over</span></div>
+                <a href="shop-laveen.html" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="feature-card shop-card">
-                <h5>Venn Coffee</h5>
-                <p>📍 West Perth</p>
-                <p>⭐ 4.7</p>
-                <p>⏰ Open 7:00 AM – 2:00 PM</p>
-
-                <button class="btn btn-outline-nav">View Details</button>
+        <div class="col-md-4 shop-item" data-open="true" data-pet="true" data-cold-brew="false" data-pour-over="false">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Venn Coffee</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Subiaco</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.7</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 7:00 AM – 4:00 PM</p>
+                <div class="mt-2"><span class="shop-tag">Pet Friendly</span></div>
+                <a href="shop-venn.html" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
             </div>
         </div>
 
     </div>
-</div>
+</main>
 
+<!-- FOOTER -->
+<footer class="mt-5">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <span class="footer-brand">Coffee Social Hub</span>
+        <span class="footer-note">CITS3403 / CITS5505 Group Project · UWA 2025</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/brew.js"></script> 
+</body>
 </body>
 </html>
