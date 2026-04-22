@@ -3,84 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venn Coffee | Coffee Social Hub</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+    <title>Shop Detail</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/shop.css">
+
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
+<!-- ── Navigation ─────────────────────────────────────── -->
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" href="{{ url_for('landing') }}">Coffee Social Hub</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMenu">
-            <ul class="navbar-nav ms-auto align-items-center gap-2">
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('brew') }}">Brew Map</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('social') }}">Social Grounds</a></li>
-                <li class="nav-item"><a class="btn btn-nav" href="{{ url_for('login') }}">Login / Sign Up</a></li>
-            </ul>
-        </div>
+        <a class="navbar-brand" href="landing.html">☕ Coffee Social Hub</a>
+        <ul class="navbar-nav ms-auto gap-3">
+            <li><a class="nav-link" href="brew.html">Brew Map</a></li>
+            <li><a class="nav-link" href="feed.html">Social Grounds</a></li>
+            <li><a class="btn btn-outline-nav" href="login.html">Log In</a></li>
+            <li><a class="btn btn-nav" href="signup.html">Join Free</a></li>
+        </ul>
     </div>
 </nav>
 
+<!-- ── Shop Hero ───────────────────────────────────────── -->
 <section class="hero-shop">
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
-        <a href="{{ url_for('brew') }}" class="shop-back-link">
+
+        <!-- Back breadcrumb -->
+        <a href="brew.html" class="shop-back-link">
             <span class="shop-back-arrow">←</span> Back to Brew Map
         </a>
+
         <div class="shop-hero-body">
+            <!-- Shop identity -->
             <div class="shop-identity">
                 <div class="shop-logo-badge">V</div>
                 <div>
                     <div class="shop-hero-tags">
-                        <span class="shop-badge">Pet Friendly</span>
-                        <span class="shop-badge">Dine-in</span>
+                        <span class="shop-badge">🐾 Pet Friendly</span>
+                        <span class="shop-badge">🍽️ Dine-in</span>
                         <span class="shop-badge shop-badge--open">Open Now</span>
                     </div>
                     <h1 class="shop-hero-title">Venn Coffee</h1>
-                    <p class="shop-hero-location">
-                        <i class="bi bi-geo-alt"></i> 346 Churchill Ave, Subiaco WA 6008
-                    </p>
+                    <p class="shop-hero-location">📍 346 Churchill Ave, Subiaco WA 6008</p>
                 </div>
             </div>
+
+            <!-- Rating pill -->
             <div class="shop-rating-pill">
-                <span class="rating-num">4.7</span>
+                <span class="rating-num">4.8</span>
                 <div>
                     <div class="rating-stars">★★★★★</div>
-                    <div class="rating-count">98 reviews</div>
+                    <div class="rating-count">142 reviews</div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ── Main Content ─────────────────────────────────────── -->
 <main class="container py-5">
     <div class="row g-5">
+
+        <!-- ── Left Column ──────────────────────────────── -->
         <div class="col-lg-8">
 
+            <!-- Info Strip -->
             <div class="info-strip mb-5">
                 <div class="info-strip-item">
-                    <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
+                    <span class="info-strip-icon">🕐</span>
                     <div>
                         <div class="info-strip-label">Hours Today</div>
                         <div class="info-strip-value">7:00 AM – 4:00 PM</div>
                     </div>
                 </div>
                 <div class="info-strip-item">
-                    <i class="bi bi-wifi" style="font-size:1.3rem;color:var(--caramel)"></i>
+                    <span class="info-strip-icon">📶</span>
                     <div>
                         <div class="info-strip-label">Wi-Fi</div>
                         <div class="info-strip-value">Available</div>
                     </div>
                 </div>
                 <div class="info-strip-item">
-                    <i class="bi bi-p-square" style="font-size:1.3rem;color:var(--caramel)"></i>
+                    <span class="info-strip-icon">🅿️</span>
                     <div>
                         <div class="info-strip-label">Parking</div>
                         <div class="info-strip-value">Street parking</div>
@@ -88,11 +95,12 @@
                 </div>
             </div>
 
+            <!-- Menu -->
             <span class="section-eyebrow">What's On Offer</span>
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
             <div class="menu-category mb-4">
-                <div class="menu-category-label">Espresso Drinks</div>
+                <div class="menu-category-label">☕ Espresso Drinks</div>
                 <div class="menu-grid">
                     <div class="menu-item">
                         <div class="menu-item-name">Flat White</div>
@@ -118,7 +126,7 @@
             </div>
 
             <div class="menu-category mb-5">
-                <div class="menu-category-label">Bites</div>
+                <div class="menu-category-label">🥐 Bites</div>
                 <div class="menu-grid">
                     <div class="menu-item">
                         <div class="menu-item-name">Almond Croissant</div>
@@ -133,6 +141,7 @@
                 </div>
             </div>
 
+            <!-- Reviews -->
             <span class="section-eyebrow">Community Takes</span>
             <h2 class="section-title mb-4">Ratings & Reviews</h2>
 
@@ -146,8 +155,9 @@
                         </div>
                         <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">The oat flat white here is the gold standard for Subiaco. Super smooth, never bitter. Staff brought out a water bowl for my dog unprompted!</p>
+                    <p class="review-text">The oat flat white here is the gold standard for West Perth. Super smooth, never bitter. The almond croissant is also dangerous — I've been back three times this week.</p>
                 </div>
+
                 <div class="shop-review-card">
                     <div class="review-header">
                         <div class="reviewer-avatar">B</div>
@@ -157,13 +167,28 @@
                         </div>
                         <div class="review-stars ms-auto">★★★★☆</div>
                     </div>
-                    <p class="review-text">Consistently excellent. Space can get tight on weekends but staff genuinely know their coffee.</p>
+                    <p class="review-text">Consistently excellent single-origin offerings. The space can get tight on weekend mornings but it's worth the squeeze. Staff genuinely know their coffee.</p>
+                </div>
+
+                <div class="shop-review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">L</div>
+                        <div>
+                            <div class="reviewer-name">LatteArtLena</div>
+                            <div class="reviewer-date">2 weeks ago</div>
+                        </div>
+                        <div class="review-stars ms-auto">★★★★★</div>
+                    </div>
+                    <p class="review-text">Brought my dog on a Sunday and the staff brought out a little water bowl unprompted. That kind of attention to detail carries into the coffee too.</p>
                 </div>
             </div>
 
-        </div>
+        </div><!-- /col-lg-8 -->
 
+        <!-- ── Right Column ──────────────────────────────── -->
         <div class="col-lg-4">
+
+            <!-- Rate this shop -->
             <div class="sidebar-card mb-4">
                 <span class="section-eyebrow">Your Take</span>
                 <h3 class="sidebar-title">Rate This Shop</h3>
@@ -178,43 +203,62 @@
                 <button class="btn-primary-custom w-100 mt-3">Submit Review</button>
             </div>
 
+            <!-- Quick facts -->
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
-                    <li><i class="bi bi-heart"></i> Pet-friendly seating</li>
-                    <li><i class="bi bi-shop"></i> Dine-in available</li>
-                    <li><i class="bi bi-bag"></i> Takeaway</li>
-                    <li><i class="bi bi-person-wheelchair"></i> Wheelchair accessible</li>
-                    <li><i class="bi bi-credit-card"></i> Card and cash accepted</li>
+                    <li><span>🐾</span> Pet-friendly seating</li>
+                    <li><span>🍽️</span> Dine-in available</li>
+                    <li><span>📦</span> Takeaway</li>
+                    <li><span>♿</span> Wheelchair accessible</li>
+                    <li><span>💳</span> Card &amp; cash accepted</li>
                 </ul>
             </div>
 
-            <a href="{{ url_for('brew') }}" class="btn-primary-custom w-100 text-center d-block">
-                Back to Brew Map
+            <!-- Back CTA -->
+            <a href="brew.html" class="btn-primary-custom w-100 text-center d-block">
+                ← Back to Brew Map
             </a>
-        </div>
-    </div>
+
+        </div><!-- /col-lg-4 -->
+
+    </div><!-- /row -->
 </main>
 
+<!-- ── Footer ──────────────────────────────────────────── -->
 <footer>
     <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span class="footer-brand">Coffee Social Hub</span>
-        <span class="footer-note">CITS5505 Group Project · UWA 2026</span>
+        <span class="footer-brand">☕ Coffee Social Hub</span>
+        <span class="footer-note">© 2026 Coffee Social Hub · CITS5505 Project</span>
     </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    /* ── Star picker ───────────────────────────────────── */
     const stars = document.querySelectorAll('.star-pick');
-    let selected = 0;
     stars.forEach(s => {
         s.addEventListener('mouseover', () => highlightStars(+s.dataset.val));
-        s.addEventListener('mouseout',  () => highlightStars(selected));
-        s.addEventListener('click',     () => { selected = +s.dataset.val; highlightStars(selected); });
+        s.addEventListener('mouseout',  () => highlightStars(getSelected()));
+        s.addEventListener('click',     () => { setSelected(+s.dataset.val); });
     });
+
+    let selected = 0;
+    function setSelected(v) { selected = v; highlightStars(v); }
+    function getSelected()  { return selected; }
     function highlightStars(v) {
         stars.forEach(s => s.classList.toggle('active', +s.dataset.val <= v));
     }
+
+    /* ── Discount code copy ────────────────────────────── */
+    function copyCode() {
+        const code = document.getElementById('discountCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            const btn = document.querySelector('.discount-copy-btn');
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        });
+    }
 </script>
+
 </body>
 </html>
