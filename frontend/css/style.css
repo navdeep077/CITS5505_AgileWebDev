@@ -376,3 +376,17 @@ footer {
     .hero-cta { flex-direction: column; align-items: flex-start; }
     .hiw-inner { border-radius: 16px; }
 }
+/* ── Fix footer to always stay at bottom ──── */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main, .container {
+    flex: 1;
+}
+
+footer {
+    margin-top: auto;
+}
