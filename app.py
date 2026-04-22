@@ -25,7 +25,41 @@ def login():
 
     # GET request
     error = request.args.get("error")
-    return render_template("login.html", error=error)
+    message = request.args.get("message")
+    return render_template("login.html", error=error, message=message)
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not username or not password or not confirm_password:
+            return redirect(url_for("signup", error="Please fill all fields"))
+
+        if password != confirm_password:
+            return redirect(url_for("signup", error="Passwords do not match"))
+
+        if username in users:
+            return redirect(url_for("signup", error="Username already exists"))
+
+        users[username] = password
+        return redirect(url_for("login", message="Account created. Please log in."))
+
+    error = request.args.get("error")
+    return render_template("signup.html", error=error)
+
+
+@app.route("/landing")
+def landing():
+    return render_template("index.html")
+
+
+@app.route("/brew")
+def brew():
+    return render_template("brew.html")
 
 
 # HOME PAGE (Protected)
