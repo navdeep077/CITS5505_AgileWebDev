@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "name": "Single Origin Roasters",
+    "location": "Subiaco",
+    "rating": 4.8,
+    "price": "$$",
+    "pet": "Yes",
+    "dine": "Yes",
+    "menu": [
+      {
+        "name": "Espresso",
+        "desc": "Rich and bold single shot",
+        "price": "$4"
+      },
+      {
+        "name": "Latte",
+        "desc": "Smooth milk with espresso",
+        "price": "$5"
+      },
+      {
+        "name": "Cold Brew",
+        "desc": "Slow brewed, refreshing",
+        "price": "$6"
+      }
+    ],
+    "discounts": ["10% off before 9 AM"]
+  },
+  {
+    "id": 2,
+    "name": "La Veen Coffee",
+    "location": "Perth CBD",
+    "rating": 4.6,
+    "price": "$$",
+    "pet": "No",
+    "dine": "Yes",
+    "menu": [
+      {
+        "name": "Flat White",
+        "desc": "Classic Australian favorite",
+        "price": "$5"
+      },
+      {
+        "name": "Mocha",
+        "desc": "Chocolate + espresso combo",
+        "price": "$6"
+      },
+      {
+        "name": "Cappuccino",
+        "desc": "Frothy and rich",
+        "price": "$5"
+      }
+    ],
+    "discounts": ["Free cookie with coffee"]
+  },
+  {
+    "id": 3,
+    "name": "Venn Coffee",
+    "location": "West Perth",
+    "rating": 4.7,
+    "price": "$",
+    "pet": "Yes",
+    "dine": "No",
+    "menu": [
+      {
+        "name": "Pour Over",
+        "desc": "Hand brewed specialty coffee",
+        "price": "$6"
+      },
+      {
+        "name": "Long Black",
+        "desc": "Strong and smooth",
+        "price": "$4"
+      },
+      {
+        "name": "Iced Latte",
+        "desc": "Chilled milk and espresso",
+        "price": "$5"
+      }
+    ],
+    "discounts": ["Buy 1 Get 1 Free"]
+  }
+]

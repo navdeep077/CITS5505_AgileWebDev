@@ -1,0 +1,192 @@
+/* ── Shop Page Styling (Clean + Premium) ───────────────────────── */
+
+/* GLOBAL */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    animation: fadeIn 0.6s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── LAYOUT ───────────────────────── */
+.shop-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.shop-left,
+.shop-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── CARD ───────────────────────── */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 10px 25px rgba(0,0,0,0.08),
+        0 0 15px rgba(198,156,109,0.2);
+}
+
+/* Section heading accent */
+.card h3 {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.card h3::after {
+    content: "";
+    width: 40px;
+    height: 2px;
+    background: #c69c6d;
+    display: block;
+    margin-top: 6px;
+    transition: width 0.3s ease;
+}
+
+.card:hover h3::after {
+    width: 60px;
+}
+
+/* SMALL CARDS */
+.small-card {
+    padding: 16px;
+}
+
+/* ── MENU ───────────────────────── */
+#menu-list {
+    list-style: none;
+    padding: 0;
+}
+
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+
+    transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+    background: #faf7f3;
+    padding-left: 8px;
+    border-radius: 8px;
+}
+
+.menu-item p {
+    font-size: 0.85rem;
+    color: #777;
+    margin: 4px 0 0;
+}
+
+/* ── REVIEWS ───────────────────────── */
+.review {
+    margin-bottom: 15px;
+}
+
+.review span {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* ── RATING ───────────────────────── */
+.rating-buttons {
+    margin-top: 10px;
+}
+
+.rating-buttons button {
+    margin-right: 6px;
+    padding: 6px 10px;
+    border: none;
+    background: #c69c6d;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.rating-buttons button:hover {
+    background: #a67c52;
+    transform: scale(1.1);
+}
+
+/* ── DISCOUNTS ───────────────────────── */
+#discounts {
+    padding-left: 15px;
+}
+
+/* ── HERO ───────────────────────── */
+.hero .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero h1 {
+    color: white;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+.hero-sub {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+
+    font-size: 1.1rem;
+    color: #ddd;
+    letter-spacing: 0.5px;
+}
+
+/* BACK LINK */
+.back-link {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #ccc;
+    text-decoration: none;
+}
+
+/* BUTTON POLISH */
+button, .btn {
+    transition: all 0.2s ease;
+}
+
+button:hover, .btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ── RESPONSIVE ───────────────────────── */
+@media (max-width: 768px) {
+    .shop-container {
+        grid-template-columns: 1fr;
+    }
+}

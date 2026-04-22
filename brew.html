@@ -20,7 +20,7 @@
 
         <ul class="navbar-nav ms-auto gap-3">
             <li><a class="nav-link active" href="brew.html">Brew Map</a></li>
-            <li><a class="nav-link" href="#">Social Grounds</a></li>
+            <li><a class="nav-link" href="social.html">Social Grounds</a></li>
             <li><a class="btn btn-outline-nav" href="#">Log In</a></li>
             <li><a class="btn btn-nav" href="#">Join Free</a></li>
         </ul>
@@ -49,6 +49,7 @@
     <!-- SHOPS -->
     <div class="row g-4">
 
+        <!-- SHOP 1 -->
         <div class="col-md-4">
             <div class="feature-card shop-card">
                 <h5>Single Origin Roasters</h5>
@@ -56,10 +57,20 @@
                 <p>⭐ 4.8</p>
                 <p>⏰ Open 7:00 AM – 3:00 PM</p>
 
-                <button class="btn btn-outline-nav">View Details</button>
+                <button class="btn btn-outline-nav" onclick='openShop({
+                    name: "Single Origin Roasters",
+                    location: "Subiaco",
+                    rating: "4.8",
+                    price: "$$",
+                    pet: "Yes",
+                    dineIn: "Yes"
+                })'>
+                    View Details
+                </button>
             </div>
         </div>
 
+        <!-- SHOP 2 -->
         <div class="col-md-4">
             <div class="feature-card shop-card">
                 <h5>La Veen Coffee</h5>
@@ -67,10 +78,20 @@
                 <p>⭐ 4.6</p>
                 <p>⏰ Open 6:30 AM – 2:30 PM</p>
 
-                <button class="btn btn-outline-nav">View Details</button>
+                <button class="btn btn-outline-nav" onclick='openShop({
+                    name: "La Veen Coffee",
+                    location: "Perth CBD",
+                    rating: "4.6",
+                    price: "$$",
+                    pet: "No",
+                    dineIn: "Yes"
+                })'>
+                    View Details
+                </button>
             </div>
         </div>
 
+        <!-- SHOP 3 -->
         <div class="col-md-4">
             <div class="feature-card shop-card">
                 <h5>Venn Coffee</h5>
@@ -78,12 +99,29 @@
                 <p>⭐ 4.7</p>
                 <p>⏰ Open 7:00 AM – 2:00 PM</p>
 
-                <button class="btn btn-outline-nav">View Details</button>
+                <button class="btn btn-outline-nav" onclick='openShop({
+                    name: "Venn Coffee",
+                    location: "West Perth",
+                    rating: "4.7",
+                    price: "$",
+                    pet: "Yes",
+                    dineIn: "Yes"
+                })'>
+                    View Details
+                </button>
             </div>
         </div>
 
     </div>
 </div>
+
+<!-- ✅ SCRIPT (IMPORTANT) -->
+<script>
+function openShop(shopData) {
+    localStorage.setItem("selectedShop", JSON.stringify(shopData));
+    window.location.href = "shop.html";
+}
+</script>
 
 </body>
 </html>
