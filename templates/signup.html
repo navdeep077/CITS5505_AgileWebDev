@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Hub Signup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Coffee Social Hub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <li class="nav-item"><a class="nav-link" href="brew.html">Brew Map</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Social Grounds</a></li>
+                    <li class="nav-item"><a class="btn btn-nav" href="{{ url_for('login') }}">Login / Sign Up</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="login-container">
+        <!-- LEFT SIDE -->
+        <div class="left">
+            <h2 class="logo">Coffee Hub</h2>
+            <h3>Create Account</h3>
+            <p class="subtitle">Join Perth's coffee community</p>
+
+            <div class="tabs">
+                <a href="{{ url_for('login') }}">Login</a>
+                <a class="active" href="{{ url_for('signup') }}">Signup</a>
+            </div>
+
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('signup') }}">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Choose username" required>
+
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Choose password" required>
+
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" placeholder="Confirm password" required>
+
+                <button type="submit" class="login-btn">Create Account</button>
+            </form>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="right">
+            <img src="{{ url_for('static', filename='images/login-image.jpeg') }}" alt="coffee">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
