@@ -1,17 +1,19 @@
 /* ── BREW PAGE ───────────────────────────────────────── */
 
-/* Hero override (scoped) */
 .hero-brew {
     text-align: center;
     padding: 80px 20px;
 }
-
 .hero-brew h1 {
     color: #ffffff;
-    text-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+.hero-brew .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Filters */
+/* ── Filters ─────────────────────────────────────────── */
 .filters {
     display: flex;
     justify-content: center;
@@ -20,50 +22,64 @@
     flex-wrap: wrap;
 }
 
-/* Filter chips */
 .filter-chip {
     background: rgba(0,0,0,0.04);
-    border: 1px solid rgba(0,0,0,0.12);
-    padding: 8px 18px;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    padding: 8px 20px;
     border-radius: 999px;
-    color: #2b2b2b;
+    color: var(--espresso);
     font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: 0.25s;
+    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif;
 }
-
 .filter-chip:hover {
     background: var(--caramel);
     color: #fff;
+    border-color: var(--caramel);
 }
 
-/* Shop cards */
-.shop-card h5 {
-    margin-bottom: 10px;
+/* Active filter chip — currently selected */
+.filter-chip.active-filter {
+    background: var(--espresso);
+    color: var(--latte);
+    border-color: var(--espresso);
 }
 
-.shop-card p {
-    margin-bottom: 6px;
+/* ── Shop Cards ──────────────────────────────────────── */
+.shop-card {
+    transition: transform 0.25s, box-shadow 0.25s;
 }
-
 .shop-card:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
 }
-
-/* Buttons inside cards */
-.shop-card .btn {
-    margin-top: 12px;
-    color: #2f6fed;
-    border-color: #2f6fed;
+.shop-card h5 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--espresso);
+}
+.shop-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 4px;
 }
 
-.shop-card .btn:hover {
-    background: #2f6fed;
-    color: #fff;
+/* Shop type tag */
+.shop-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(196,122,43,0.12);
+    color: var(--caramel);
+    border: 1px solid rgba(196,122,43,0.25);
 }
-.hero-brew .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
+/* View Details button inside card */
+.shop-card .btn-outline-nav {
+    font-size: 0.88rem;
+    padding: 0.45rem 1rem;
 }
