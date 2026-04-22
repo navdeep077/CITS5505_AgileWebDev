@@ -61,6 +61,26 @@ def landing():
 def brew():
     return render_template("brew.html")
 
+@app.route("/shop/blacklist")
+def shop_blacklist():
+    return render_template("shop-blacklist.html")
+
+@app.route("/shop/laveen")
+def shop_laveen():
+    return render_template("shop-laveen.html")
+
+@app.route("/shop/venn")
+def shop_venn():
+    return render_template("shop-venn.html")
+
+@app.route("/social")
+def social():
+    return render_template("social.html")
+
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
+
 
 # HOME PAGE (Protected)
 @app.route("/home")
