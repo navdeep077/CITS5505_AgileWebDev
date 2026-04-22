@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Social Grounds</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+
+    <!-- LEFT: Logo -->
+    <a class="navbar-brand" href="{{ url_for('landing') }}">
+      Coffee Social Hub
+    </a>
+
+    <!-- RIGHT: Links -->
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto align-items-center">
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('brew') }}">Brew Map</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('social') }}">Social Grounds</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('login') }}">Login / Sign Up</a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero text-center">
+    <div class="container">
+        <h1>☕ Social Grounds</h1>
+        <p class="hero-sub">Share your coffee experiences</p>
+    </div>
+</section>
+
+<!-- MAIN -->
+<div class="social-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar-left">
+        <h5>☕ Trending Cafes</h5>
+
+        <div class="shop-item" onclick="goToShop(1)">
+    <strong>Single Origin Roasters</strong>
+    <span>⭐ 4.8</span>
+        </div>
+
+        <div class="shop-item" onclick="goToShop(2)">
+    <strong>La Veen Coffee</strong>
+    <span>⭐ 4.6</span>
+        </div>
+
+        <div class="shop-item" onclick="goToShop(3)">
+    <strong>Venn Coffee</strong>
+    <span>⭐ 4.7</span>
+        </div>
+    </div>
+
+    <!-- FEED -->
+    <div id="feed" class="feed"></div>
+
+</div>
+
+<!-- FLOATING BUTTON -->
+<button class="fab" onclick="openModal()">＋</button>
+
+<!-- MODAL -->
+<div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+
+        <div class="modal-header">
+            <h4>☕ Create Post</h4>
+            <span class="close-btn" onclick="closeModal()">×</span>
+        </div>
+
+        <textarea id="modal-text" placeholder="Share your coffee moment..."></textarea>
+
+        <label>📍 Cafe</label>
+        <select id="modal-shop">
+            <option>Single Origin Roasters</option>
+            <option>La Veen Coffee</option>
+            <option>Venn Coffee</option>
+        </select>
+
+        <label>🖼 Image Style</label>
+        <select id="aspect-ratio">
+            <option value="original">Original</option>
+            <option value="square">Square (1:1)</option>
+            <option value="portrait">Portrait (4:5)</option>
+            <option value="landscape">Landscape (16:9)</option>
+        </select>
+
+        <input type="file" id="modal-image" accept="image/*" onchange="previewImage(event)">
+
+        <div class="preview-container">
+            <img id="image-preview">
+        </div>
+
+        <button class="post-btn" onclick="submitModalPost()">Post ☕</button>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+
+</body>
+</html>
