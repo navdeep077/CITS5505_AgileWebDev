@@ -1,0 +1,112 @@
+/* ── PROFILE STYLES ──────────────────────────────────── */
+
+.hero-profile {
+    background: linear-gradient(140deg, var(--espresso) 0%, var(--roast) 100%);
+    padding: 80px 0 60px;
+    color: var(--cream);
+    border-bottom: 3px solid var(--caramel);
+    text-align: center; 
+}
+
+/* ── Profile Avatar ───────────────────────────────────── */
+
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 4px solid var(--caramel);
+    background: #fff;
+    object-fit: cover;
+    display: block; 
+    margin: 0 auto 1.25rem; 
+}
+
+.hero-profile h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.9rem, 4vw, 2.8rem); 
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 0.75rem;
+}
+
+/* ── Profile Bio ──────────────────────────────────────── */
+
+.profile-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(253, 246, 237, 0.85); 
+    font-weight: 400;
+    max-width: 600px;
+    margin: 0 auto; 
+}
+
+.hero-profile .container::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: var(--caramel);
+    margin: 2rem auto 0;
+    border-radius: 2px;
+}
+
+/* ── Post Gallery ─────────────────────────────────────── */
+
+.post-masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.post-card-mini {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    height: 250px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.post-card-mini:hover {
+    transform: translateY(-5px);
+}
+
+.post-card-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-tag {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(transparent, rgba(26, 14, 0, 0.9)); 
+    padding: 20px 15px 10px;
+    color: var(--latte);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* ── Review Cards ─────────────────────────────────────── */
+
+.review-item {
+    margin-bottom: 1rem;
+    padding: 1.25rem !important;
+    border-left: 4px solid var(--caramel) !important;
+}
+
+.stars {
+    color: var(--caramel);
+    font-size: 0.8rem;
+}
+
+.text-espresso {
+    color: var(--espresso);
+}

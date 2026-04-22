@@ -1,0 +1,85 @@
+/* ── BREW PAGE ───────────────────────────────────────── */
+
+.hero-brew {
+    text-align: center;
+    padding: 80px 20px;
+}
+.hero-brew h1 {
+    color: #ffffff;
+}
+.hero-brew .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ── Filters ─────────────────────────────────────────── */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    background: rgba(0,0,0,0.04);
+    border: 1.5px solid rgba(0,0,0,0.12);
+    padding: 8px 20px;
+    border-radius: 999px;
+    color: var(--espresso);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif;
+}
+.filter-chip:hover {
+    background: var(--caramel);
+    color: #fff;
+    border-color: var(--caramel);
+}
+
+/* Active filter chip — currently selected */
+.filter-chip.active-filter {
+    background: var(--espresso);
+    color: var(--latte);
+    border-color: var(--espresso);
+}
+
+/* ── Shop Cards ──────────────────────────────────────── */
+.shop-card {
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.shop-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+}
+.shop-card h5 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--espresso);
+}
+.shop-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+/* Shop type tag */
+.shop-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(196,122,43,0.12);
+    color: var(--caramel);
+    border: 1px solid rgba(196,122,43,0.25);
+}
+
+/* View Details button inside card */
+.shop-card .btn-outline-nav {
+    font-size: 0.88rem;
+    padding: 0.45rem 1rem;
+}
