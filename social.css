@@ -479,3 +479,12 @@ input[type="text"] {
     max-height: 220px;
     object-fit: cover;
 }
+
+.shop-item {
+    cursor: pointer;
+}
+
+.shop-item:hover {
+    background: #f8f5f2;
+    border-radius: 8px;
+}

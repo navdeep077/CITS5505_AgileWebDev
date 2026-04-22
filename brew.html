@@ -57,14 +57,7 @@
                 <p>⭐ 4.8</p>
                 <p>⏰ Open 7:00 AM – 3:00 PM</p>
 
-                <button class="btn btn-outline-nav" onclick='openShop({
-                    name: "Single Origin Roasters",
-                    location: "Subiaco",
-                    rating: "4.8",
-                    price: "$$",
-                    pet: "Yes",
-                    dineIn: "Yes"
-                })'>
+                <button class="btn btn-outline-nav" onclick="goToShop(1)">
                     View Details
                 </button>
             </div>
@@ -78,14 +71,7 @@
                 <p>⭐ 4.6</p>
                 <p>⏰ Open 6:30 AM – 2:30 PM</p>
 
-                <button class="btn btn-outline-nav" onclick='openShop({
-                    name: "La Veen Coffee",
-                    location: "Perth CBD",
-                    rating: "4.6",
-                    price: "$$",
-                    pet: "No",
-                    dineIn: "Yes"
-                })'>
+                <button class="btn btn-outline-nav" onclick="goToShop(2)">
                     View Details
                 </button>
             </div>
@@ -99,14 +85,7 @@
                 <p>⭐ 4.7</p>
                 <p>⏰ Open 7:00 AM – 2:00 PM</p>
 
-                <button class="btn btn-outline-nav" onclick='openShop({
-                    name: "Venn Coffee",
-                    location: "West Perth",
-                    rating: "4.7",
-                    price: "$",
-                    pet: "Yes",
-                    dineIn: "Yes"
-                })'>
+                <button class="btn btn-outline-nav" onclick="goToShop(3)">
                     View Details
                 </button>
             </div>
@@ -117,9 +96,9 @@
 
 <!-- ✅ SCRIPT (IMPORTANT) -->
 <script>
-function openShop(shopData) {
-    localStorage.setItem("selectedShop", JSON.stringify(shopData));
-    window.location.href = "shop.html";
+function goToShop(id) {
+    console.log("Going to shop:", id); // debug
+    window.location.href = `shop.html?id=${id}`;
 }
 </script>
 

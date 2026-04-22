@@ -1,15 +1,18 @@
 // Get ID from URL
 const params = new URLSearchParams(window.location.search);
-const shopId = parseInt(params.get("id"));
+const shopId = Number(params.get("id"));
 
 // Fetch data
 fetch("data/shops.json")
 .then(res => res.json())
 .then(data => {
 
-    const shop = data.find(s => s.id === shopId);
+    const shop = data.find(s => Number(s.id) === shopId);
 
-    if (!shop) return;
+    if (!shop) {
+    document.getElementById("shop-name").textContent = "Shop not found";
+    return;
+}
 
     // Fill header
     document.getElementById("shop-name").textContent = `☕ ${shop.name}`;

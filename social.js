@@ -287,6 +287,10 @@ function submitModalPost() {
     reader.readAsDataURL(imageInput.files[0]);
 }
 
+function goToShop(id) {
+    window.location.href = `shop.html?id=${id}`;
+}
+
 // ── LOGOUT ─────────────────────────
 function logout() {
     localStorage.clear();
