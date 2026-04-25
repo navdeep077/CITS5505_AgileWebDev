@@ -22,8 +22,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    {% if session.get("user") %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('brew') }}">Brew Map</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('social') }}">Social Grounds</a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="btn btn-nav" href="{{ url_for('login') }}">Login / Sign Up</a></li>
                 </ul>
             </div>
