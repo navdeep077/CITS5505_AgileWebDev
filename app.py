@@ -74,7 +74,7 @@ def profile():
 
 @app.route("/social")
 def social():
-    return "Social Grounds coming soon!"
+    return render_template("social.html")
 
 
 # ── Shop Routes ──────────────────────────────────────────

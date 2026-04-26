@@ -1,0 +1,515 @@
+body{
+    background: var(--cream) !important;
+}
+/* ── LAYOUT (IMPROVED BALANCE) ───────────────────────── */
+.social-layout {
+    display: flex;
+    align-items: flex-start;
+    max-width: 1000px; /* 🔥 reduced for tighter layout */
+    margin: 10px auto;
+    padding: 0 20px;
+    gap: 30px; /* 🔥 increased gap for better separation */
+}
+
+/* LEFT SIDEBAR */
+.sidebar-left {
+    width: 240px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 125px;
+
+    transform: translateX(-30px);  /* 🔥 move left slightly */
+
+    background: var(--cream);
+    padding: 16px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.sidebar-left h5 {
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+/* SIDEBAR ITEMS */
+.shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.shop-item:last-child {
+    border-bottom: none;
+}
+
+.shop-item:hover {
+    color: #c69c6d;
+    transform: translateX(3px); /* 🔥 subtle movement */
+}
+
+/* ⭐ Rating style */
+.shop-item span:last-child {
+    font-weight: 500;
+    color: #c69c6d;
+}
+
+/* FEED WIDTH FIX */
+.feed {
+    flex: 1;
+    max-width: 720px; /* 🔥 tighter feed */
+}
+
+/* ── FEED ───────────────────────── */
+#feed {
+    padding: 0 0 40px; /* 🔥 removed extra side padding */
+    margin-top: -2.5px;
+}
+
+/* ── POSTS ───────────────────────── */
+.post {
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px;
+    margin-bottom: 25px;
+    padding: 15px;
+
+    border-radius: 12px;
+    background: #fff;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: 0.25s ease;
+}
+
+.post:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 12px 28px rgba(0,0,0,0.08),
+        0 0 12px rgba(198,156,109,0.15);
+}
+
+/* TEXT */
+.post strong {
+    font-size: 0.95rem;
+}
+
+.post em {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.post p {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+/* ── HERO ───────────────────────── */
+.hero {
+    padding: 30px 0;
+    min-height: 140px;
+    background: linear-gradient(135deg, #3e2c1c, #1f1a17);
+}
+
+.hero .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero h1 {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.hero-sub {
+    color: #eee;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* ── FLOATING BUTTON ───────────────────────── */
+.fab {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+
+    width: 55px;
+    height: 55px;
+
+    border-radius: 50%;
+    border: none;
+
+    background: linear-gradient(135deg, #c69c6d, #a67c52);
+    color: white;
+
+    font-size: 26px;
+    cursor: pointer;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* ── MODAL ───────────────────────── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.25s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-box {
+    width: 90%;
+    max-width: 500px;
+
+    background: var(--cream) !important;
+    padding: 20px;
+    border-radius: 14px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.close-btn {
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* INPUTS */
+.modal-box textarea,
+.modal-box select,
+.modal-box input {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+/* HEADER */
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* AVATAR */
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* USER INFO */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.location {
+    font-size: 0.75rem;
+    color: #777;
+}
+
+/* IMAGE WRAPPER */
+.post-image-wrapper {
+    width: 100%;
+    max-height: 500px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* IMAGE */
+.post-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    display: block;
+}
+
+/* CAPTION */
+.post-caption {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+/* ACTIONS */
+.post-actions {
+    margin: 10px 0;
+}
+
+.post-actions button {
+    border: none;
+    background: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* COMMENTS */
+.comments {
+    margin-top: 5px;
+}
+
+.comments p {
+    margin: 3px 0;
+    font-size: 14px;
+}
+
+input[type="text"] {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #eee;
+    padding: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.comment-list {
+    margin-top: 8px;
+}
+
+.comment-list p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.comment {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.comment strong {
+    margin-right: 4px;
+}
+
+/* PREVIEW */
+.preview-container {
+    width: 100%;
+    margin-top: 10px;
+    display: none;
+}
+
+.preview-container img {
+    width: 100%;
+    border-radius: 12px;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+/* ── MOBILE FIX ───────────────────────── */
+@media (max-width: 900px) {
+    .sidebar-left {
+        display: none;
+    }
+
+    .social-layout {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .feed {
+        max-width: 100%;
+    }
+}
+/* ── COMMENT UPGRADE ───────────────────────── */
+.comment {
+    margin-bottom: 10px;
+}
+
+.comment-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+}
+
+.comment-time {
+    color: #888;
+}
+
+.comment-text {
+    font-size: 0.9rem;
+    margin: 2px 0;
+}
+
+.comment-actions {
+    font-size: 0.75rem;
+    color: #c69c6d;
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.comment-actions span:hover {
+    text-decoration: underline;
+}
+
+.edit-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    outline: none;
+}
+/* ── MODAL UPGRADE ───────────────────────── */
+
+.modal-box {
+    width: 90%;
+    max-width: 480px;
+
+    background: #fff;
+    padding: 22px;
+    border-radius: 16px;
+
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+
+    animation: modalFade 0.25s ease;
+}
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header h4 {
+    font-weight: 600;
+    color: #3e2c1c; /* coffee brown */
+}
+
+/* LABELS */
+.modal-box label {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #777;
+}
+
+/* INPUTS */
+.modal-box textarea,
+.modal-box select,
+.modal-box input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px;
+
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+
+    font-size: 0.9rem;
+
+    transition: 0.2s ease;
+}
+
+/* FOCUS EFFECT */
+.modal-box textarea:focus,
+.modal-box select:focus,
+.modal-box input:focus {
+    border-color: #c69c6d;
+    box-shadow: 0 0 0 3px rgba(198,156,109,0.15);
+    outline: none;
+}
+
+/* TEXTAREA STYLE */
+.modal-box textarea {
+    min-height: 80px;
+    resize: none;
+}
+
+/* FILE INPUT */
+.modal-box input[type="file"] {
+    padding: 8px;
+    background: #fafafa;
+}
+
+/* POST BUTTON */
+.post-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: linear-gradient(135deg, #c69c6d, #a67c52);
+    color: white;
+
+    font-size: 1rem;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+/* BUTTON HOVER */
+.post-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+
+/* PREVIEW IMAGE */
+.preview-container img {
+    margin-top: 10px;
+    border-radius: 12px;
+    max-height: 220px;
+    object-fit: cover;
+}
+
+.shop-item {
+    cursor: pointer;
+}
+
+.shop-item:hover {
+    background: #f8f5f2;
+    border-radius: 8px;
+}
+.navbar {
+    background-color: #1a1a1a;
+}
+
+.navbar .nav-link {
+    color: #ffffff;
+    opacity: 0.8;
+}
+
+.navbar .nav-link:hover {
+    opacity: 1;
+    color: #f5c16c;
+}
+
+.navbar .nav-link.active {
+    color: #f5c16c;
+    font-weight: 600;
+}
+.bi {
+    margin-right: 5px;
+}

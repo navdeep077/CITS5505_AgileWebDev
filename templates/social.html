@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Social Grounds{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero text-center">
+    <div class="container">
+        <h1>
+            <i class="bi bi-cup-hot-fill"></i> Social Grounds
+        </h1>
+        <p class="hero-sub">Share your coffee experiences</p>
+    </div>
+</section>
+
+<!-- MAIN -->
+<div class="social-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar-left">
+        <h5>
+            <i class="bi bi-fire"></i> Trending Cafes
+        </h5>
+
+        <div class="shop-item" onclick="goToShop(1)">
+            <strong>Single Origin Roasters</strong>
+            <span>
+                <i class="bi bi-star-fill text-warning"></i> 4.8
+            </span>
+        </div>
+
+        <div class="shop-item" onclick="goToShop(2)">
+            <strong>La Veen Coffee</strong>
+            <span>
+                <i class="bi bi-star-fill text-warning"></i> 4.6
+            </span>
+        </div>
+
+        <div class="shop-item" onclick="goToShop(3)">
+            <strong>Venn Coffee</strong>
+            <span>
+                <i class="bi bi-star-fill text-warning"></i> 4.7
+            </span>
+        </div>
+    </div>
+
+    <!-- FEED -->
+    <div id="feed" class="feed"></div>
+
+</div>
+
+<!-- FLOATING BUTTON -->
+<button class="fab" onclick="openModal()">
+    <i class="bi bi-plus-lg"></i>
+</button>
+
+<!-- MODAL -->
+<div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+
+        <div class="modal-header">
+            <h4>
+                <i class="bi bi-pencil-square"></i> Create Post
+            </h4>
+            <span class="close-btn" onclick="closeModal()">
+                <i class="bi bi-x-lg"></i>
+            </span>
+        </div>
+
+        <textarea id="modal-text" placeholder="Share your coffee moment..."></textarea>
+
+        <label>
+            <i class="bi bi-geo-alt-fill"></i> Cafe
+        </label>
+        <select id="modal-shop">
+            <option>Single Origin Roasters</option>
+            <option>La Veen Coffee</option>
+            <option>Venn Coffee</option>
+        </select>
+
+        <label>
+            <i class="bi bi-image-fill"></i> Image Style
+        </label>
+        <select id="aspect-ratio">
+            <option value="original">Original</option>
+            <option value="square">Square (1:1)</option>
+            <option value="portrait">Portrait (4:5)</option>
+            <option value="landscape">Landscape (16:9)</option>
+        </select>
+
+        <input type="file" id="modal-image" accept="image/*" onchange="previewImage(event)">
+
+        <div class="preview-container">
+            <img id="image-preview">
+        </div>
+
+        <button class="post-btn" onclick="submitModalPost()">
+            Post <i class="bi bi-cup-hot"></i>
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const routes = {
+        blacklist: "{{ url_for('shop_blacklist') }}",
+        laveen: "{{ url_for('shop_laveen') }}",
+        venn: "{{ url_for('shop_venn') }}",
+        landing: "{{ url_for('landing') }}"
+    };
+</script>
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+{% endblock %}
