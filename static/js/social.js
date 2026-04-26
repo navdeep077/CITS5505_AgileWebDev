@@ -118,7 +118,7 @@ function renderPost(postData, prepend = false) {
 
     <div class="post-actions">
         <button onclick="likePost('${postData.time}', this)">
-            ❤️ ${postData.likes || 0}
+            <i class="bi bi-heart-fill"></i> ${postData.likes || 0}
         </button>
     </div>
 
@@ -288,13 +288,13 @@ function submitModalPost() {
 }
 
 function goToShop(id) {
-    if (id == 1) window.location.href = "/shop/blacklist";
-    if (id == 2) window.location.href = "/shop/laveen";
-    if (id == 3) window.location.href = "/shop/venn";
+    if (id == 1) window.location.href = routes.blacklist;
+    if (id == 2) window.location.href = routes.laveen;
+    if (id == 3) window.location.href = routes.venn;
 }
 
 // ── LOGOUT ─────────────────────────
 function logout() {
     localStorage.clear();
-    window.location.href = "/landing";
+    window.location.href = routes.landing;
 }
