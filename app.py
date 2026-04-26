@@ -68,27 +68,27 @@ def landing():
 def brew():
     return render_template("brew.html")
 
-@app.route("/profile")
-def profile():
-    return render_template("profile.html")
 
-@app.route("/social")
-def social():
-    return "Social Grounds coming soon!"
+# HOME PAGE (Protected)
+@app.route("/home")
+def home():
+    if "user" in session:
+        return render_template("home.html", username=session["user"])
+    else:
+        return redirect(url_for("login"))
 
 
-# ── Shop Routes ──────────────────────────────────────────
-@app.route("/shop/blacklist")
-def shop_blacklist():
-    return render_template("shop-blacklist.html")
+# LOGOUT
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("login"))
 
-@app.route("/shop/laveen")
-def shop_laveen():
-    return render_template("shop-laveen.html")
 
-@app.route("/shop/venn")
-def shop_venn():
-    return render_template("shop-venn.html")
+# OPTIONAL: redirect root to login (temporary)
+@app.route("/")
+def index():
+    return redirect(url_for("login"))
 
 
 if __name__ == "__main__":
