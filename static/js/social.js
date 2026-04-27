@@ -6,7 +6,15 @@ const defaultPosts = [
         shop: "La Veen Coffee",
         image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
         likes: 5,
-        comments: [],
+        comments: [
+    {
+        username: "brewmaster",
+        owner: "brewmaster",
+        text: "This place is amazing!",
+        time: new Date().toISOString()
+    },
+]
+,
         time: "seed1"
     },
     {
@@ -16,7 +24,14 @@ const defaultPosts = [
         shop: "Single Origin Roasters",
         image: "https://images.unsplash.com/photo-1511920170033-f8396924c348",
         likes: 8,
-        comments: [],
+        comments: [{
+        username: "coffeelover",
+        owner: "coffeelover",
+        text: "This place is amazing!",
+        time: new Date().toISOString()
+    }
+],
+
         time: "seed2"
     },
     {
@@ -26,7 +41,13 @@ const defaultPosts = [
         shop: "Venn Coffee",
         image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
         likes: 3,
-        comments: [],
+        comments: [{
+        username: "coffeelover",
+        owner: "coffeelover",
+        text: "Awesome!",
+        time: new Date().toISOString()
+    }
+],
         time: "seed3"
     }
 ];
@@ -83,7 +104,7 @@ function loadPosts() {
     if (!posts || posts.length === 0) {
         posts = defaultPosts.map(p => ({
             ...p,
-            comments: [], // 🔥 remove old broken comments
+            comments: p.comments || [], // 🔥 remove old broken comments
             time: new Date().toISOString() + Math.random() // unique
         }));
 
@@ -103,6 +124,8 @@ function renderPost(postData, prepend = false) {
     const post = document.createElement("div");
     post.classList.add("post");
 
+    const canDelete = postData.username === currentUser;
+
     post.innerHTML = `
     <div class="post-header">
         <img class="avatar" src="${postData.avatar || ''}">
@@ -120,31 +143,59 @@ function renderPost(postData, prepend = false) {
         <button onclick="likePost('${postData.time}', this)">
             <i class="bi bi-heart-fill"></i> ${postData.likes || 0}
         </button>
+
+        
+        ${canDelete
+            ? `<button onclick="deletePost('${postData.time}')">
+                <i class="bi bi-trash"></i>
+           </button>`
+        : ""
+    }
     </div>
 
     <div class="post-caption">
         <strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}
     </div>
 
-    <div class="comment-list">
-    ${(postData.comments || [])
-        .filter(c => typeof c === "object")
-        .map((c, index) => `
-            <div class="comment">
-                <div class="comment-top">
-                    <strong>${c.username}</strong>
-                    <span class="comment-time">${timeAgo(c.time)}</span>
-                </div>
+<div class="comment-list">
+${(postData.comments || [])
+    .filter(c => typeof c === "object")
+    .map((c, index) => {
 
-                <div class="comment-text">${c.text}</div>
+        const canDelete =
+            c.owner === currentUser || postData.owner === currentUser;
 
-                <div class="comment-actions">
-                    <span onclick="editComment('${postData.time}', ${index}, this)">Edit</span>
-                    <span onclick="deleteComment('${postData.time}', ${index}, this)">Delete</span>
-                </div>
+        const canEdit =
+            c.owner === currentUser;
+
+        return `
+        <div class="comment">
+            <div class="comment-top">
+                <strong>${c.username}</strong>
+                <span class="comment-time">${timeAgo(c.time)}</span>
             </div>
-        `).join("")}
-    </div>
+
+            <div class="comment-text">${c.text}</div>
+
+            <div class="comment-actions">
+                ${
+                    canEdit
+                    ? `<span onclick="editComment('${postData.time}', ${index}, this)">Edit</span>`
+                    : ""
+                }
+
+                ${
+                    canDelete
+                    ? `<span onclick="deleteComment('${postData.time}', ${index})">
+                        <i class="bi bi-trash"></i>
+                       </span>`
+                    : ""
+                }
+            </div>
+        </div>
+        `;
+    }).join("")}
+</div>
 
     <input
         type="text"
@@ -173,13 +224,25 @@ function likePost(postTime, btn) {
     updateStorage(posts);
 }
 
+function deletePost(postTime) {
+    let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+    posts = posts.filter(p => p.time !== postTime);
+
+    updateStorage(posts);
+    loadPosts();
+}
+
 // ── ADD COMMENT ─────────────────────────
 function addComment(e, postTime, input) {
     if (e.key === "Enter" && input.value.trim() !== "") {
 
         const commentText = input.value.trim();
         let posts = JSON.parse(localStorage.getItem("posts")) || [];
-        const user = getRandomUser();
+        const user = {
+            name: currentUser || "Anonymous",
+            avatar: "https://i.pravatar.cc/40"
+        };
 
         posts = posts.map(p => {
             if (p.time === postTime) {
@@ -187,6 +250,7 @@ function addComment(e, postTime, input) {
 
                 p.comments.push({
                     username: user.name,
+                    owner: currentUser,   // ✅ IMPORTANT
                     text: commentText,
                     time: new Date().toISOString()
                 });
@@ -266,10 +330,14 @@ function submitModalPost() {
     const reader = new FileReader();
 
     reader.onload = function (e) {
-        const user = getRandomUser();
+        const user = {
+         name: currentUser,
+    avatar: "https://i.pravatar.cc/40?u=" + currentUser
+        };
 
         const postData = {
             username: user.name,
+            owner: currentUser,   // ✅ ADD THIS
             avatar: user.avatar,
             text,
             shop,
@@ -285,6 +353,18 @@ function submitModalPost() {
     };
 
     reader.readAsDataURL(imageInput.files[0]);
+}
+
+function previewImage(event) {
+    const preview = document.getElementById("image-preview");
+    const container = document.querySelector(".preview-container");
+
+    const file = event.target.files[0];
+
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        container.style.display = "block";
+    }
 }
 
 function goToShop(id) {

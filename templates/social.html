@@ -115,6 +115,8 @@
         venn: "{{ url_for('shop_venn') }}",
         landing: "{{ url_for('landing') }}"
     };
+
+    const currentUser = "{{session.get('user')}}";
 </script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 {% endblock %}
