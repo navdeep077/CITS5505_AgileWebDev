@@ -6,6 +6,7 @@ const defaultPosts = [
         shop: "La Veen Coffee",
         image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
         likes: 5,
+        likedBy: [],
         comments: [
     {
         username: "brewmaster",
@@ -24,6 +25,7 @@ const defaultPosts = [
         shop: "Single Origin Roasters",
         image: "https://images.unsplash.com/photo-1511920170033-f8396924c348",
         likes: 8,
+        likedBy: [],
         comments: [{
         username: "coffeelover",
         owner: "coffeelover",
@@ -41,6 +43,7 @@ const defaultPosts = [
         shop: "Venn Coffee",
         image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
         likes: 3,
+        likedBy: [],
         comments: [{
         username: "coffeelover",
         owner: "coffeelover",
@@ -124,6 +127,7 @@ function renderPost(postData, prepend = false) {
     const post = document.createElement("div");
     post.classList.add("post");
 
+    const isLiked = postData.likedBy?.includes(currentUser);
     const canDelete = postData.username === currentUser;
 
     post.innerHTML = `
@@ -140,8 +144,9 @@ function renderPost(postData, prepend = false) {
     </div>
 
     <div class="post-actions">
-        <button onclick="likePost('${postData.time}', this)">
-            <i class="bi bi-heart-fill"></i> ${postData.likes || 0}
+        <button onclick="likePost('${postData.time}')">
+            <i class="bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+             ${postData.likes || 0}
         </button>
 
         
@@ -215,22 +220,26 @@ function likePost(postTime, btn) {
 
     posts = posts.map(p => {
         if (p.time === postTime) {
-            p.likes = (p.likes || 0) + 1;
-            btn.innerText = `❤️ ${p.likes}`;
+
+            if (!p.likedBy) p.likedBy = [];
+
+            const alreadyLiked = p.likedBy.includes(currentUser);
+
+            if (alreadyLiked) {
+                // ❌ UNLIKE
+                p.likes = Math.max((p.likes || 1) - 1, 0);
+                p.likedBy = p.likedBy.filter(u => u !== currentUser);
+            } else {
+                // ✅ LIKE
+                p.likes = (p.likes || 0) + 1;
+                p.likedBy.push(currentUser);
+            }
         }
         return p;
     });
 
-    updateStorage(posts);
-}
-
-function deletePost(postTime) {
-    let posts = JSON.parse(localStorage.getItem("posts")) || [];
-
-    posts = posts.filter(p => p.time !== postTime);
-
-    updateStorage(posts);
-    loadPosts();
+    localStorage.setItem("posts", JSON.stringify(posts));
+    loadPosts(); // re-render UI
 }
 
 // ── ADD COMMENT ─────────────────────────
