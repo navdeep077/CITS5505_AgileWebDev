@@ -1,0 +1,97 @@
+/* ── HOME SPLIT LAYOUT ───────────────────────────────── */
+.home-split-layout {
+    display: flex;
+    gap: 0;
+    min-height: calc(100vh - 70px);
+}
+
+.home-left {
+    width: 62%;
+    padding: 1.5rem 4rem;  /* more side padding to center posts */
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* center everything */
+}
+
+/* Center the feed posts */
+#feed {
+    width: 100%;
+    max-width: 650px;
+}
+
+/* Center the section header */
+.home-left .home-section-header {
+    width: 100%;
+    max-width: 550px;
+}
+
+/* RIGHT — Brew Map — smaller sidebar */
+.home-right {
+    width: 38%;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: var(--cream);
+}
+
+/* Section headers */
+.home-section-header {
+    position: sticky;
+    top: 0;
+    background: var(--cream);
+    padding: 0.75rem 0;
+    border-bottom: 2px solid rgba(196,122,43,0.15);
+    margin-bottom: 1rem;
+    z-index: 10;
+}
+
+.home-section-header h5 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--espresso);
+    margin: 0;
+}
+
+
+
+/* Responsive */
+@media (max-width: 900px) {
+    .home-split-layout {
+        flex-direction: column;
+    }
+    .home-left,
+    .home-right {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid rgba(196,122,43,0.15);
+    }
+}
+/* Brew map cards grid — 2 columns */
+.brew-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+/* Make last card fill remaining space */
+.brew-grid .shop-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;  /* span both columns */
+    max-width: 50%;        /* but only take half width */
+}
+
+.brew-grid .feature-card {
+    height: 200px;          /* fixed height not min-height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.brew-grid h6 {
+    font-size: 0.88rem;
+    min-height: 2.5rem;
+}
+
+/* Force View Details button to always stick to bottom */
+.brew-grid .btn-outline-nav {
+    margin-top: auto !important;
+}

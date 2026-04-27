@@ -23,7 +23,7 @@ def login():
             return redirect(url_for("login", error="Please fill all fields"))
         elif username in users and users[username] == password:
             session["user"] = username
-            return redirect(url_for("landing"))
+            return redirect(url_for("home"))
         else:
             return redirect(url_for("login", error="Invalid username or password"))
 
@@ -89,6 +89,12 @@ def shop_laveen():
 @app.route("/shop/venn")
 def shop_venn():
     return render_template("shop-venn.html")
+
+@app.route("/home")
+def home():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    return render_template("home.html")
 
 
 if __name__ == "__main__":
