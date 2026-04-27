@@ -65,25 +65,25 @@
         border-bottom: 2px solid rgba(196,122,43,0.15);
     }
 }
-/* Brew map cards grid — 2 columns */
+/* Brew map cards grid — 3 equal columns */
 .brew-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     align-items: stretch;
 }
 
-/* Make last card fill remaining space */
-.brew-grid .shop-item:last-child:nth-child(odd) {
-    grid-column: 1 / -1;  /* span both columns */
-    max-width: 50%;        /* but only take half width */
+.brew-grid .shop-item {
+    display: flex;
 }
 
 .brew-grid .feature-card {
-    height: 200px;          /* fixed height not min-height */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 100%;
+    min-height: 200px;
+    height: auto;
 }
 
 .brew-grid h6 {
