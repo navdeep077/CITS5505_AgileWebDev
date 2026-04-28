@@ -59,6 +59,28 @@ function getRandomUser() {
     return users[Math.floor(Math.random() * users.length)];
 }
 
+const activeUser = typeof currentUser === "string" && currentUser.trim()
+    ? currentUser
+    : "User";
+
+function getSavedAvatar(username = activeUser) {
+    return localStorage.getItem(`profileAvatar:${username}`) || "";
+}
+
+function getDisplayAvatar(postData) {
+    if (postData.username === activeUser) return getSavedAvatar() || postData.avatar || "";
+    if (postData.avatar) return postData.avatar;
+    return "";
+}
+
+function avatarMarkup(username, avatar) {
+    if (avatar) {
+        return `<img class="avatar" src="${avatar}" alt="${username} profile photo">`;
+    }
+
+    return `<div class="avatar avatar-placeholder">${(username || "U").charAt(0).toUpperCase()}</div>`;
+}
+
 // ── INIT ─────────────────────────
 window.onload = function () {
     loadPosts();
@@ -99,22 +121,27 @@ function loadPosts() {
 // ── RENDER POST ─────────────────────────
 function renderPost(postData, prepend = false) {
     const feed = document.getElementById("feed");
+    const username = postData.username || "Anonymous";
+    const avatar = getDisplayAvatar(postData);
+    const postImage = postData.image
+        ? `<div class="post-image-wrapper">
+        <img src="${postData.image}" alt="Coffee post image">
+    </div>`
+        : "";
 
     const post = document.createElement("div");
     post.classList.add("post");
 
     post.innerHTML = `
     <div class="post-header">
-        <img class="avatar" src="${postData.avatar || ''}">
+        ${avatarMarkup(username, avatar)}
         <div class="user-info">
-            <strong>${postData.username || "Anonymous"}</strong>
+            <strong>${username}</strong>
             <span class="location">${postData.shop || ""}</span>
         </div>
     </div>
 
-    <div class="post-image-wrapper">
-        <img src="${postData.image || ''}">
-    </div>
+    ${postImage}
 
     <div class="post-actions">
         <button onclick="likePost('${postData.time}', this)">
@@ -123,7 +150,7 @@ function renderPost(postData, prepend = false) {
     </div>
 
     <div class="post-caption d-flex justify-content-between align-items-start">
-    <span><strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}</span>
+    <span><strong>${username}</strong> ${postData.text || ""}</span>
     <button onclick="deletePost('${postData.time}')" 
         style="border:none;background:none;color:var(--muted);font-size:0.8rem;cursor:pointer;">
         <i class="bi bi-trash"></i>
@@ -183,14 +210,12 @@ function addComment(e, postTime, input) {
 
         const commentText = input.value.trim();
         let posts = JSON.parse(localStorage.getItem("posts")) || [];
-        const user = getRandomUser();
-
         posts = posts.map(p => {
             if (p.time === postTime) {
                 if (!p.comments) p.comments = [];
 
                 p.comments.push({
-                    username: user.name,
+                    username: activeUser,
                     text: commentText,
                     time: new Date().toISOString()
                 });
@@ -270,11 +295,9 @@ function submitModalPost() {
     const reader = new FileReader();
 
     reader.onload = function (e) {
-        const user = getRandomUser();
-
         const postData = {
-            username: user.name,
-            avatar: user.avatar,
+            username: activeUser,
+            avatar: getSavedAvatar(),
             text,
             shop,
             image: e.target.result,
