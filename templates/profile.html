@@ -1,76 +1,200 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile</title>
-    
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/profile.css">
+{% extends 'base.html' %}
+{% block title %}My Profile | Coffee Social Hub{% endblock %}
 
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-</head>
-<body>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
 
-<!-- ── Navigation ─────────────────────────── -->    
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="landing.html">☕ Coffee Social Hub</a>
-            <ul class="navbar-nav ms-auto gap-3">
-                <li><a class="nav-link" href="brew.html">Brew Map</a></li>
-                <li><a class="nav-link" href="#">Social Grounds</a></li>
-                <li><a class="btn btn-outline-nav" href="#">Log In</a></li>
-                <li><a class="btn btn-nav" href="#">Join Free</a></li>
-            </ul>
-        </div>
-    </nav>
+{% block content %}
+<div class="container py-4">
 
-<!-- ── Hero Section ─────────────────────────── -->
-    <section class="hero-profile">
-    <div class="container">
-        <img src="avatar.jpg" class="profile-img" alt="User">
-        <h1>CoffeeEnthusiast_UWA</h1>
-            <p class="profile-bio">
-                Third-year UWA student and amateur latte artist. Usually found at Hackett Coffee 
-                with a batch brew and a laptop. I'm on a mission to find the best 
-                espresso shot in Nedlands!
-            </p>
+    <!-- Back to Home -->
+    <div class="mb-3">
+        <a href="{{ url_for('home') }}" class="btn btn-outline-coffee btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Home
+        </a>
     </div>
-</section>
 
-<!-- ── Feed & activity Section ─────────────────────────── -->
-    <main class="container py-5">
-        <div class="row g-5">
-            <div class="col-lg-8">
-                <span class="section-eyebrow">My Feed</span>
-                <h2 class="section-title mb-4">Brew Moments</h2>
-                <div class="post-masonry">
-                    <div class="post-card-mini">
-                        <img src="https://via.placeholder.com/400x300" alt="Coffee">
-                        <div class="post-tag">@ Hackett Coffee</div>
-                    </div>
-                    <div class="post-card-mini">
-                        <img src="https://via.placeholder.com/400x400" alt="Coffee">
-                        <div class="post-tag">@ The Guild Village</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <span class="section-eyebrow">Recent Activity</span>
-                <h2 class="section-title mb-4">My Reviews</h2>
-                
-                <div class="feature-card review-item">
-                    <div class="d-flex justify-content-between mb-2">
-                        <strong class="text-espresso">Venn Coffee</strong>
-                        <span class="stars">⭐⭐⭐⭐⭐</span>
-                    </div>
-                    <p class="small text-muted">The oat flat white here is the gold standard for West Perth. Super smooth.</p>
-                </div>
+    <!-- Profile Header -->
+    <div class="profile-header d-flex align-items-center gap-4 mb-4">
+        <div class="profile-avatar-wrapper">
+            <div class="profile-avatar-placeholder">
+                {{ session.get('user', 'U')[0].upper() }}
             </div>
         </div>
-    </main>
+        <div>
+            <h2 class="mb-1">{{ session.get('user', 'User') }}</h2>
+            <p class="text-muted mb-0">Coffee enthusiast · Perth WA</p>
+        </div>
+    </div>
 
-</body>
-</html>
+    <div class="row g-4">
+
+        <!-- LEFT — Create Post + My Posts -->
+        <div class="col-lg-8">
+
+            <!-- Create Post Box -->
+            <div class="card mb-4 p-3">
+                <h6 class="mb-3">Share a coffee moment</h6>
+                <textarea id="profile-post-text" class="form-control mb-2"
+                    placeholder="What are you brewing today?" rows="3"></textarea>
+                <select id="profile-post-shop" class="form-select mb-2">
+                    <option value="">Tag a cafe...</option>
+                    <option>Blacklist Coffee Roasters</option>
+                    <option>La Veen Coffee</option>
+                    <option>Venn Coffee</option>
+                </select>
+                <input type="file" id="profile-post-image" class="form-control mb-2" accept="image/*">
+                <button class="btn btn-primary-custom w-100" onclick="submitProfilePost()">Post</button>
+            </div>
+
+            <!-- My Posts -->
+            <h5 class="mb-3">My Posts</h5>
+            <div id="profile-feed"></div>
+
+        </div>
+
+        <!-- RIGHT — My Reviews -->
+        <div class="col-lg-4">
+            <h5 class="mb-3">My Reviews</h5>
+
+            <div class="card p-3 mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <strong>Venn Coffee</strong>
+                    <span style="color:var(--caramel);">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                    </span>
+                </div>
+                <p class="small text-muted mb-0">The oat flat white here is the gold standard for Subiaco.</p>
+                <a href="{{ url_for('shop_venn') }}" class="small mt-1 d-block" style="color:var(--caramel);">View shop</a>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <strong>Blacklist Coffee</strong>
+                    <span style="color:var(--caramel);">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star"></i>
+                    </span>
+                </div>
+                <p class="small text-muted mb-0">Best cold brew in Perth. Worth the drive to Welshpool.</p>
+                <a href="{{ url_for('shop_blacklist') }}" class="small mt-1 d-block" style="color:var(--caramel);">View shop</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const currentUser = "{{ session.get('user', 'User') }}";
+
+function submitProfilePost() {
+    const text = document.getElementById('profile-post-text').value.trim();
+    const shop = document.getElementById('profile-post-shop').value;
+    const imageInput = document.getElementById('profile-post-image');
+
+    if (!text) { alert('Please write something!'); return; }
+
+    const reader = new FileReader();
+
+    function createPost(imageData) {
+        const post = {
+            username: currentUser,
+            avatar: '',
+            text: text,
+            shop: shop,
+            image: imageData || '',
+            likes: 0,
+            comments: [],
+            time: new Date().toISOString()
+        };
+
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
+        posts.unshift(post);
+        localStorage.setItem('posts', JSON.stringify(posts));
+
+        document.getElementById('profile-post-text').value = '';
+        document.getElementById('profile-post-shop').value = '';
+        document.getElementById('profile-post-image').value = '';
+
+        loadProfilePosts();
+    }
+
+    if (imageInput.files.length > 0) {
+        reader.onload = e => createPost(e.target.result);
+        reader.readAsDataURL(imageInput.files[0]);
+    } else {
+        createPost('');
+    }
+}
+
+function loadProfilePosts() {
+    const feed = document.getElementById('profile-feed');
+    let posts = JSON.parse(localStorage.getItem('posts')) || [];
+    const myPosts = posts.filter(p => p.username === currentUser);
+
+    if (myPosts.length === 0) {
+        feed.innerHTML = '<p class="text-muted">No posts yet. Share your first coffee moment!</p>';
+        return;
+    }
+
+    feed.innerHTML = myPosts.map((p, i) => `
+        <div class="card mb-3 p-3">
+            <p class="mb-1"><strong>${p.shop || ''}</strong></p>
+            ${p.image ? `<img src="${p.image}" class="img-fluid rounded mb-2" style="max-height:300px;object-fit:cover;">` : ''}
+            <p class="mb-2">${p.text}</p>
+
+            <!-- Comments -->
+            <div class="comment-section mt-2">
+                ${(p.comments || []).map((c, ci) => `
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <p class="small mb-0"><strong>${c.username}</strong> ${c.text}</p>
+                        <button class="btn btn-sm p-0 ms-2" style="color:var(--caramel);font-size:0.75rem;"
+                            onclick="deleteProfileComment('${p.time}', ${ci})">Delete</button>
+                    </div>
+                `).join('')}
+                <input type="text" class="form-control form-control-sm mt-2"
+                    placeholder="Add a comment..."
+                    onkeypress="addProfileComment(event, '${p.time}', this)">
+            </div>
+        </div>
+    `).join('');
+}
+
+function addProfileComment(e, postTime, input) {
+    if (e.key === 'Enter' && input.value.trim()) {
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
+        posts = posts.map(p => {
+            if (p.time === postTime) {
+                if (!p.comments) p.comments = [];
+                p.comments.push({ username: currentUser, text: input.value.trim(), time: new Date().toISOString() });
+            }
+            return p;
+        });
+        localStorage.setItem('posts', JSON.stringify(posts));
+        loadProfilePosts();
+    }
+}
+
+function deleteProfileComment(postTime, index) {
+    let posts = JSON.parse(localStorage.getItem('posts')) || [];
+    posts = posts.map(p => {
+        if (p.time === postTime) p.comments.splice(index, 1);
+        return p;
+    });
+    localStorage.setItem('posts', JSON.stringify(posts));
+    loadProfilePosts();
+}
+
+window.onload = loadProfilePosts;
+</script>
+{% endblock %}

@@ -158,9 +158,13 @@ function renderPost(postData, prepend = false) {
     }
     </div>
 
-    <div class="post-caption">
-        <strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}
-    </div>
+    <div class="post-caption d-flex justify-content-between align-items-start">
+    <span><strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}</span>
+    <button onclick="deletePost('${postData.time}')" 
+        style="border:none;background:none;color:var(--muted);font-size:0.8rem;cursor:pointer;">
+        <i class="bi bi-trash"></i>
+    </button>
+</div>
 
 <div class="comment-list">
 ${(postData.comments || [])
@@ -386,4 +390,13 @@ function goToShop(id) {
 function logout() {
     localStorage.clear();
     window.location.href = routes.landing;
+}
+// ── DELETE POST ─────────────────────────
+function deletePost(postTime) {
+    if (!confirm('Delete this post?')) return;
+    
+    let posts = JSON.parse(localStorage.getItem('posts')) || [];
+    posts = posts.filter(p => p.time !== postTime);
+    localStorage.setItem('posts', JSON.stringify(posts));
+    loadPosts();
 }
