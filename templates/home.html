@@ -40,7 +40,17 @@
                     <option>La Veen Coffee</option>
                     <option>Venn Coffee</option>
                 </select>
-                <input type="file" id="modal-image" accept="image/*">
+                <label>
+                    <i class="bi bi-image-fill"></i> Image Style
+                </label>
+
+                <select id="aspect-ratio">
+                    <option value="original">Original</option>
+                    <option value="square">Square (1:1)</option>
+                    <option value="portrait">Portrait (4:5)</option>
+                    <option value="landscape">Landscape (16:9)</option>
+                </select>
+                <input type="file" id="modal-image" accept="image/*" onchange="previewImage(event)">
                 <div class="preview-container">
                     <img id="image-preview">
                 </div>
@@ -126,6 +136,9 @@
         venn: "{{ url_for('shop_venn') }}",
         landing: "{{ url_for('landing') }}"
     };
+</script>
+<script>
+    window.currentUser = "{{ session.get('user') }}";
 </script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 <script src="{{ url_for('static', filename='js/brew.js') }}"></script>

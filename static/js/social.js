@@ -1,6 +1,9 @@
+const currentUser = window.currentUser || "guest";
+
 const defaultPosts = [
     {
         username: "CoffeeLover",
+        owner: "CoffeeLover",   // ✅ ADD THIS
         avatar: "https://i.pravatar.cc/40?img=1",
         text: "Best latte I’ve had in Perth ☕",
         shop: "La Veen Coffee",
@@ -20,9 +23,10 @@ const defaultPosts = [
     },
     {
         username: "BrewMaster",
+        owner: "BrewMaster",
         avatar: "https://i.pravatar.cc/40?img=2",
         text: "Morning espresso hit 🔥",
-        shop: "Single Origin Roasters",
+        shop: "Blacklist Coffee Roasters",
         image: "https://images.unsplash.com/photo-1511920170033-f8396924c348",
         likes: 8,
         likedBy: [],
@@ -38,6 +42,7 @@ const defaultPosts = [
     },
     {
         username: "BeanHunter",
+        owner: "BeanHunter",
         avatar: "https://i.pravatar.cc/40?img=3",
         text: "Chill vibes and cold brew ❄️",
         shop: "Venn Coffee",
@@ -128,7 +133,7 @@ function renderPost(postData, prepend = false) {
     post.classList.add("post");
 
     const isLiked = postData.likedBy?.includes(currentUser);
-    const canDelete = postData.username === currentUser;
+    const canDelete = postData.owner === currentUser;
 
     post.innerHTML = `
     <div class="post-header">
@@ -158,13 +163,9 @@ function renderPost(postData, prepend = false) {
     }
     </div>
 
-    <div class="post-caption d-flex justify-content-between align-items-start">
-    <span><strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}</span>
-    <button onclick="deletePost('${postData.time}')" 
-        style="border:none;background:none;color:var(--muted);font-size:0.8rem;cursor:pointer;">
-        <i class="bi bi-trash"></i>
-    </button>
-</div>
+    <div class="post-caption">
+        <strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}
+    </div>
 
 <div class="comment-list">
 ${(postData.comments || [])
@@ -327,6 +328,27 @@ function openModal() {
 
 function closeModal() {
     document.getElementById("post-modal").classList.remove("active");
+    resetModal();
+}
+
+function resetModal() {
+    // clear text
+    document.getElementById("modal-text").value = "";
+
+    // reset dropdowns
+    document.getElementById("modal-shop").selectedIndex = 0;
+    document.getElementById("aspect-ratio").selectedIndex = 0;
+
+    // clear file input
+    const fileInput = document.getElementById("modal-image");
+    fileInput.value = "";
+
+    // clear preview
+    const preview = document.getElementById("image-preview");
+    preview.src = "";
+    
+    const container = document.querySelector(".preview-container");
+    container.style.display = "none";
 }
 
 // ── CREATE POST ─────────────────────────
@@ -340,44 +362,117 @@ function submitModalPost() {
         return;
     }
 
+    const aspect = document.getElementById("aspect-ratio")?.value || "original";
+
     const reader = new FileReader();
 
     reader.onload = function (e) {
-        const user = {
-         name: currentUser,
-    avatar: "https://i.pravatar.cc/40?u=" + currentUser
-        };
+        const img = new Image();
+        img.src = e.target.result;
 
-        const postData = {
-            username: user.name,
-            owner: currentUser,   // ✅ ADD THIS
-            avatar: user.avatar,
-            text,
-            shop,
-            image: e.target.result,
-            likes: 0,
-            comments: [],
-            time: new Date().toISOString()
-        };
+        img.onload = function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
 
-        savePost(postData);
-        loadPosts();
-        closeModal();
+            let width = img.width;
+            let height = img.height;
+
+            // 🎯 Apply aspect ratio logic
+            if (aspect === "square") {
+                const size = Math.min(width, height);
+                width = height = size;
+            } 
+            else if (aspect === "portrait") {
+                height = width * (5 / 4);
+            } 
+            else if (aspect === "landscape") {
+                height = width * (9 / 16);
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const finalImage = canvas.toDataURL();
+
+            document.getElementById("image-preview").src = finalImage;
+
+            const user = {
+                name: currentUser,
+                avatar: "https://i.pravatar.cc/40?u=" + currentUser
+            };
+
+            const postData = {
+                username: user.name,
+                owner: currentUser,
+                avatar: user.avatar,
+                text,
+                shop,
+                image: finalImage, // ✅ processed image
+                likes: 0,
+                comments: [],
+                time: new Date().toISOString()
+            };
+
+            savePost(postData);
+            loadPosts();
+            resetModal();
+            closeModal();
+
+            // 🔥 Reset modal (clean UX)
+            document.getElementById("modal-text").value = "";
+            imageInput.value = "";
+        };
     };
 
     reader.readAsDataURL(imageInput.files[0]);
 }
 
 function previewImage(event) {
+    const file = event.target.files[0];
     const preview = document.getElementById("image-preview");
     const container = document.querySelector(".preview-container");
 
-    const file = event.target.files[0];
+    if (!file) return;
 
-    if (file) {
-        preview.src = URL.createObjectURL(file);
-        container.style.display = "block";
-    }
+    const aspect = document.getElementById("aspect-ratio")?.value || "original";
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            let width = img.width;
+            let height = img.height;
+
+            if (aspect === "square") {
+                const size = Math.min(width, height);
+                width = height = size;
+            } 
+            else if (aspect === "portrait") {
+                height = width * (5 / 4);
+            } 
+            else if (aspect === "landscape") {
+                height = width * (9 / 16);
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            preview.src = canvas.toDataURL(); // ✅ THIS is the fix
+            container.style.display = "block";
+        };
+    };
+
+    reader.readAsDataURL(file);
 }
 
 function goToShop(id) {
@@ -400,3 +495,16 @@ function deletePost(postTime) {
     localStorage.setItem('posts', JSON.stringify(posts));
     loadPosts();
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const aspectDropdown = document.getElementById("aspect-ratio");
+
+    if (aspectDropdown) {
+        aspectDropdown.addEventListener("change", function () {
+            const fileInput = document.getElementById("modal-image");
+
+            if (fileInput.files.length > 0) {
+                previewImage({ target: fileInput });
+            }
+        });
+    }
+});
