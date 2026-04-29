@@ -229,6 +229,17 @@ body{
     object-fit: cover;
 }
 
+.avatar-placeholder {
+    background: #c69c6d;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
 /* USER INFO */
 .user-info {
     display: flex;
