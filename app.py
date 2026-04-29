@@ -9,6 +9,99 @@ users = {
     "user1": "password1",
 }
 
+CAFES = [
+    {
+        "name": "Blacklist Coffee Roasters",
+        "location": "Welshpool",
+        "rating": "4.8",
+        "hours": "7:00 AM - 3:00 PM",
+        "open": True,
+        "pet": False,
+        "cold_brew": True,
+        "pour_over": False,
+        "tags": ["Cold Brew"],
+        "route": "shop_blacklist"
+    },
+    {
+        "name": "La Veen Coffee",
+        "location": "Perth CBD",
+        "rating": "4.6",
+        "hours": "6:30 AM - 2:30 PM",
+        "open": True,
+        "pet": False,
+        "cold_brew": False,
+        "pour_over": True,
+        "tags": ["Pour Over"],
+        "route": "shop_laveen"
+    },
+    {
+        "name": "Venn Coffee",
+        "location": "Subiaco",
+        "rating": "4.7",
+        "hours": "7:00 AM - 4:00 PM",
+        "open": True,
+        "pet": True,
+        "cold_brew": False,
+        "pour_over": False,
+        "tags": ["Pet Friendly"],
+        "route": "shop_venn"
+    },
+    {
+        "name": "Harvest Espresso",
+        "location": "Leederville",
+        "rating": "4.7",
+        "hours": "6:30 AM - 2:00 PM",
+        "open": True,
+        "pet": False,
+        "cold_brew": True,
+        "pour_over": True,
+        "tags": ["Cold Brew", "Pour Over"],
+        "route": None
+    },
+    {
+        "name": "Telegram Cafe",
+        "location": "Northbridge",
+        "rating": "4.5",
+        "hours": "7:00 AM - 2:30 PM",
+        "open": True,
+        "pet": False,
+        "cold_brew": False,
+        "pour_over": True,
+        "tags": ["Pour Over"],
+        "route": None
+    },
+    {
+        "name": "Satchmo",
+        "location": "Mount Lawley",
+        "rating": "4.6",
+        "hours": "7:00 AM - 3:00 PM",
+        "open": True,
+        "pet": True,
+        "cold_brew": False,
+        "pour_over": False,
+        "tags": ["Pet Friendly"],
+        "route": None
+    },
+    {
+        "name": "Mary Street Bakery",
+        "location": "Perth CBD",
+        "rating": "4.4",
+        "hours": "7:00 AM - 3:00 PM",
+        "open": True,
+        "pet": False,
+        "cold_brew": True,
+        "pour_over": False,
+        "tags": ["Cold Brew"],
+        "route": None
+    }
+]
+
+
+@app.context_processor
+def inject_cafes():
+    trending_cafes = sorted(CAFES, key=lambda cafe: float(cafe["rating"]), reverse=True)[:3]
+    return {"cafes": CAFES, "trending_cafes": trending_cafes}
+
 # ── Auth Routes ──────────────────────────────────────────
 @app.route("/")
 def index():

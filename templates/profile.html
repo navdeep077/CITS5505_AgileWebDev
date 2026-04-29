@@ -33,6 +33,9 @@
             <label for="profile-avatar-upload" class="btn btn-outline-coffee btn-sm mt-2">
                 <i class="bi bi-camera-fill"></i> Change photo
             </label>
+            <button type="button" id="profile-avatar-remove" class="btn btn-outline-danger btn-sm mt-2 ms-2">
+                <i class="bi bi-trash"></i> Remove photo
+            </button>
             <input type="file" id="profile-avatar-upload" class="visually-hidden" accept="image/*">
         </div>
     </div>
@@ -42,7 +45,25 @@
     </div>
 </div>
 
-<div class="row g-4">
+    <div class="row g-4">
+
+        <!-- LEFT — Create Post + My Posts -->
+        <div class="col-lg-8">
+
+            <!-- Create Post Box -->
+            <div class="card mb-4 p-3">
+                <h6 class="mb-3">Share a coffee moment</h6>
+                <textarea id="profile-post-text" class="form-control mb-2"
+                    placeholder="What are you brewing today?" rows="3"></textarea>
+                <select id="profile-post-shop" class="form-select mb-2">
+                    <option value="">Tag a cafe...</option>
+                    {% for cafe in cafes %}
+                    <option>{{ cafe.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="file" id="profile-post-image" class="form-control mb-2" accept="image/*">
+                <button class="btn btn-primary-custom w-100" onclick="submitProfilePost()">Post</button>
+            </div>
 
 <div class="col-lg-8">
 
@@ -137,15 +158,18 @@ function renderProfileAvatar() {
     const avatar = getSavedAvatar();
     const image = document.getElementById('profile-avatar-image');
     const placeholder = document.getElementById('profile-avatar-placeholder');
+    const removeButton = document.getElementById('profile-avatar-remove');
 
     if (avatar) {
         image.src = avatar;
         image.style.display = 'block';
         placeholder.style.display = 'none';
+        removeButton.style.display = 'inline-block';
     } else {
         image.removeAttribute('src');
         image.style.display = 'none';
         placeholder.style.display = 'flex';
+        removeButton.style.display = 'none';
     }
 }
 
@@ -165,6 +189,20 @@ function handleAvatarUpload(event) {
         event.target.value = '';
     };
     reader.readAsDataURL(file);
+}
+
+function removeProfileAvatar() {
+    if (!getSavedAvatar()) return;
+
+    localStorage.removeItem(avatarStorageKey);
+    syncUserPostAvatars('');
+
+    if (window.updateNavbarAvatar) {
+        window.updateNavbarAvatar('');
+    }
+
+    renderProfileAvatar();
+    loadProfilePosts();
 }
 
 function syncUserPostAvatars(avatar) {
@@ -319,6 +357,7 @@ window.onload = loadProfilePosts;
 
 {% endblock %}
 document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
+document.getElementById('profile-avatar-remove').addEventListener('click', removeProfileAvatar);
 
 window.onload = function() {
     renderProfileAvatar();

@@ -27,26 +27,22 @@
             <i class="bi bi-fire"></i> Trending Cafes
         </h5>
 
-        <div class="shop-item" onclick="goToShop(1)">
-            <strong>Blacklist Coffee Roasters</strong>
+        {% for cafe in trending_cafes %}
+        {% if cafe.route %}
+        <a class="shop-item text-decoration-none text-reset" href="{{ url_for(cafe.route) }}">
+        {% else %}
+        <div class="shop-item">
+        {% endif %}
+            <strong>{{ cafe.name }}</strong>
             <span>
-                <i class="bi bi-star-fill text-warning"></i> 4.8
+                <i class="bi bi-star-fill text-warning"></i> {{ cafe.rating }}
             </span>
+        {% if cafe.route %}
+        </a>
+        {% else %}
         </div>
-
-        <div class="shop-item" onclick="goToShop(2)">
-            <strong>La Veen Coffee</strong>
-            <span>
-                <i class="bi bi-star-fill text-warning"></i> 4.6
-            </span>
-        </div>
-
-        <div class="shop-item" onclick="goToShop(3)">
-            <strong>Venn Coffee</strong>
-            <span>
-                <i class="bi bi-star-fill text-warning"></i> 4.7
-            </span>
-        </div>
+        {% endif %}
+        {% endfor %}
     </div>
 
     <!-- FEED -->
@@ -78,9 +74,9 @@
             <i class="bi bi-geo-alt-fill"></i> Cafe
         </label>
         <select id="modal-shop">
-            <option>Blacklist Coffee Roasters</option>
-            <option>La Veen Coffee</option>
-            <option>Venn Coffee</option>
+            {% for cafe in cafes %}
+            <option>{{ cafe.name }}</option>
+            {% endfor %}
         </select>
 
         <label>
@@ -111,9 +107,6 @@
 <script>
     const currentUser = {{ session.get('user', 'User')|tojson }};
     const routes = {
-        blacklist: "{{ url_for('shop_blacklist') }}",
-        laveen: "{{ url_for('shop_laveen') }}",
-        venn: "{{ url_for('shop_venn') }}",
         landing: "{{ url_for('landing') }}"
     };
 

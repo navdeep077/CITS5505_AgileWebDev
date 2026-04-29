@@ -495,59 +495,6 @@ function submitModalPost() {
 
     reader.readAsDataURL(imageInput.files[0]);
 }
-
-function previewImage(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById("image-preview");
-    const container = document.querySelector(".preview-container");
-
-    if (!file) return;
-
-    const aspect = document.getElementById("aspect-ratio")?.value || "original";
-
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        const img = new Image();
-        img.src = e.target.result;
-
-        img.onload = function () {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            let width = img.width;
-            let height = img.height;
-
-            if (aspect === "square") {
-                const size = Math.min(width, height);
-                width = height = size;
-            } 
-            else if (aspect === "portrait") {
-                height = width * (5 / 4);
-            } 
-            else if (aspect === "landscape") {
-                height = width * (9 / 16);
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            ctx.drawImage(img, 0, 0, width, height);
-
-            preview.src = canvas.toDataURL(); // ✅ THIS is the fix
-            container.style.display = "block";
-        };
-    };
-
-    reader.readAsDataURL(file);
-}
-
-function goToShop(id) {
-    if (id == 1) window.location.href = routes.blacklist;
-    if (id == 2) window.location.href = routes.laveen;
-    if (id == 3) window.location.href = routes.venn;
-}
-
 // ── LOGOUT ─────────────────────────
 function logout() {
     localStorage.clear();

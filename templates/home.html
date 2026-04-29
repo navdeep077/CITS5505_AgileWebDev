@@ -36,9 +36,9 @@
                 <textarea id="modal-text" placeholder="Share your coffee moment..."></textarea>
                 <label><i class="bi bi-geo-alt-fill"></i> Cafe</label>
                 <select id="modal-shop">
-                    <option>Blacklist Coffee Roasters</option>
-                    <option>La Veen Coffee</option>
-                    <option>Venn Coffee</option>
+                    {% for cafe in cafes %}
+                    <option>{{ cafe.name }}</option>
+                    {% endfor %}
                 </select>
                 <label>
                     <i class="bi bi-image-fill"></i> Image Style
@@ -84,44 +84,28 @@
 
         <!-- Shop cards -->
         <div class="brew-grid" id="shop-grid">
-    <div class="shop-item" data-open="true" data-pet="false" data-cold-brew="true" data-pour-over="false">
+    {% for cafe in cafes %}
+    <div class="shop-item" data-open="{{ cafe.open|lower }}" data-pet="{{ cafe.pet|lower }}" data-cold-brew="{{ cafe.cold_brew|lower }}" data-pour-over="{{ cafe.pour_over|lower }}">
         <div class="feature-card shop-card h-100">
             <div class="d-flex justify-content-between align-items-start mb-2">
-                <h6 class="mb-0">Blacklist Coffee Roasters</h6>
+                <h6 class="mb-0">{{ cafe.name }}</h6>
                 <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
             </div>
-            <p class="mb-1"><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Welshpool</p>
-            <p class="mb-1"><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.8</p>
-            <div class="mt-1 mb-2"><span class="shop-tag">Cold Brew</span></div>
-            <a href="{{ url_for('shop_blacklist') }}" class="btn btn-outline-nav mt-auto d-block text-center">View Details</a>
-        </div>
-    </div>
-
-    <div class="shop-item" data-open="true" data-pet="false" data-cold-brew="false" data-pour-over="true">
-        <div class="feature-card shop-card h-100">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <h6 class="mb-0">La Veen Coffee</h6>
-                <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+            <p class="mb-1"><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> {{ cafe.location }}</p>
+            <p class="mb-1"><i class="bi bi-star-fill" style="color:var(--caramel)"></i> {{ cafe.rating }}</p>
+            <div class="mt-1 mb-2">
+                {% for tag in cafe.tags %}
+                <span class="shop-tag">{{ tag }}</span>
+                {% endfor %}
             </div>
-            <p class="mb-1"><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Perth CBD</p>
-            <p class="mb-1"><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.6</p>
-            <div class="mt-1 mb-2"><span class="shop-tag">Pour Over</span></div>
-            <a href="{{ url_for('shop_laveen') }}" class="btn btn-outline-nav mt-auto d-block text-center">View Details</a>
+            {% if cafe.route %}
+            <a href="{{ url_for(cafe.route) }}" class="btn btn-outline-nav mt-auto d-block text-center">View Details</a>
+            {% else %}
+            <span class="btn btn-outline-nav mt-auto d-block text-center disabled">Details coming soon</span>
+            {% endif %}
         </div>
     </div>
-
-    <div class="shop-item" data-open="true" data-pet="true" data-cold-brew="false" data-pour-over="false">
-        <div class="feature-card shop-card h-100">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <h6 class="mb-0">Venn Coffee</h6>
-                <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
-            </div>
-            <p class="mb-1"><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Subiaco</p>
-            <p class="mb-1"><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.7</p>
-            <div class="mt-1 mb-2"><span class="shop-tag">Pet Friendly</span></div>
-            <a href="{{ url_for('shop_venn') }}" class="btn btn-outline-nav mt-auto d-block text-center">View Details</a>
-        </div>
-    </div>
+    {% endfor %}
 </div>
     </div>
 
@@ -132,9 +116,6 @@
 <script>
     const currentUser = {{ session.get('user', 'User')|tojson }};
     const routes = {
-        blacklist: "{{ url_for('shop_blacklist') }}",
-        laveen: "{{ url_for('shop_laveen') }}",
-        venn: "{{ url_for('shop_venn') }}",
         landing: "{{ url_for('landing') }}"
     };
 </script>
