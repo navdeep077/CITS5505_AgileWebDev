@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}La Veen Coffee | Coffee Social Hub{% endblock %}
+{% block title %}Telegram Cafe | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
@@ -15,16 +15,16 @@
         </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
-                <div class="shop-logo-badge">L</div>
+                <div class="shop-logo-badge">T</div>
                 <div>
                     <div class="shop-hero-tags">
-                        <span class="shop-badge">Pour Over</span>
+                        <span class="shop-badge">Specialty Coffee</span>
                         <span class="shop-badge">Dine-in</span>
                         <span class="shop-badge shop-badge--open">Open Now</span>
                     </div>
-                    <h1 class="shop-hero-title">La Veen Coffee</h1>
+                    <h1 class="shop-hero-title">Telegram Cafe</h1>
                     <p class="shop-hero-location">
-                        <i class="bi bi-geo-alt"></i> 79 King St, Perth WA 6000
+                        <i class="bi bi-geo-alt"></i> 278 William St, Northbridge WA 6003
                     </p>
                 </div>
             </div>
@@ -32,7 +32,7 @@
                 <span class="rating-num">4.6</span>
                 <div>
                     <div class="rating-stars">★★★★☆</div>
-                    <div class="rating-count">178 reviews</div>
+                    <div class="rating-count">142 reviews</div>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
                         <div class="info-strip-label">Hours Today</div>
-                        <div class="info-strip-value">6:30 AM – 2:30 PM</div>
+                        <div class="info-strip-value">7:30 AM – 4:00 PM</div>
                     </div>
                 </div>
                 <div class="info-strip-item">
@@ -71,38 +71,48 @@
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
             <div class="menu-category mb-4">
-                <div class="menu-category-label">Pour Over Selection</div>
+                <div class="menu-category-label">Espresso</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Ethiopia Yirgacheffe</div>
-                        <div class="menu-item-desc">Floral, citrus, light body</div>
-                        <div class="menu-item-price">$8.00</div>
+                        <div class="menu-item-name">Latte</div>
+                        <div class="menu-item-desc">House blend, smooth and balanced</div>
+                        <div class="menu-item-price">$5.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Colombia Huila</div>
-                        <div class="menu-item-desc">Caramel, stone fruit, medium body</div>
-                        <div class="menu-item-price">$8.50</div>
+                        <div class="menu-item-name">Cappuccino</div>
+                        <div class="menu-item-desc">Dry foam, rich espresso base</div>
+                        <div class="menu-item-price">$5.00</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Kenya AA</div>
-                        <div class="menu-item-desc">Blackcurrant, tomato, bright acidity</div>
-                        <div class="menu-item-price">$9.00</div>
+                        <div class="menu-item-name">Magic</div>
+                        <div class="menu-item-desc">Ristretto double shot, less milk</div>
+                        <div class="menu-item-price">$5.00</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Cold Brew</div>
+                        <div class="menu-item-desc">12-hour steep, served over ice</div>
+                        <div class="menu-item-price">$6.50</div>
                     </div>
                 </div>
             </div>
 
             <div class="menu-category mb-5">
-                <div class="menu-category-label">Espresso</div>
+                <div class="menu-category-label">Brunch</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Latte</div>
-                        <div class="menu-item-desc">Smooth, full-bodied espresso</div>
-                        <div class="menu-item-price">$5.50</div>
+                        <div class="menu-item-name">Eggs Benedict</div>
+                        <div class="menu-item-desc">Poached eggs, hollandaise, sourdough</div>
+                        <div class="menu-item-price">$19.00</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Cappuccino</div>
-                        <div class="menu-item-desc">Classic dry foam style</div>
-                        <div class="menu-item-price">$5.00</div>
+                        <div class="menu-item-name">Ricotta Hotcakes</div>
+                        <div class="menu-item-desc">Berry compote, maple syrup</div>
+                        <div class="menu-item-price">$18.00</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Mushroom Toast</div>
+                        <div class="menu-item-desc">Roasted mushrooms, thyme, sourdough</div>
+                        <div class="menu-item-price">$16.00</div>
                     </div>
                 </div>
             </div>
@@ -113,25 +123,25 @@
             <div class="review-list">
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">M</div>
+                        <div class="reviewer-avatar">N</div>
                         <div>
-                            <div class="reviewer-name">MorningBrewMia</div>
+                            <div class="reviewer-name">NorthbridgeNadia</div>
                             <div class="reviewer-date">1 day ago</div>
                         </div>
                         <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">The Ethiopia pour over was extraordinary — floral and bright. The barista explained the origin and brewing method which made it even better.</p>
+                    <p class="review-text">The ricotta hotcakes are unreal — light, fluffy, and the berry compote is perfect. Coffee is consistently strong too. My weekly brunch spot.</p>
                 </div>
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">T</div>
+                        <div class="reviewer-avatar">K</div>
                         <div>
-                            <div class="reviewer-name">ThirdWaveTom</div>
-                            <div class="reviewer-date">4 days ago</div>
+                            <div class="reviewer-name">KaffeeKlaus</div>
+                            <div class="reviewer-date">3 days ago</div>
                         </div>
                         <div class="review-stars ms-auto">★★★★☆</div>
                     </div>
-                    <p class="review-text">Excellent pour over selection, changes with the season. Right in the heart of the CBD — perfect for a pre-work coffee ritual.</p>
+                    <p class="review-text">The "Magic" here is exactly right — strong, intense, and perfectly balanced. Great atmosphere on William St, especially in the afternoon.</p>
                 </div>
             </div>
 
@@ -155,10 +165,10 @@
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
-                    <li><i class="bi bi-cup"></i> Specialty pour over</li>
+                    <li><i class="bi bi-cup-hot"></i> Specialty espresso</li>
                     <li><i class="bi bi-shop"></i> Dine-in available</li>
                     <li><i class="bi bi-bag"></i> Takeaway</li>
-                    <li><i class="bi bi-person-wheelchair"></i> Wheelchair accessible</li>
+                    <li><i class="bi bi-egg-fried"></i> Full brunch menu</li>
                     <li><i class="bi bi-credit-card"></i> Card and cash accepted</li>
                 </ul>
             </div>
@@ -175,4 +185,3 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}
-
