@@ -28,7 +28,7 @@
         </h5>
 
         <div class="shop-item" onclick="goToShop(1)">
-            <strong>Single Origin Roasters</strong>
+            <strong>Blacklist Coffee Roasters</strong>
             <span>
                 <i class="bi bi-star-fill text-warning"></i> 4.8
             </span>
@@ -78,7 +78,7 @@
             <i class="bi bi-geo-alt-fill"></i> Cafe
         </label>
         <select id="modal-shop">
-            <option>Single Origin Roasters</option>
+            <option>Blacklist Coffee Roasters</option>
             <option>La Veen Coffee</option>
             <option>Venn Coffee</option>
         </select>
@@ -116,6 +116,8 @@
         venn: "{{ url_for('shop_venn') }}",
         landing: "{{ url_for('landing') }}"
     };
+
+    const currentUser = "{{session.get('user')}}";
 </script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 {% endblock %}
