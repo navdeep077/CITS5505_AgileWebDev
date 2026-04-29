@@ -1,102 +1,140 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}My Profile | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
 
-    <!-- Back to Home -->
-    <div class="mb-3">
-        <a href="{{ url_for('home') }}" class="btn btn-outline-coffee btn-sm">
-            <i class="bi bi-arrow-left"></i> Back to Home
-        </a>
-    </div>
+<div class="mb-3">
+    <a href="{{ url_for('home') }}" class="btn btn-outline-coffee btn-sm">
+        <i class="bi bi-arrow-left"></i> Back to Home
+    </a>
+</div>
 
-    <!-- Profile Header -->
-    <div class="profile-header d-flex align-items-center gap-4 mb-4">
-        <div class="profile-avatar-wrapper">
-            <div class="profile-avatar-placeholder">
-                {{ session.get('user', 'U')[0].upper() }}
-            </div>
-        </div>
-        <div>
-            <h2 class="mb-1">{{ session.get('user', 'User') }}</h2>
-            <p class="text-muted mb-0">Coffee enthusiast · Perth WA</p>
+<div class="profile-header d-flex align-items-center gap-4 mb-4">
+    <div class="profile-avatar-wrapper">
+        <div class="profile-avatar-placeholder">
+            {{ session.get('user', 'U')[0].upper() }}
         </div>
     </div>
-
-    <div class="row g-4">
-
-        <!-- LEFT — Create Post + My Posts -->
-        <div class="col-lg-8">
-
-            <!-- Create Post Box -->
-            <div class="card mb-4 p-3">
-                <h6 class="mb-3">Share a coffee moment</h6>
-                <textarea id="profile-post-text" class="form-control mb-2"
-                    placeholder="What are you brewing today?" rows="3"></textarea>
-                <select id="profile-post-shop" class="form-select mb-2">
-                    <option value="">Tag a cafe...</option>
-                    <option>Blacklist Coffee Roasters</option>
-                    <option>La Veen Coffee</option>
-                    <option>Venn Coffee</option>
-                </select>
-                <input type="file" id="profile-post-image" class="form-control mb-2" accept="image/*">
-                <button class="btn btn-primary-custom w-100" onclick="submitProfilePost()">Post</button>
-            </div>
-
-            <!-- My Posts -->
-            <h5 class="mb-3">My Posts</h5>
-            <div id="profile-feed"></div>
-
-        </div>
-
-        <!-- RIGHT — My Reviews -->
-        <div class="col-lg-4">
-            <h5 class="mb-3">My Reviews</h5>
-
-            <div class="card p-3 mb-3">
-                <div class="d-flex justify-content-between mb-1">
-                    <strong>Venn Coffee</strong>
-                    <span style="color:var(--caramel);">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </span>
-                </div>
-                <p class="small text-muted mb-0">The oat flat white here is the gold standard for Subiaco.</p>
-                <a href="{{ url_for('shop_venn') }}" class="small mt-1 d-block" style="color:var(--caramel);">View shop</a>
-            </div>
-
-            <div class="card p-3 mb-3">
-                <div class="d-flex justify-content-between mb-1">
-                    <strong>Blacklist Coffee</strong>
-                    <span style="color:var(--caramel);">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star"></i>
-                    </span>
-                </div>
-                <p class="small text-muted mb-0">Best cold brew in Perth. Worth the drive to Welshpool.</p>
-                <a href="{{ url_for('shop_blacklist') }}" class="small mt-1 d-block" style="color:var(--caramel);">View shop</a>
-            </div>
-        </div>
-
+    <div>
+        <h2 class="mb-1">{{ session.get('user', 'User') }}</h2>
+        <p class="text-muted mb-0">Coffee enthusiast · Perth WA</p>
     </div>
+</div>
+
+<div class="row g-4">
+
+<div class="col-lg-8">
+
+    <div class="card mb-4 p-3">
+        <h6 class="mb-3">Share a coffee moment</h6>
+
+        <textarea id="profile-post-text" class="form-control mb-2"
+            placeholder="What are you brewing today?" rows="3"></textarea>
+
+        <select id="profile-post-shop" class="form-select mb-2">
+            <option value="">Tag a cafe...</option>
+            <option>Blacklist Coffee Roasters</option>
+            <option>La Veen Coffee</option>
+            <option>Venn Coffee</option>
+        </select>
+
+        <select id="aspect-ratio" class="form-select mb-2">
+            <option value="original">Original</option>
+            <option value="square">Square (1:1)</option>
+            <option value="portrait">Portrait (4:5)</option>
+            <option value="landscape">Landscape (16:9)</option>
+        </select>
+
+        <input type="file" id="profile-post-image" class="form-control mb-2"
+            accept="image/*" onchange="previewProfileImage(event)">
+
+        <img id="profile-image-preview"
+            style="width:100%; display:none; border-radius:10px; margin-top:8px; object-fit:cover;">
+
+        <button class="btn btn-primary-custom w-100" onclick="submitProfilePost()">Post</button>
+    </div>
+
+    <h5 class="mb-3">My Posts</h5>
+    <div id="profile-feed" class="feed"></div>
+
+</div>
+
+<div class="col-lg-4">
+    <h5 class="mb-3">My Reviews</h5>
+
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between mb-1">
+            <strong>Venn Coffee</strong>
+            <span style="color:var(--caramel);">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+            </span>
+        </div>
+        <p class="small text-muted mb-0">The oat flat white here is the gold standard for Subiaco.</p>
+    </div>
+
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between mb-1">
+            <strong>Blacklist Coffee</strong>
+            <span style="color:var(--caramel);">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star"></i>
+            </span>
+        </div>
+        <p class="small text-muted mb-0">Best cold brew in Perth.</p>
+    </div>
+</div>
+
+</div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-const currentUser = "{{ session.get('user', 'User') }}";
 
+    <script>
+        window.currentUser = "{{ session.get('user', 'User') }}";
+    </script>
+
+    <script src="/static/js/social.js"></script>
+
+    <script>
+
+/* PREVIEW (same behavior as before) */
+    function previewProfileImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const img = document.getElementById("profile-image-preview");
+            const ratio = document.getElementById("aspect-ratio").value;
+
+            img.src = e.target.result;
+            img.style.display = "block";
+
+            if (ratio === "square") img.style.aspectRatio = "1 / 1";
+            else if (ratio === "portrait") img.style.aspectRatio = "4 / 5";
+            else if (ratio === "landscape") img.style.aspectRatio = "16 / 9";
+            else img.style.aspectRatio = "auto";
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+/* CREATE POST — reuse social structure */
 function submitProfilePost() {
     const text = document.getElementById('profile-post-text').value.trim();
     const shop = document.getElementById('profile-post-shop').value;
@@ -106,95 +144,69 @@ function submitProfilePost() {
 
     const reader = new FileReader();
 
-    function createPost(imageData) {
-        const post = {
+    reader.onload = function (e) {
+
+        const postData = {
             username: currentUser,
-            avatar: '',
-            text: text,
-            shop: shop,
-            image: imageData || '',
+            owner: currentUser,
+            avatar: "https://i.pravatar.cc/40?u=" + currentUser,
+            text,
+            shop,
+            image: e.target.result,
             likes: 0,
+            likedBy: [],
             comments: [],
             time: new Date().toISOString()
         };
 
-        let posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts.unshift(post);
-        localStorage.setItem('posts', JSON.stringify(posts));
+        savePost(postData);   // 🔥 FROM social.js
+        loadProfilePosts();
 
         document.getElementById('profile-post-text').value = '';
         document.getElementById('profile-post-shop').value = '';
         document.getElementById('profile-post-image').value = '';
-
-        loadProfilePosts();
-    }
+        document.getElementById('profile-image-preview').style.display = "none";
+    };
 
     if (imageInput.files.length > 0) {
-        reader.onload = e => createPost(e.target.result);
         reader.readAsDataURL(imageInput.files[0]);
     } else {
-        createPost('');
+        reader.onload({ target: { result: "" } });
     }
 }
 
+/* 🔥 MAIN FIX — reuse social renderer */
 function loadProfilePosts() {
-    const feed = document.getElementById('profile-feed');
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    const myPosts = posts.filter(p => p.username === currentUser);
+    let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+    const myPosts = posts.filter(p => p.owner === currentUser);
+
+    const feed = document.getElementById("profile-feed");
+    feed.innerHTML = "";
 
     if (myPosts.length === 0) {
-        feed.innerHTML = '<p class="text-muted">No posts yet. Share your first coffee moment!</p>';
+        feed.innerHTML = "<p class='text-muted'>No posts yet.</p>";
         return;
     }
 
-    feed.innerHTML = myPosts.map((p, i) => `
-        <div class="card mb-3 p-3">
-            <p class="mb-1"><strong>${p.shop || ''}</strong></p>
-            ${p.image ? `<img src="${p.image}" class="img-fluid rounded mb-2" style="max-height:300px;object-fit:cover;">` : ''}
-            <p class="mb-2">${p.text}</p>
+    // 🔥 TEMPORARILY hijack feed
+    const originalFeed = document.getElementById("feed");
 
-            <!-- Comments -->
-            <div class="comment-section mt-2">
-                ${(p.comments || []).map((c, ci) => `
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <p class="small mb-0"><strong>${c.username}</strong> ${c.text}</p>
-                        <button class="btn btn-sm p-0 ms-2" style="color:var(--caramel);font-size:0.75rem;"
-                            onclick="deleteProfileComment('${p.time}', ${ci})">Delete</button>
-                    </div>
-                `).join('')}
-                <input type="text" class="form-control form-control-sm mt-2"
-                    placeholder="Add a comment..."
-                    onkeypress="addProfileComment(event, '${p.time}', this)">
-            </div>
-        </div>
-    `).join('');
+    const tempFeed = document.createElement("div");
+    tempFeed.id = "feed";
+    document.body.appendChild(tempFeed);
+
+    myPosts.forEach(post => renderPost(post));
+
+    feed.innerHTML = tempFeed.innerHTML;
+
+    tempFeed.remove();
 }
 
-function addProfileComment(e, postTime, input) {
-    if (e.key === 'Enter' && input.value.trim()) {
-        let posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts = posts.map(p => {
-            if (p.time === postTime) {
-                if (!p.comments) p.comments = [];
-                p.comments.push({ username: currentUser, text: input.value.trim(), time: new Date().toISOString() });
-            }
-            return p;
-        });
-        localStorage.setItem('posts', JSON.stringify(posts));
-        loadProfilePosts();
-    }
-}
 
-function deleteProfileComment(postTime, index) {
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    posts = posts.map(p => {
-        if (p.time === postTime) p.comments.splice(index, 1);
-        return p;
-    });
-    localStorage.setItem('posts', JSON.stringify(posts));
-    loadProfilePosts();
-}
-
+/* INIT */
 window.onload = loadProfilePosts;
+
 </script>
+
 {% endblock %}

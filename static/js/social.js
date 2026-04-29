@@ -90,7 +90,9 @@ function getRandomUser() {
 
 // ── INIT ─────────────────────────
 window.onload = function () {
-    loadPosts();
+    if (document.getElementById("feed")) {
+        loadPosts(); // only run on social page
+    }
 };
 
 // ── STORAGE ─────────────────────────
@@ -121,7 +123,10 @@ function loadPosts() {
 
     posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
 
-    document.getElementById("feed").innerHTML = "";
+    const feedEl = document.getElementById("feed");
+    if (!feedEl) return;   // 🔥 STOP if not social page
+
+    feedEl.innerHTML = "";
     posts.forEach(post => renderPost(post));
 }
 
@@ -244,7 +249,11 @@ function likePost(postTime, btn) {
     });
 
     localStorage.setItem("posts", JSON.stringify(posts));
-    loadPosts(); // re-render UI
+    if (document.getElementById("profile-feed")) {
+        loadProfilePosts();   // profile page
+    } else {
+        loadPosts();          // social page
+    }
 }
 
 // ── ADD COMMENT ─────────────────────────
@@ -273,7 +282,11 @@ function addComment(e, postTime, input) {
         });
 
         updateStorage(posts);
-        loadPosts(); // 🔥 re-render cleanly
+        if (document.getElementById("profile-feed")) {
+            loadProfilePosts();
+        } else {
+            loadPosts();
+        }
     }
 }
 
@@ -289,7 +302,11 @@ function deleteComment(postTime, index) {
     });
 
     updateStorage(posts);
-    loadPosts();
+    if (document.getElementById("profile-feed")) {
+        loadProfilePosts();
+    } else {
+        loadPosts();
+    }
 }
 
 // ── EDIT COMMENT ─────────────────────────
@@ -316,7 +333,11 @@ function editComment(postTime, index, el) {
             });
 
             updateStorage(posts);
-            loadPosts();
+            if (document.getElementById("profile-feed")) {
+                loadProfilePosts();   // profile page
+            } else {
+                loadPosts();          // social page
+            }
         }
     };
 }
@@ -356,6 +377,7 @@ function submitModalPost() {
     const text = document.getElementById("modal-text").value.trim();
     const shop = document.getElementById("modal-shop").value;
     const imageInput = document.getElementById("modal-image");
+    if (!imageInput) return; // 🔥 not social page
 
     if (!text || imageInput.files.length === 0) {
         alert("Add caption + image");
@@ -493,7 +515,11 @@ function deletePost(postTime) {
     let posts = JSON.parse(localStorage.getItem('posts')) || [];
     posts = posts.filter(p => p.time !== postTime);
     localStorage.setItem('posts', JSON.stringify(posts));
-    loadPosts();
+    if (document.getElementById("profile-feed")) {
+        loadProfilePosts();
+    } else {
+        loadPosts();
+    }
 }
 document.addEventListener("DOMContentLoaded", function () {
     const aspectDropdown = document.getElementById("aspect-ratio");
