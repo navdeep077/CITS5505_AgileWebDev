@@ -196,26 +196,15 @@ function renderPost(postData, prepend = false) {
     </div>
 
     <div class="post-caption">
-        <strong>${postData.username || "Anonymous"}</strong> ${postData.text || ""}
-    </div>
+    <strong>${username}</strong> ${postData.text || ""}
+</div>
 
 <div class="comment-list">
 ${(postData.comments || [])
     .filter(c => typeof c === "object")
     .map((c, index) => {
-
-        const canDelete =
-            c.owner === currentUser || postData.owner === currentUser;
-
-        const canEdit =
-            c.owner === currentUser;
-    <div class="post-caption d-flex justify-content-between align-items-start">
-    <span><strong>${username}</strong> ${postData.text || ""}</span>
-    <button onclick="deletePost('${postData.time}')" 
-        style="border:none;background:none;color:var(--muted);font-size:0.8rem;cursor:pointer;">
-        <i class="bi bi-trash"></i>
-    </button>
-</div>
+        const canDelete = c.owner === currentUser || postData.owner === currentUser;
+        const canEdit = c.owner === currentUser;
 
         return `
         <div class="comment">
@@ -306,12 +295,11 @@ function addComment(e, postTime, input) {
                 if (!p.comments) p.comments = [];
 
                 p.comments.push({
-                    username: user.name,
-                    owner: currentUser,   // ✅ IMPORTANT
-                    username: activeUser,
-                    text: commentText,
-                    time: new Date().toISOString()
-                });
+    username: currentUser,
+    owner: currentUser,
+    text: commentText,
+    time: new Date().toISOString()
+});
             }
             return p;
         });
@@ -325,24 +313,6 @@ function addComment(e, postTime, input) {
     }
 }
 
-// ── DELETE COMMENT ─────────────────────────
-function deleteComment(postTime, index) {
-    let posts = JSON.parse(localStorage.getItem("posts")) || [];
-
-    posts = posts.map(p => {
-        if (p.time === postTime) {
-            p.comments.splice(index, 1);
-        }
-        return p;
-    });
-
-    updateStorage(posts);
-    if (document.getElementById("profile-feed")) {
-        loadProfilePosts();
-    } else {
-        loadPosts();
-    }
-}
 
 // ── EDIT COMMENT ─────────────────────────
 function editComment(postTime, index, el) {
@@ -406,7 +376,27 @@ function resetModal() {
     const container = document.querySelector(".preview-container");
     container.style.display = "none";
 }
+// ── IMAGE PREVIEW (modal) ─────────────────────────
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById("image-preview");
+        const container = document.querySelector(".preview-container");
+        const ratio = document.getElementById("aspect-ratio")?.value || "original";
+
+        preview.src = e.target.result;
+        container.style.display = "block";
+
+        if (ratio === "square")    preview.style.aspectRatio = "1 / 1";
+        else if (ratio === "portrait")  preview.style.aspectRatio = "4 / 5";
+        else if (ratio === "landscape") preview.style.aspectRatio = "16 / 9";
+        else preview.style.aspectRatio = "auto";
+    };
+    reader.readAsDataURL(file);
+}
 // ── CREATE POST ─────────────────────────
 function submitModalPost() {
     const text = document.getElementById("modal-text").value.trim();
@@ -445,16 +435,6 @@ function submitModalPost() {
             else if (aspect === "landscape") {
                 height = width * (9 / 16);
             }
-        const postData = {
-            username: activeUser,
-            avatar: getSavedAvatar(),
-            text,
-            shop,
-            image: e.target.result,
-            likes: 0,
-            comments: [],
-            time: new Date().toISOString()
-        };
 
             canvas.width = width;
             canvas.height = height;
@@ -499,32 +479,4 @@ function submitModalPost() {
 function logout() {
     localStorage.clear();
     window.location.href = routes.landing;
-}
-// ── DELETE POST ─────────────────────────
-function deletePost(postTime) {
-    if (!confirm('Delete this post?')) return;
-    
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    posts = posts.filter(p => p.time !== postTime);
-    localStorage.setItem('posts', JSON.stringify(posts));
-    if (document.getElementById("profile-feed")) {
-        loadProfilePosts();
-    } else {
-        loadPosts();
-    }
-}
-document.addEventListener("DOMContentLoaded", function () {
-    const aspectDropdown = document.getElementById("aspect-ratio");
-
-    if (aspectDropdown) {
-        aspectDropdown.addEventListener("change", function () {
-            const fileInput = document.getElementById("modal-image");
-
-            if (fileInput.files.length > 0) {
-                previewImage({ target: fileInput });
-            }
-        });
-    }
-});
-    loadPosts();
 }

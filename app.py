@@ -56,7 +56,7 @@ CAFES = [
         "cold_brew": True,
         "pour_over": True,
         "tags": ["Cold Brew", "Pour Over"],
-        "route": None
+        "route": "shop_harvest"
     },
     {
         "name": "Telegram Cafe",
@@ -68,7 +68,7 @@ CAFES = [
         "cold_brew": False,
         "pour_over": True,
         "tags": ["Pour Over"],
-        "route": None
+        "route": "shop_telegram"
     },
     {
         "name": "Satchmo",
@@ -80,7 +80,7 @@ CAFES = [
         "cold_brew": False,
         "pour_over": False,
         "tags": ["Pet Friendly"],
-        "route": None
+        "route": "shop_satchmo"
     },
     {
         "name": "Mary Street Bakery",
@@ -92,7 +92,7 @@ CAFES = [
         "cold_brew": True,
         "pour_over": False,
         "tags": ["Cold Brew"],
-        "route": None
+        "route": "shop_marystreet"
     }
 ]
 
@@ -183,6 +183,22 @@ def shop_laveen():
 @app.route("/shop/venn")
 def shop_venn():
     return render_template("shop-venn.html")
+
+@app.route("/shop/harvest")
+def shop_harvest():
+    return render_template("shop-harvest.html")
+
+@app.route("/shop/telegram")
+def shop_telegram():
+    return render_template("shop-telegram.html")
+
+@app.route("/shop/satchmo")
+def shop_satchmo():
+    return render_template("shop-satchmo.html")
+
+@app.route("/shop/marystreet")
+def shop_marystreet():
+    return render_template("shop-marystreet.html")
 
 @app.route("/home")
 def home():
