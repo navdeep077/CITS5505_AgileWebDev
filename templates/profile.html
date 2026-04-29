@@ -29,6 +29,9 @@
             <label for="profile-avatar-upload" class="btn btn-outline-coffee btn-sm mt-2">
                 <i class="bi bi-camera-fill"></i> Change photo
             </label>
+            <button type="button" id="profile-avatar-remove" class="btn btn-outline-danger btn-sm mt-2 ms-2">
+                <i class="bi bi-trash"></i> Remove photo
+            </button>
             <input type="file" id="profile-avatar-upload" class="visually-hidden" accept="image/*">
         </div>
     </div>
@@ -119,15 +122,18 @@ function renderProfileAvatar() {
     const avatar = getSavedAvatar();
     const image = document.getElementById('profile-avatar-image');
     const placeholder = document.getElementById('profile-avatar-placeholder');
+    const removeButton = document.getElementById('profile-avatar-remove');
 
     if (avatar) {
         image.src = avatar;
         image.style.display = 'block';
         placeholder.style.display = 'none';
+        removeButton.style.display = 'inline-block';
     } else {
         image.removeAttribute('src');
         image.style.display = 'none';
         placeholder.style.display = 'flex';
+        removeButton.style.display = 'none';
     }
 }
 
@@ -147,6 +153,20 @@ function handleAvatarUpload(event) {
         event.target.value = '';
     };
     reader.readAsDataURL(file);
+}
+
+function removeProfileAvatar() {
+    if (!getSavedAvatar()) return;
+
+    localStorage.removeItem(avatarStorageKey);
+    syncUserPostAvatars('');
+
+    if (window.updateNavbarAvatar) {
+        window.updateNavbarAvatar('');
+    }
+
+    renderProfileAvatar();
+    loadProfilePosts();
 }
 
 function syncUserPostAvatars(avatar) {
@@ -266,6 +286,7 @@ function deleteProfileComment(postTime, index) {
 }
 
 document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
+document.getElementById('profile-avatar-remove').addEventListener('click', removeProfileAvatar);
 
 window.onload = function() {
     renderProfileAvatar();
