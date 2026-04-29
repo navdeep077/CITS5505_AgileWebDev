@@ -48,9 +48,9 @@
                     placeholder="What are you brewing today?" rows="3"></textarea>
                 <select id="profile-post-shop" class="form-select mb-2">
                     <option value="">Tag a cafe...</option>
-                    <option>Blacklist Coffee Roasters</option>
-                    <option>La Veen Coffee</option>
-                    <option>Venn Coffee</option>
+                    {% for cafe in cafes %}
+                    <option>{{ cafe.name }}</option>
+                    {% endfor %}
                 </select>
                 <input type="file" id="profile-post-image" class="form-control mb-2" accept="image/*">
                 <button class="btn btn-primary-custom w-100" onclick="submitProfilePost()">Post</button>

@@ -13,7 +13,7 @@ const defaultPosts = [
         username: "BrewMaster",
         avatar: "https://i.pravatar.cc/40?img=2",
         text: "Morning espresso hit 🔥",
-        shop: "Single Origin Roasters",
+        shop: "Blacklist Coffee Roasters",
         image: "https://images.unsplash.com/photo-1511920170033-f8396924c348",
         likes: 8,
         comments: [],
@@ -313,13 +313,6 @@ function submitModalPost() {
 
     reader.readAsDataURL(imageInput.files[0]);
 }
-
-function goToShop(id) {
-    if (id == 1) window.location.href = routes.blacklist;
-    if (id == 2) window.location.href = routes.laveen;
-    if (id == 3) window.location.href = routes.venn;
-}
-
 // ── LOGOUT ─────────────────────────
 function logout() {
     localStorage.clear();
