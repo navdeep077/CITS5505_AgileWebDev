@@ -120,6 +120,7 @@
 
 {% block extra_js %}
 <script>
+    const currentUser = {{ session.get('user', 'User')|tojson }};
     const routes = {
         blacklist: "{{ url_for('shop_blacklist') }}",
         laveen: "{{ url_for('shop_laveen') }}",

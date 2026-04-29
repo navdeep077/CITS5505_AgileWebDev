@@ -18,13 +18,18 @@
     <!-- Profile Header -->
     <div class="profile-header d-flex align-items-center gap-4 mb-4">
         <div class="profile-avatar-wrapper">
-            <div class="profile-avatar-placeholder">
+            <img id="profile-avatar-image" class="profile-avatar-image" alt="Profile photo">
+            <div id="profile-avatar-placeholder" class="profile-avatar-placeholder">
                 {{ session.get('user', 'U')[0].upper() }}
             </div>
         </div>
         <div>
             <h2 class="mb-1">{{ session.get('user', 'User') }}</h2>
             <p class="text-muted mb-0">Coffee enthusiast · Perth WA</p>
+            <label for="profile-avatar-upload" class="btn btn-outline-coffee btn-sm mt-2">
+                <i class="bi bi-camera-fill"></i> Change photo
+            </label>
+            <input type="file" id="profile-avatar-upload" class="visually-hidden" accept="image/*">
         </div>
     </div>
 
@@ -95,7 +100,66 @@
 
 {% block extra_js %}
 <script>
-const currentUser = "{{ session.get('user', 'User') }}";
+const currentUser = {{ session.get('user', 'User')|tojson }};
+const avatarStorageKey = `profileAvatar:${currentUser}`;
+
+function getSavedAvatar() {
+    return localStorage.getItem(avatarStorageKey) || '';
+}
+
+function avatarMarkup(username, avatar) {
+    if (avatar) {
+        return `<img class="post-avatar-image" src="${avatar}" alt="${username} profile photo">`;
+    }
+
+    return `<div class="post-avatar-placeholder">${(username || 'U').charAt(0).toUpperCase()}</div>`;
+}
+
+function renderProfileAvatar() {
+    const avatar = getSavedAvatar();
+    const image = document.getElementById('profile-avatar-image');
+    const placeholder = document.getElementById('profile-avatar-placeholder');
+
+    if (avatar) {
+        image.src = avatar;
+        image.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        image.removeAttribute('src');
+        image.style.display = 'none';
+        placeholder.style.display = 'flex';
+    }
+}
+
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        localStorage.setItem(avatarStorageKey, e.target.result);
+        syncUserPostAvatars(e.target.result);
+        if (window.updateNavbarAvatar) {
+            window.updateNavbarAvatar(e.target.result);
+        }
+        renderProfileAvatar();
+        loadProfilePosts();
+        event.target.value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function syncUserPostAvatars(avatar) {
+    const posts = JSON.parse(localStorage.getItem('posts')) || [];
+    const updatedPosts = posts.map(post => {
+        if (post.username === currentUser) {
+            return { ...post, avatar };
+        }
+        return post;
+    });
+
+    localStorage.setItem('posts', JSON.stringify(updatedPosts));
+}
 
 function submitProfilePost() {
     const text = document.getElementById('profile-post-text').value.trim();
@@ -109,7 +173,7 @@ function submitProfilePost() {
     function createPost(imageData) {
         const post = {
             username: currentUser,
-            avatar: '',
+            avatar: getSavedAvatar(),
             text: text,
             shop: shop,
             image: imageData || '',
@@ -149,7 +213,13 @@ function loadProfilePosts() {
 
     feed.innerHTML = myPosts.map((p, i) => `
         <div class="card mb-3 p-3">
-            <p class="mb-1"><strong>${p.shop || ''}</strong></p>
+            <div class="profile-post-header">
+                ${avatarMarkup(p.username || currentUser, getSavedAvatar() || p.avatar)}
+                <div>
+                    <strong>${p.username || currentUser}</strong>
+                    <p class="small text-muted mb-0">${p.shop || ''}</p>
+                </div>
+            </div>
             ${p.image ? `<img src="${p.image}" class="img-fluid rounded mb-2" style="max-height:300px;object-fit:cover;">` : ''}
             <p class="mb-2">${p.text}</p>
 
@@ -195,6 +265,11 @@ function deleteProfileComment(postTime, index) {
     loadProfilePosts();
 }
 
-window.onload = loadProfilePosts;
+document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
+
+window.onload = function() {
+    renderProfileAvatar();
+    loadProfilePosts();
+};
 </script>
 {% endblock %}
