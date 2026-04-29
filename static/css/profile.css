@@ -124,6 +124,13 @@
     font-weight: 700;
     border: 3px solid var(--latte);
 }
+.like-btn i {
+    color: #999;
+}
+
+.like-btn.active i {
+    color: red;
+}
 
 .profile-avatar-image {
     width: 90px;

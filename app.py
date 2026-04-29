@@ -5,7 +5,8 @@ app.secret_key = "secret123"
 
 # Temporary users dictionary until database is set up
 users = {
-    "admin": "1234"
+    "admin": "1234",
+    "user1": "password1",
 }
 
 CAFES = [
