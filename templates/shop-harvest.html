@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}La Veen Coffee | Coffee Social Hub{% endblock %}
+{% block title %}Harvest Espresso | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
@@ -15,24 +15,24 @@
         </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
-                <div class="shop-logo-badge">L</div>
+                <div class="shop-logo-badge">H</div>
                 <div>
                     <div class="shop-hero-tags">
-                        <span class="shop-badge">Pour Over</span>
+                        <span class="shop-badge">Single Origin</span>
                         <span class="shop-badge">Dine-in</span>
                         <span class="shop-badge shop-badge--open">Open Now</span>
                     </div>
-                    <h1 class="shop-hero-title">La Veen Coffee</h1>
+                    <h1 class="shop-hero-title">Harvest Espresso</h1>
                     <p class="shop-hero-location">
-                        <i class="bi bi-geo-alt"></i> 79 King St, Perth WA 6000
+                        <i class="bi bi-geo-alt"></i> 227 Oxford St, Leederville WA 6007
                     </p>
                 </div>
             </div>
             <div class="shop-rating-pill">
-                <span class="rating-num">4.6</span>
+                <span class="rating-num">4.7</span>
                 <div>
-                    <div class="rating-stars">★★★★☆</div>
-                    <div class="rating-count">178 reviews</div>
+                    <div class="rating-stars">★★★★★</div>
+                    <div class="rating-count">183 reviews</div>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
                         <div class="info-strip-label">Hours Today</div>
-                        <div class="info-strip-value">6:30 AM – 2:30 PM</div>
+                        <div class="info-strip-value">7:00 AM – 3:30 PM</div>
                     </div>
                 </div>
                 <div class="info-strip-item">
@@ -62,7 +62,7 @@
                     <i class="bi bi-p-square" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
                         <div class="info-strip-label">Parking</div>
-                        <div class="info-strip-value">Nearby paid parking</div>
+                        <div class="info-strip-value">Street parking</div>
                     </div>
                 </div>
             </div>
@@ -71,38 +71,43 @@
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
             <div class="menu-category mb-4">
-                <div class="menu-category-label">Pour Over Selection</div>
+                <div class="menu-category-label">Single Origin Espresso</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Ethiopia Yirgacheffe</div>
-                        <div class="menu-item-desc">Floral, citrus, light body</div>
-                        <div class="menu-item-price">$8.00</div>
+                        <div class="menu-item-name">Seasonal Espresso</div>
+                        <div class="menu-item-desc">Rotating single origin, ask your barista</div>
+                        <div class="menu-item-price">$4.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Colombia Huila</div>
-                        <div class="menu-item-desc">Caramel, stone fruit, medium body</div>
-                        <div class="menu-item-price">$8.50</div>
+                        <div class="menu-item-name">Flat White</div>
+                        <div class="menu-item-desc">House single origin, velvety microfoam</div>
+                        <div class="menu-item-price">$5.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Kenya AA</div>
-                        <div class="menu-item-desc">Blackcurrant, tomato, bright acidity</div>
-                        <div class="menu-item-price">$9.00</div>
+                        <div class="menu-item-name">Long Black</div>
+                        <div class="menu-item-desc">Double ristretto over hot water</div>
+                        <div class="menu-item-price">$4.80</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Oat Latte</div>
+                        <div class="menu-item-desc">Single origin with Oatly oat milk</div>
+                        <div class="menu-item-price">$6.50</div>
                     </div>
                 </div>
             </div>
 
             <div class="menu-category mb-5">
-                <div class="menu-category-label">Espresso</div>
+                <div class="menu-category-label">Food</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Latte</div>
-                        <div class="menu-item-desc">Smooth, full-bodied espresso</div>
-                        <div class="menu-item-price">$5.50</div>
+                        <div class="menu-item-name">Smashed Avo Toast</div>
+                        <div class="menu-item-desc">Sourdough, feta, dukkah</div>
+                        <div class="menu-item-price">$16.00</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Cappuccino</div>
-                        <div class="menu-item-desc">Classic dry foam style</div>
-                        <div class="menu-item-price">$5.00</div>
+                        <div class="menu-item-name">Granola Bowl</div>
+                        <div class="menu-item-desc">House granola, seasonal fruit, yoghurt</div>
+                        <div class="menu-item-price">$14.00</div>
                     </div>
                 </div>
             </div>
@@ -113,25 +118,25 @@
             <div class="review-list">
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">M</div>
+                        <div class="reviewer-avatar">J</div>
                         <div>
-                            <div class="reviewer-name">MorningBrewMia</div>
-                            <div class="reviewer-date">1 day ago</div>
+                            <div class="reviewer-name">JavaJourneyJess</div>
+                            <div class="reviewer-date">2 days ago</div>
                         </div>
                         <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">The Ethiopia pour over was extraordinary — floral and bright. The barista explained the origin and brewing method which made it even better.</p>
+                    <p class="review-text">The rotating single origin program here is next level. Every visit brings something new and the baristas actually explain the tasting notes. My Leederville go-to.</p>
                 </div>
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">T</div>
+                        <div class="reviewer-avatar">O</div>
                         <div>
-                            <div class="reviewer-name">ThirdWaveTom</div>
-                            <div class="reviewer-date">4 days ago</div>
+                            <div class="reviewer-name">OxfordStOliver</div>
+                            <div class="reviewer-date">5 days ago</div>
                         </div>
                         <div class="review-stars ms-auto">★★★★☆</div>
                     </div>
-                    <p class="review-text">Excellent pour over selection, changes with the season. Right in the heart of the CBD — perfect for a pre-work coffee ritual.</p>
+                    <p class="review-text">Solid flat white, great granola bowl. The space is cosy and the vibe is relaxed. Gets busy around 9am on weekdays but moves fast.</p>
                 </div>
             </div>
 
@@ -155,7 +160,7 @@
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
-                    <li><i class="bi bi-cup"></i> Specialty pour over</li>
+                    <li><i class="bi bi-cup-hot"></i> Rotating single origin</li>
                     <li><i class="bi bi-shop"></i> Dine-in available</li>
                     <li><i class="bi bi-bag"></i> Takeaway</li>
                     <li><i class="bi bi-person-wheelchair"></i> Wheelchair accessible</li>
@@ -175,4 +180,3 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}
-

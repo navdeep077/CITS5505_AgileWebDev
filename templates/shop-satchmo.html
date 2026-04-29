@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}La Veen Coffee | Coffee Social Hub{% endblock %}
+{% block title %}Satchmo | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
@@ -15,24 +15,24 @@
         </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
-                <div class="shop-logo-badge">L</div>
+                <div class="shop-logo-badge">S</div>
                 <div>
                     <div class="shop-hero-tags">
-                        <span class="shop-badge">Pour Over</span>
+                        <span class="shop-badge">Filter Coffee</span>
                         <span class="shop-badge">Dine-in</span>
                         <span class="shop-badge shop-badge--open">Open Now</span>
                     </div>
-                    <h1 class="shop-hero-title">La Veen Coffee</h1>
+                    <h1 class="shop-hero-title">Satchmo</h1>
                     <p class="shop-hero-location">
-                        <i class="bi bi-geo-alt"></i> 79 King St, Perth WA 6000
+                        <i class="bi bi-geo-alt"></i> 662 Beaufort St, Mount Lawley WA 6050
                     </p>
                 </div>
             </div>
             <div class="shop-rating-pill">
-                <span class="rating-num">4.6</span>
+                <span class="rating-num">4.8</span>
                 <div>
-                    <div class="rating-stars">★★★★☆</div>
-                    <div class="rating-count">178 reviews</div>
+                    <div class="rating-stars">★★★★★</div>
+                    <div class="rating-count">207 reviews</div>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
                         <div class="info-strip-label">Hours Today</div>
-                        <div class="info-strip-value">6:30 AM – 2:30 PM</div>
+                        <div class="info-strip-value">6:30 AM – 3:00 PM</div>
                     </div>
                 </div>
                 <div class="info-strip-item">
@@ -62,7 +62,7 @@
                     <i class="bi bi-p-square" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
                         <div class="info-strip-label">Parking</div>
-                        <div class="info-strip-value">Nearby paid parking</div>
+                        <div class="info-strip-value">Street parking</div>
                     </div>
                 </div>
             </div>
@@ -71,22 +71,22 @@
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
             <div class="menu-category mb-4">
-                <div class="menu-category-label">Pour Over Selection</div>
+                <div class="menu-category-label">Filter & Batch Brew</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Ethiopia Yirgacheffe</div>
-                        <div class="menu-item-desc">Floral, citrus, light body</div>
-                        <div class="menu-item-price">$8.00</div>
+                        <div class="menu-item-name">Batch Brew</div>
+                        <div class="menu-item-desc">Drip filter, daily changing origin</div>
+                        <div class="menu-item-price">$4.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Colombia Huila</div>
-                        <div class="menu-item-desc">Caramel, stone fruit, medium body</div>
-                        <div class="menu-item-price">$8.50</div>
+                        <div class="menu-item-name">AeroPress</div>
+                        <div class="menu-item-desc">Clean, full-bodied, low acidity</div>
+                        <div class="menu-item-price">$6.00</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Kenya AA</div>
-                        <div class="menu-item-desc">Blackcurrant, tomato, bright acidity</div>
-                        <div class="menu-item-price">$9.00</div>
+                        <div class="menu-item-name">V60 Pour Over</div>
+                        <div class="menu-item-desc">Precise pour, delicate clarity</div>
+                        <div class="menu-item-price">$7.50</div>
                     </div>
                 </div>
             </div>
@@ -95,13 +95,18 @@
                 <div class="menu-category-label">Espresso</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Latte</div>
-                        <div class="menu-item-desc">Smooth, full-bodied espresso</div>
+                        <div class="menu-item-name">Flat White</div>
+                        <div class="menu-item-desc">House blend, silky texture</div>
                         <div class="menu-item-price">$5.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Cappuccino</div>
-                        <div class="menu-item-desc">Classic dry foam style</div>
+                        <div class="menu-item-name">Piccolo</div>
+                        <div class="menu-item-desc">Ristretto, steamed milk, small</div>
+                        <div class="menu-item-price">$4.50</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Cortado</div>
+                        <div class="menu-item-desc">Equal parts espresso and milk</div>
                         <div class="menu-item-price">$5.00</div>
                     </div>
                 </div>
@@ -113,25 +118,25 @@
             <div class="review-list">
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">M</div>
+                        <div class="reviewer-avatar">S</div>
                         <div>
-                            <div class="reviewer-name">MorningBrewMia</div>
+                            <div class="reviewer-name">SiphonSam_Perth</div>
                             <div class="reviewer-date">1 day ago</div>
                         </div>
                         <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">The Ethiopia pour over was extraordinary — floral and bright. The barista explained the origin and brewing method which made it even better.</p>
+                    <p class="review-text">The V60 pour over here is genuinely one of the best in Perth. So clean and articulate — you can actually taste the terroir. Beaufort St legend.</p>
                 </div>
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">T</div>
+                        <div class="reviewer-avatar">P</div>
                         <div>
-                            <div class="reviewer-name">ThirdWaveTom</div>
-                            <div class="reviewer-date">4 days ago</div>
+                            <div class="reviewer-name">PiccoloPatricia</div>
+                            <div class="reviewer-date">6 days ago</div>
                         </div>
-                        <div class="review-stars ms-auto">★★★★☆</div>
+                        <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">Excellent pour over selection, changes with the season. Right in the heart of the CBD — perfect for a pre-work coffee ritual.</p>
+                    <p class="review-text">The piccolo here is my daily ritual. Perfect ratio, never over-extracted. The batch brew is also outstanding — a steal at $4.50.</p>
                 </div>
             </div>
 
@@ -155,7 +160,7 @@
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
-                    <li><i class="bi bi-cup"></i> Specialty pour over</li>
+                    <li><i class="bi bi-funnel"></i> Filter & batch brew</li>
                     <li><i class="bi bi-shop"></i> Dine-in available</li>
                     <li><i class="bi bi-bag"></i> Takeaway</li>
                     <li><i class="bi bi-person-wheelchair"></i> Wheelchair accessible</li>
@@ -175,4 +180,3 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}
-

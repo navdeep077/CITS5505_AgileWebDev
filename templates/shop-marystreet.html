@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}La Veen Coffee | Coffee Social Hub{% endblock %}
+{% block title %}Mary Street Bakery | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
@@ -15,24 +15,24 @@
         </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
-                <div class="shop-logo-badge">L</div>
+                <div class="shop-logo-badge">M</div>
                 <div>
                     <div class="shop-hero-tags">
-                        <span class="shop-badge">Pour Over</span>
+                        <span class="shop-badge">Bakery</span>
                         <span class="shop-badge">Dine-in</span>
                         <span class="shop-badge shop-badge--open">Open Now</span>
                     </div>
-                    <h1 class="shop-hero-title">La Veen Coffee</h1>
+                    <h1 class="shop-hero-title">Mary Street Bakery</h1>
                     <p class="shop-hero-location">
-                        <i class="bi bi-geo-alt"></i> 79 King St, Perth WA 6000
+                        <i class="bi bi-geo-alt"></i> 507 Wellington St, Perth WA 6000
                     </p>
                 </div>
             </div>
             <div class="shop-rating-pill">
-                <span class="rating-num">4.6</span>
+                <span class="rating-num">4.9</span>
                 <div>
-                    <div class="rating-stars">★★★★☆</div>
-                    <div class="rating-count">178 reviews</div>
+                    <div class="rating-stars">★★★★★</div>
+                    <div class="rating-count">341 reviews</div>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
                         <div class="info-strip-label">Hours Today</div>
-                        <div class="info-strip-value">6:30 AM – 2:30 PM</div>
+                        <div class="info-strip-value">7:00 AM – 3:00 PM</div>
                     </div>
                 </div>
                 <div class="info-strip-item">
@@ -71,38 +71,53 @@
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
             <div class="menu-category mb-4">
-                <div class="menu-category-label">Pour Over Selection</div>
+                <div class="menu-category-label">Coffee</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Ethiopia Yirgacheffe</div>
-                        <div class="menu-item-desc">Floral, citrus, light body</div>
-                        <div class="menu-item-price">$8.00</div>
+                        <div class="menu-item-name">Flat White</div>
+                        <div class="menu-item-desc">House blend, smooth and rich</div>
+                        <div class="menu-item-price">$5.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Colombia Huila</div>
-                        <div class="menu-item-desc">Caramel, stone fruit, medium body</div>
-                        <div class="menu-item-price">$8.50</div>
+                        <div class="menu-item-name">Latte</div>
+                        <div class="menu-item-desc">Full-bodied espresso, steamed milk</div>
+                        <div class="menu-item-price">$5.50</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Kenya AA</div>
-                        <div class="menu-item-desc">Blackcurrant, tomato, bright acidity</div>
-                        <div class="menu-item-price">$9.00</div>
+                        <div class="menu-item-name">Cold Brew</div>
+                        <div class="menu-item-desc">Slow-steeped, served over ice</div>
+                        <div class="menu-item-price">$6.50</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Matcha Latte</div>
+                        <div class="menu-item-desc">Ceremonial grade, oat milk</div>
+                        <div class="menu-item-price">$7.00</div>
                     </div>
                 </div>
             </div>
 
             <div class="menu-category mb-5">
-                <div class="menu-category-label">Espresso</div>
+                <div class="menu-category-label">Bakery</div>
                 <div class="menu-grid">
                     <div class="menu-item">
-                        <div class="menu-item-name">Latte</div>
-                        <div class="menu-item-desc">Smooth, full-bodied espresso</div>
-                        <div class="menu-item-price">$5.50</div>
+                        <div class="menu-item-name">Kouign-Amann</div>
+                        <div class="menu-item-desc">Caramelised, buttery, flaky pastry</div>
+                        <div class="menu-item-price">$7.00</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Cappuccino</div>
-                        <div class="menu-item-desc">Classic dry foam style</div>
-                        <div class="menu-item-price">$5.00</div>
+                        <div class="menu-item-name">Cruffin</div>
+                        <div class="menu-item-desc">Rotating seasonal filling</div>
+                        <div class="menu-item-price">$8.00</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Sourdough Loaf</div>
+                        <div class="menu-item-desc">Baked fresh daily, whole loaf</div>
+                        <div class="menu-item-price">$12.00</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Almond Croissant</div>
+                        <div class="menu-item-desc">Double baked, frangipane filled</div>
+                        <div class="menu-item-price">$7.50</div>
                     </div>
                 </div>
             </div>
@@ -113,25 +128,25 @@
             <div class="review-list">
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">M</div>
+                        <div class="reviewer-avatar">F</div>
                         <div>
-                            <div class="reviewer-name">MorningBrewMia</div>
+                            <div class="reviewer-name">FlakyFanatic</div>
                             <div class="reviewer-date">1 day ago</div>
                         </div>
                         <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">The Ethiopia pour over was extraordinary — floral and bright. The barista explained the origin and brewing method which made it even better.</p>
+                    <p class="review-text">The cruffin is worth setting an alarm for — they sell out by 9am on weekends. The kouign-amann is equally dangerous. Best bakery in Perth CBD, full stop.</p>
                 </div>
                 <div class="shop-review-card">
                     <div class="review-header">
-                        <div class="reviewer-avatar">T</div>
+                        <div class="reviewer-avatar">W</div>
                         <div>
-                            <div class="reviewer-name">ThirdWaveTom</div>
+                            <div class="reviewer-name">WellingtonStreetWendy</div>
                             <div class="reviewer-date">4 days ago</div>
                         </div>
-                        <div class="review-stars ms-auto">★★★★☆</div>
+                        <div class="review-stars ms-auto">★★★★★</div>
                     </div>
-                    <p class="review-text">Excellent pour over selection, changes with the season. Right in the heart of the CBD — perfect for a pre-work coffee ritual.</p>
+                    <p class="review-text">Coffee is great but the real star is the pastry cabinet. The almond croissant pairs perfectly with a flat white. Queue moves fast and the staff are lovely.</p>
                 </div>
             </div>
 
@@ -155,7 +170,7 @@
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
-                    <li><i class="bi bi-cup"></i> Specialty pour over</li>
+                    <li><i class="bi bi-basket"></i> In-house artisan bakery</li>
                     <li><i class="bi bi-shop"></i> Dine-in available</li>
                     <li><i class="bi bi-bag"></i> Takeaway</li>
                     <li><i class="bi bi-person-wheelchair"></i> Wheelchair accessible</li>
@@ -175,4 +190,3 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}
-

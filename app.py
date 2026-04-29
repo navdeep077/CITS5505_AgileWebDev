@@ -90,6 +90,22 @@ def shop_laveen():
 def shop_venn():
     return render_template("shop-venn.html")
 
+@app.route('/shop/harvest')
+def shop_harvest():
+    return render_template('shop-harvest.html')
+
+@app.route('/shop/telegram')
+def shop_telegram():
+    return render_template('shop-telegram.html')
+
+@app.route('/shop/satchmo')
+def shop_satchmo():
+    return render_template('shop-satchmo.html')
+
+@app.route('/shop/marystreet')
+def shop_marystreet():
+    return render_template('shop-marystreet.html')
+
 @app.route("/home")
 def home():
     if "user" not in session:

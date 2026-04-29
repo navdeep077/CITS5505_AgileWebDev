@@ -78,6 +78,62 @@
             </div>
         </div>
 
+        <div class="col-md-4 shop-item" data-open="true" data-pet="false" data-cold-brew="false" data-pour-over="false">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Harvest Espresso</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Leederville</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.7</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 7:00 AM – 3:30 PM</p>
+                <div class="mt-2"><span class="shop-tag">Single Origin</span></div>
+                <a href="{{ url_for('shop_harvest') }}" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 shop-item" data-open="true" data-pet="false" data-cold-brew="true" data-pour-over="false">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Telegram Cafe</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Northbridge</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.6</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 7:30 AM – 4:00 PM</p>
+                <div class="mt-2"><span class="shop-tag">Cold Brew</span></div>
+                <a href="{{ url_for('shop_telegram') }}" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 shop-item" data-open="true" data-pet="false" data-cold-brew="false" data-pour-over="true">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Satchmo</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Mount Lawley</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.8</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 6:30 AM – 3:00 PM</p>
+                <div class="mt-2"><span class="shop-tag">Pour Over</span></div>
+                <a href="{{ url_for('shop_satchmo') }}" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 shop-item" data-open="true" data-pet="false" data-cold-brew="false" data-pour-over="false">
+            <div class="feature-card shop-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">Mary Street Bakery</h5>
+                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                </div>
+                <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> Perth CBD</p>
+                <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> 4.9</p>
+                <p><i class="bi bi-clock" style="color:var(--caramel)"></i> 7:00 AM – 3:00 PM</p>
+                <div class="mt-2"><span class="shop-tag">Bakery</span></div>
+                <a href="{{ url_for('shop_marystreet') }}" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
+            </div>
+        </div>
+
     </div>
 </main>
 {% endblock %}
