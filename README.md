@@ -1,8 +1,20 @@
 # CITS5505_AgileWebDev
 Repository for CITS5505 26S1 group project.
 
+A location-based social web application for coffee lovers in Perth, WA. Users can discover nearby coffee shops, view menus and ratings, and share their coffee experiences with the community.
+
 **Purpose of the application:** 
-to be finished
+Coffee Social Hub combines **shop discovery** with **social features** to create a community-driven platform for coffee enthusiasts.
+
+**Key features:**
+- Browse and filter Perth coffee shops by tags (Pet Friendly, Cold Brew, Pour Over)
+- View shop detail pages with menus, pricing, hours and reviews
+- Rate coffee shops (1–5 stars)
+- Create posts with photos and tag a cafe
+- Like and comment on posts from other users
+- Personal profile with avatar, post history and reviews
+
+---
 
 **Group members:**
 | UWA ID   | Name                      | User Name          |
@@ -26,7 +38,7 @@ CITS5505_AgileWebDev/
 ├── README.md
 ├── templates/
 │   ├── brew.html
-│   ├── navbar.html
+│   ├── base.html
 │   ├── profile.html
 │   └── ... other HTML templates
 ├── static/
@@ -39,7 +51,7 @@ CITS5505_AgileWebDev/
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/itsEvanZHAO/CITS5505_AgileWebDev/
+git clone https://github.com/navdeep077/CITS5505_AgileWebDev.git
 cd CITS5505_AgileWebDev
 ```
 
@@ -76,6 +88,19 @@ python3 app.py
 ```bash
 http://127.0.0.1:5000
 ```
+
+## 🧪 How to Run Tests
+
+```bash
+# Unit tests
+python -m pytest tests/test_models.py tests/test_routes.py -v
+
+# Selenium tests (requires running server)
+python -m pytest tests/test_selenium.py -v
+```
+
+---
+
 ## Git Workflow
 - Do not work directly on `main`  
 - Create a feature branch:
