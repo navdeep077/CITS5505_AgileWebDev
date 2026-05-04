@@ -183,4 +183,31 @@ document.getElementById('profile-avatar-remove').addEventListener('click', remov
 window.onload = function () {
     renderProfileAvatar();
     loadProfilePosts();
+    loadMyReviews();
 };
+// ── LOAD REVIEWS (localStorage for now, DB later) ─────────────────────────
+function loadMyReviews() {
+    const container = document.getElementById('my-reviews-list');
+    if (!container) return;
+
+    const reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
+    const myReviews = reviews.filter(r => r.username === window.currentUser);
+
+    if (myReviews.length === 0) {
+        container.innerHTML = "<p class='text-muted small'>No reviews yet. Visit a cafe and share your experience!</p>";
+        return;
+    }
+
+    container.innerHTML = myReviews.map(r => `
+        <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between mb-1">
+                <strong>${r.shop}</strong>
+                <span style="color:var(--caramel);">
+                    ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
+                    ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
+                </span>
+            </div>
+            <p class="small text-muted mb-0">${r.text}</p>
+        </div>
+    `).join('');
+}
