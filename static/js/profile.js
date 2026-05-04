@@ -176,11 +176,63 @@ function addProfileComment(e, postTime, input) {
     }
 }
 
-// ── INIT ─────────────────────────
 document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
 document.getElementById('profile-avatar-remove').addEventListener('click', removeProfileAvatar);
 
 window.onload = function () {
     renderProfileAvatar();
     loadProfilePosts();
+    loadMyReviews();
 };
+
+// ── RELOAD ON TAB VISIBLE ─────────────────────────
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        loadMyReviews();
+    }
+});
+
+// ── RELOAD ON BROWSER BACK/FORWARD (fixes bfcache) ─────────────────────────
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+        loadMyReviews();
+    }
+});
+
+function loadMyReviews() {
+    const container = document.getElementById('my-reviews-list');
+    if (!container) return;
+
+    const reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
+    const myReviews = reviews.filter(r => r.username === window.currentUser);
+
+    if (myReviews.length === 0) {
+        container.innerHTML = "<p class='text-muted small'>No reviews yet. Visit a cafe and share your experience!</p>";
+        return;
+    }
+
+container.innerHTML = myReviews.map(r => `
+    <div class="card p-3 mb-3" data-review-id="${r.id}">
+        <div class="d-flex justify-content-between mb-1">
+            <strong>${r.shop}</strong>
+            <span style="color:var(--caramel);">
+                ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
+                ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
+            </span>
+        </div>
+        <p class="small text-muted mb-0">${r.text}</p>
+        <p class="small mt-1" style="color:var(--caramel);">Visit the cafe page to delete this review.</p>
+    </div>
+`).join('');
+
+}
+
+function deleteMyReview(id) {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+
+    let reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
+    reviews = reviews.filter(r => r.id !== id);
+    localStorage.setItem('shopReviews', JSON.stringify(reviews));
+
+    loadMyReviews();
+}

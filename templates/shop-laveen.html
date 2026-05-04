@@ -6,13 +6,12 @@
 {% endblock %}
 
 {% block content %}
-
 <section class="hero-shop">
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
         <a href="{{ url_for('home') }}" class="shop-back-link">
-    <span class="shop-back-arrow">←</span> Back to Home
-</a>
+            <span class="shop-back-arrow">←</span> Back to Home
+        </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
                 <div class="shop-logo-badge">L</div>
@@ -42,7 +41,6 @@
 <main class="container py-5">
     <div class="row g-5">
         <div class="col-lg-8">
-
             <div class="info-strip mb-5">
                 <div class="info-strip-item">
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
@@ -109,32 +107,7 @@
 
             <span class="section-eyebrow">Community Takes</span>
             <h2 class="section-title mb-4">Ratings & Reviews</h2>
-
-            <div class="review-list">
-                <div class="shop-review-card">
-                    <div class="review-header">
-                        <div class="reviewer-avatar">M</div>
-                        <div>
-                            <div class="reviewer-name">MorningBrewMia</div>
-                            <div class="reviewer-date">1 day ago</div>
-                        </div>
-                        <div class="review-stars ms-auto">★★★★★</div>
-                    </div>
-                    <p class="review-text">The Ethiopia pour over was extraordinary — floral and bright. The barista explained the origin and brewing method which made it even better.</p>
-                </div>
-                <div class="shop-review-card">
-                    <div class="review-header">
-                        <div class="reviewer-avatar">T</div>
-                        <div>
-                            <div class="reviewer-name">ThirdWaveTom</div>
-                            <div class="reviewer-date">4 days ago</div>
-                        </div>
-                        <div class="review-stars ms-auto">★★★★☆</div>
-                    </div>
-                    <p class="review-text">Excellent pour over selection, changes with the season. Right in the heart of the CBD — perfect for a pre-work coffee ritual.</p>
-                </div>
-            </div>
-
+            <div class="review-list"></div>
         </div>
 
         <div class="col-lg-4">
@@ -151,7 +124,6 @@
                 <textarea class="review-textarea" placeholder="Share your experience…" rows="4"></textarea>
                 <button class="btn-primary-custom w-100 mt-3">Submit Review</button>
             </div>
-
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
@@ -162,24 +134,14 @@
                     <li><i class="bi bi-credit-card"></i> Card and cash accepted</li>
                 </ul>
             </div>
-
             <a href="{{ url_for('home') }}" class="btn-primary-custom w-100 text-center d-block">
-    Back to Home
-</a>
+                Back to Home
+            </a>
         </div>
     </div>
 </main>
-
-<footer>
-    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span class="footer-brand">Coffee Social Hub</span>
-        <span class="footer-note">CITS5505 Group Project · UWA 2026</span>
-    </div>
-</footer>
-
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}
-
