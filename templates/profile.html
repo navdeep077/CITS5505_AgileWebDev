@@ -65,32 +65,11 @@
         </div>
 
         <div class="col-lg-4">
-            <h5 class="mb-3">My Reviews</h5>
-            <div class="card p-3 mb-3">
-                <div class="d-flex justify-content-between mb-1">
-                    <strong>Venn Coffee</strong>
-                    <span style="color:var(--caramel);">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </span>
-                </div>
-                <p class="small text-muted mb-0">The oat flat white here is the gold standard for Subiaco.</p>
-                <a href="{{ url_for('shop_venn') }}" class="small mt-1 d-block" style="color:var(--caramel);">View shop</a>
-            </div>
-            <div class="card p-3 mb-3">
-                <div class="d-flex justify-content-between mb-1">
-                    <strong>Blacklist Coffee</strong>
-                    <span style="color:var(--caramel);">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star"></i>
-                    </span>
-                </div>
-                <p class="small text-muted mb-0">Best cold brew in Perth. Worth the drive to Welshpool.</p>
-                <a href="{{ url_for('shop_blacklist') }}" class="small mt-1 d-block" style="color:var(--caramel);">View shop</a>
-            </div>
-        </div>
+    <h5 class="mb-3">My Reviews</h5>
+    <div id="my-reviews-list">
+        <p class="text-muted small">No reviews yet. Visit a cafe and share your experience!</p>
+    </div>
+</div>
     </div>
 </div>
 {% endblock %}
