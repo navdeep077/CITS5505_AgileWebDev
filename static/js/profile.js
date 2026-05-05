@@ -54,7 +54,6 @@ async function handleAvatarUpload(event) {
     }
 
     currentAvatar = data.avatar || '';
-    syncUserPostAvatars(currentAvatar);
     renderProfileAvatar();
     loadProfilePosts();
     event.target.value = '';
@@ -72,14 +71,9 @@ async function removeProfileAvatar() {
         return;
     }
 
-    currentAvatar = data.avatar || '';
-    syncUserPostAvatars('');
+    currentAvatar = '';
     renderProfileAvatar();
     loadProfilePosts();
-}
-
-function syncUserPostAvatars(avatar) {
-    return avatar;
 }
 
 function previewProfileImage(event) {
@@ -106,60 +100,45 @@ async function submitProfilePost() {
 
     if (!text) { alert('Please write something!'); return; }
 
-    try {
-        await createServerPost({
-            text,
-            shop,
-            imageFile: imageInput.files.length > 0 ? imageInput.files[0] : null
-        });
+    const formData = new FormData();
+    formData.append('text', text);
+    formData.append('shop', shop || '');
+    if (imageInput.files.length > 0) formData.append('image', imageInput.files[0]);
 
-        document.getElementById('profile-post-text').value = '';
-        document.getElementById('profile-post-shop').value = '';
-        imageInput.value = '';
-        document.getElementById('profile-image-preview').style.display = "none";
-        await loadProfilePosts();
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function loadProfilePosts() {
-    const posts = await fetchServerPosts();
-    const myPosts = posts.filter(p => p.owner === window.currentUser || p.username === window.currentUser);
-    const feed = document.getElementById("profile-feed");
-    if (!feed) return;
-    feed.innerHTML = "";
-
-    if (myPosts.length === 0) {
-        feed.innerHTML = "<p class='text-muted'>No posts yet. Share your first coffee moment!</p>";
+    const response = await fetch('/api/posts', { method: 'POST', body: formData });
+    if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || 'Could not create post');
         return;
     }
 
-    myPosts.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'card mb-3 p-3';
-        div.innerHTML = `
-            <div class="d-flex align-items-center gap-2 mb-2">
-                ${getSavedAvatar()
-                    ? `<img src="${getSavedAvatar()}" class="avatar">`
-                    : `<div class="avatar avatar-placeholder">${window.currentUser[0].toUpperCase()}</div>`}
-                <div>
-                    <strong>${p.username || window.currentUser}</strong>
-                    <p class="small text-muted mb-0">${p.shop || ''}</p>
-                </div>
-            </div>
-            ${p.image ? `<img src="${p.image}" class="img-fluid rounded mb-2" style="max-height:300px;object-fit:cover;">` : ''}
-            <p class="mb-2">${p.text}</p>
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteProfilePost('${p.time}')">
-                <i class="bi bi-trash"></i> Delete Post
-            </button>
-        `;
-        feed.appendChild(div);
-    });
+    document.getElementById('profile-post-text').value = '';
+    document.getElementById('profile-post-shop').value = '';
+    imageInput.value = '';
+    document.getElementById('profile-image-preview').style.display = "none";
+    await loadProfilePosts();
 }
 
-async function deleteProfilePost(postTime) {
-    await deletePost(postTime);
+function loadProfilePosts() {
+    fetch("/api/posts")
+        .then(res => res.json())
+        .then(posts => {
+            const feed = document.getElementById("profile-feed");
+            if (!feed) return;
+            feed.innerHTML = "";
+
+            const myPosts = posts.filter(
+                p => p.username === window.currentUser || p.owner === window.currentUser
+            );
+
+            if (myPosts.length === 0) {
+                feed.innerHTML = "<p class='text-muted'>No posts yet. Share your first coffee moment!</p>";
+                return;
+            }
+
+            myPosts.forEach(post => renderPost(post, "profile-feed"));
+        })
+        .catch(err => console.error("Profile load error:", err));
 }
 
 document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
@@ -172,18 +151,12 @@ window.onload = async function () {
     loadMyReviews();
 };
 
-// ── RELOAD ON TAB VISIBLE ─────────────────────────
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        loadMyReviews();
-    }
+    if (document.visibilityState === 'visible') loadMyReviews();
 });
 
-// ── RELOAD ON BROWSER BACK/FORWARD (fixes bfcache) ─────────────────────────
 window.addEventListener('pageshow', (e) => {
-    if (e.persisted) {
-        loadMyReviews();
-    }
+    if (e.persisted) loadMyReviews();
 });
 
 function loadMyReviews() {
@@ -198,28 +171,17 @@ function loadMyReviews() {
         return;
     }
 
-container.innerHTML = myReviews.map(r => `
-    <div class="card p-3 mb-3" data-review-id="${r.id}">
-        <div class="d-flex justify-content-between mb-1">
-            <strong>${r.shop}</strong>
-            <span style="color:var(--caramel);">
-                ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
-                ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
-            </span>
+    container.innerHTML = myReviews.map(r => `
+        <div class="card p-3 mb-3" data-review-id="${r.id}">
+            <div class="d-flex justify-content-between mb-1">
+                <strong>${r.shop}</strong>
+                <span style="color:var(--caramel);">
+                    ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
+                    ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
+                </span>
+            </div>
+            <p class="small text-muted mb-0">${r.text}</p>
+            <p class="small mt-1" style="color:var(--caramel);">Visit the cafe page to delete this review.</p>
         </div>
-        <p class="small text-muted mb-0">${r.text}</p>
-        <p class="small mt-1" style="color:var(--caramel);">Visit the cafe page to delete this review.</p>
-    </div>
-`).join('');
-
-}
-
-function deleteMyReview(id) {
-    if (!confirm('Are you sure you want to delete this review?')) return;
-
-    let reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
-    reviews = reviews.filter(r => r.id !== id);
-    localStorage.setItem('shopReviews', JSON.stringify(reviews));
-
-    loadMyReviews();
+    `).join('');
 }
