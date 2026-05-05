@@ -1,13 +1,16 @@
 from flask import Flask, render_template, request, redirect, session, url_for
+from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
+from models import db, User
 
 app = Flask(__name__)
 app.secret_key = "secret123"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coffee_hub.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Temporary users dictionary until database is set up
-users = {
-    "admin": "1234",
-    "user1": "password1",
-}
+db.init_app(app)
+bcrypt = Bcrypt(app)
+migrate = Migrate(app, db)
 
 CAFES = [
     {
@@ -99,13 +102,15 @@ CAFES = [
 
 @app.context_processor
 def inject_cafes():
-    trending_cafes = sorted(CAFES, key=lambda cafe: float(cafe["rating"]), reverse=True)[:3]
+    trending_cafes = sorted(CAFES, key=lambda c: float(c["rating"]), reverse=True)[:3]
     return {"cafes": CAFES, "trending_cafes": trending_cafes}
+
 
 # ── Auth Routes ──────────────────────────────────────────
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -115,7 +120,10 @@ def login():
 
         if not username or not password:
             return redirect(url_for("login", error="Please fill all fields"))
-        elif username in users and users[username] == password:
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and bcrypt.check_password_hash(user.password, password):
             session["user"] = username
             return redirect(url_for("home"))
         else:
@@ -137,10 +145,14 @@ def signup():
             return redirect(url_for("signup", error="Please fill all fields"))
         if password != confirm_password:
             return redirect(url_for("signup", error="Passwords do not match"))
-        if username in users:
+        if User.query.filter_by(username=username).first():
             return redirect(url_for("signup", error="Username already exists"))
 
-        users[username] = password
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+
         return redirect(url_for("login", message="Account created. Please log in."))
 
     error = request.args.get("error")
@@ -208,4 +220,6 @@ def home():
 
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
