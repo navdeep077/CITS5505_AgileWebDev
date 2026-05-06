@@ -1,16 +1,62 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+import os
+from uuid import uuid4
+
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
-from models import db, User
+from werkzeug.utils import secure_filename
+from models import db, User, Post
 
 app = Flask(__name__)
 app.secret_key = "secret123"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coffee_hub.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db.init_app(app)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
+
+
+def allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+def get_current_user():
+    username = session.get("user")
+    if not username:
+        return None
+    return User.query.filter_by(username=username).first()
+
+
+def save_uploaded_image(file):
+    if not file or file.filename == "":
+        return None
+    if not allowed_image(file.filename):
+        raise ValueError("Only png, jpg, jpeg, gif and webp images are allowed")
+
+    original_name = secure_filename(file.filename)
+    extension = original_name.rsplit('.', 1)[1].lower()
+    filename = f"{uuid4().hex}.{extension}"
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    return url_for('static', filename=f'uploads/{filename}')
+
+
+def serialize_post(post):
+    return {
+        "id": post.id,
+        "username": post.author.username,
+        "owner": post.author.username,
+        "avatar": post.author.avatar or "",
+        "text": post.text,
+        "shop": post.shop or "",
+        "image": post.image or "",
+        "created_at": post.created_at.isoformat(),
+        "time": f"post-{post.id}"
+    }
 
 CAFES = [
     {
@@ -181,6 +227,77 @@ def profile():
 @app.route("/social")
 def social():
     return render_template("social.html")
+
+
+# API Routes
+@app.route("/api/avatar", methods=["GET", "POST", "DELETE"])
+def api_avatar():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    if request.method == "GET":
+        return jsonify({"avatar": user.avatar or ""})
+
+    if request.method == "DELETE":
+        user.avatar = None
+        db.session.commit()
+        return jsonify({"avatar": ""})
+
+    file = request.files.get("avatar")
+    if not file:
+        return jsonify({"error": "No avatar file uploaded"}), 400
+
+    try:
+        user.avatar = save_uploaded_image(file)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    db.session.commit()
+    return jsonify({"avatar": user.avatar})
+
+
+@app.route("/api/posts", methods=["GET", "POST"])
+def api_posts():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    if request.method == "GET":
+        posts = Post.query.order_by(Post.created_at.desc()).all()
+        return jsonify([serialize_post(post) for post in posts])
+
+    text = request.form.get("text", "").strip()
+    shop = request.form.get("shop", "").strip()
+    image_file = request.files.get("image")
+
+    if not text:
+        return jsonify({"error": "Post text is required"}), 400
+
+    try:
+        image_path = save_uploaded_image(image_file) if image_file else None
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    post = Post(text=text, shop=shop, image=image_path, author=user)
+    db.session.add(post)
+    db.session.commit()
+    return jsonify(serialize_post(post)), 201
+
+
+@app.route("/api/posts/<int:post_id>", methods=["DELETE"])
+def api_delete_post(post_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    post = Post.query.get_or_404(post_id)
+    if post.author != user:
+        return jsonify({"error": "You can only delete your own posts"}), 403
+
+    db.session.delete(post)
+    db.session.commit()
+    return jsonify({"deleted": True})
 
 
 # ── Shop Routes ──────────────────────────────────────────
