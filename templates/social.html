@@ -105,12 +105,9 @@
 
 {% block extra_js %}
 <script>
-    const currentUser = {{ session.get('user', 'User')|tojson }};
-    const routes = {
+    window.routes = {
         landing: "{{ url_for('landing') }}"
     };
-
-    const currentUser = "{{session.get('user')}}";
 </script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 {% endblock %}
