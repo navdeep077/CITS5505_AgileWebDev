@@ -45,6 +45,24 @@ def save_uploaded_image(file):
     return url_for('static', filename=f'uploads/{filename}')
 
 
+def delete_uploaded_image(image_path):
+    if not image_path or not image_path.startswith('/static/uploads/'):
+        return
+
+    filename = os.path.basename(image_path)
+    if not filename:
+        return
+
+    upload_dir = os.path.abspath(app.config['UPLOAD_FOLDER'])
+    target_path = os.path.abspath(os.path.join(upload_dir, filename))
+
+    if os.path.commonpath([upload_dir, target_path]) != upload_dir:
+        return
+
+    if os.path.exists(target_path):
+        os.remove(target_path)
+
+
 def serialize_post(post):
     return {
         "id": post.id,
@@ -240,6 +258,7 @@ def api_avatar():
         return jsonify({"avatar": user.avatar or ""})
 
     if request.method == "DELETE":
+        delete_uploaded_image(user.avatar)
         user.avatar = None
         db.session.commit()
         return jsonify({"avatar": ""})
@@ -249,11 +268,13 @@ def api_avatar():
         return jsonify({"error": "No avatar file uploaded"}), 400
 
     try:
+        old_avatar = user.avatar
         user.avatar = save_uploaded_image(file)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
 
     db.session.commit()
+    delete_uploaded_image(old_avatar)
     return jsonify({"avatar": user.avatar})
 
 
@@ -295,8 +316,10 @@ def api_delete_post(post_id):
     if post.author != user:
         return jsonify({"error": "You can only delete your own posts"}), 403
 
+    image_path = post.image
     db.session.delete(post)
     db.session.commit()
+    delete_uploaded_image(image_path)
     return jsonify({"deleted": True})
 
 
