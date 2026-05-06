@@ -1,16 +1,17 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from models import db, User
+from config import Config
 
 app = Flask(__name__)
-app.secret_key = "secret123"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coffee_hub.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_object(Config)
 
 db.init_app(app)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
+csrf = CSRFProtect(app)
 
 CAFES = [
     {

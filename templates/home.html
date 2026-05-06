@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/brew.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
 
 {% block content %}
@@ -54,6 +55,7 @@
                 <button class="post-btn" onclick="submitModalPost()">
                     Post <i class="bi bi-cup-hot"></i>
                 </button>
+                <input type="hidden" id="csrf-token-field" value="{{ csrf_token() }}">
             </div>
         </div>
     </div>
