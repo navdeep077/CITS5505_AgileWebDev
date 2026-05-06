@@ -1,12 +1,19 @@
 // ── PROFILE PAGE ─────────────────────────
-const avatarStorageKey = `profileAvatar:${window.currentUser}`;
+let currentAvatar = "";
 
 function getSavedAvatar() {
-    return localStorage.getItem(avatarStorageKey) || '';
+    return currentAvatar;
+}
+
+async function fetchAvatar() {
+    const response = await fetch('/api/avatar');
+    if (!response.ok) return '';
+    const data = await response.json();
+    return data.avatar || '';
 }
 
 function renderProfileAvatar() {
-    const avatar = getSavedAvatar();
+    const avatar = currentAvatar;
     const image = document.getElementById('profile-avatar-image');
     const placeholder = document.getElementById('profile-avatar-placeholder');
     const removeButton = document.getElementById('profile-avatar-remove');
@@ -22,26 +29,50 @@ function renderProfileAvatar() {
         placeholder.style.display = 'flex';
         removeButton.style.display = 'none';
     }
+
+    if (typeof window.updateNavbarAvatar === 'function') {
+        window.updateNavbarAvatar(avatar);
+    }
 }
 
-function handleAvatarUpload(event) {
+async function handleAvatarUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        localStorage.setItem(avatarStorageKey, e.target.result);
-        syncUserPostAvatars(e.target.result);
-        renderProfileAvatar();
-        loadProfilePosts();
-        event.target.value = '';
-    };
-    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const response = await fetch('/api/avatar', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        alert(data.error || 'Could not upload profile picture.');
+        return;
+    }
+
+    currentAvatar = data.avatar || '';
+    syncUserPostAvatars(currentAvatar);
+    renderProfileAvatar();
+    loadProfilePosts();
+    event.target.value = '';
 }
 
-function removeProfileAvatar() {
+async function removeProfileAvatar() {
     if (!confirm('Are you sure you want to remove your profile picture?')) return;
-    if (!getSavedAvatar()) return;
-    localStorage.removeItem(avatarStorageKey);
+    if (!currentAvatar) return;
+
+    const response = await fetch('/api/avatar', { method: 'DELETE' });
+    const data = await response.json();
+
+    if (!response.ok) {
+        alert(data.error || 'Could not remove profile picture.');
+        return;
+    }
+
+    currentAvatar = data.avatar || '';
     syncUserPostAvatars('');
     renderProfileAvatar();
     loadProfilePosts();
@@ -179,7 +210,8 @@ function addProfileComment(e, postTime, input) {
 document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
 document.getElementById('profile-avatar-remove').addEventListener('click', removeProfileAvatar);
 
-window.onload = function () {
+window.onload = async function () {
+    currentAvatar = await fetchAvatar();
     renderProfileAvatar();
     loadProfilePosts();
     loadMyReviews();
