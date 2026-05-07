@@ -3,7 +3,6 @@
     const currentUser = window.currentUser || "";
     if (!currentUser) return;
 
-    const avatar = localStorage.getItem(`profileAvatar:${currentUser}`);
     const avatarSlot = document.querySelector('[data-navbar-avatar]');
 
     function updateNavbarAvatar(avatarData) {
@@ -15,6 +14,13 @@
         }
     }
 
-    updateNavbarAvatar(avatar);
+    async function loadNavbarAvatar() {
+        const response = await fetch("/api/avatar");
+        if (!response.ok) return;
+        const data = await response.json();
+        updateNavbarAvatar(data.avatar || "");
+    }
+
     window.updateNavbarAvatar = updateNavbarAvatar;
+    loadNavbarAvatar();
 })();

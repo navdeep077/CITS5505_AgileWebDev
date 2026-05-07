@@ -1,45 +1,23 @@
-// ── DELETE POST ─────────────────────────
-function deletePost(postTime) {
+async function deletePost(postTime) {
     if (!confirm('Are you sure you want to delete this post?')) return;
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    posts = posts.filter(p => p.time !== postTime);
-    localStorage.setItem('posts', JSON.stringify(posts));
 
-    if (document.getElementById("profile-feed")) loadProfilePosts();
-    else loadPosts();
+    if (postTime.startsWith('post-')) {
+        const postId = postTime.replace('post-', '');
+        const response = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
+        if (!response.ok) {
+            const data = await response.json();
+            alert(data.error || 'Could not delete post');
+            return;
+        }
+    }
+
+    if (document.getElementById('profile-feed') && typeof loadProfilePosts === 'function') {
+        await loadProfilePosts();
+    } else if (typeof loadPosts === 'function') {
+        await loadPosts();
+    }
 }
 
-// ── DELETE COMMENT ─────────────────────────
-function deleteComment(postTime, index) {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    posts = posts.map(p => {
-        if (p.time === postTime) p.comments.splice(index, 1);
-        return p;
-    });
-    localStorage.setItem('posts', JSON.stringify(posts));
-
-    if (document.getElementById("profile-feed")) loadProfilePosts();
-    else loadPosts();
-}
-
-// ── DELETE PROFILE POST ─────────────────────────
-function deleteProfilePost(postTime) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    posts = posts.filter(p => p.time !== postTime);
-    localStorage.setItem('posts', JSON.stringify(posts));
-    loadProfilePosts();
-}
-
-// ── DELETE PROFILE COMMENT ─────────────────────────
-function deleteProfileComment(postTime, index) {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
-    let posts = JSON.parse(localStorage.getItem('posts')) || [];
-    posts = posts.map(p => {
-        if (p.time === postTime) p.comments.splice(index, 1);
-        return p;
-    });
-    localStorage.setItem('posts', JSON.stringify(posts));
-    loadProfilePosts();
+async function deleteProfilePost(postTime) {
+    await deletePost(postTime);
 }

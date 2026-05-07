@@ -4,7 +4,7 @@ from uuid import uuid4
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect, csrf_exempt
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
 from models import db, User, Post, Comment
 from config import Config
@@ -325,17 +325,14 @@ def like_post(post_id):
     current_user = session.get("user")
     if not current_user:
         return jsonify({"error": "Unauthorized"}), 401
-
     post = Post.query.get_or_404(post_id)
     liked_users = post.liked_by.split(",") if post.liked_by else []
-
     if current_user in liked_users:
         liked_users.remove(current_user)
         post.likes = max(post.likes - 1, 0)
     else:
         liked_users.append(current_user)
         post.likes += 1
-
     post.liked_by = ",".join(filter(None, liked_users))
     db.session.commit()
     return jsonify({"likes": post.likes, "liked": current_user in liked_users})
@@ -347,7 +344,6 @@ def add_comment(post_id):
     current_user = session.get("user")
     if not current_user:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.json
     new_comment = Comment(
         post_id=post_id,
@@ -365,14 +361,11 @@ def delete_comment(comment_id):
     current_user = session.get("user")
     if not current_user:
         return jsonify({"error": "Unauthorized"}), 401
-
     comment = Comment.query.get(comment_id)
     if not comment:
         return jsonify({"error": "Not found"}), 404
-
     if comment.username != current_user and comment.post.author.username != current_user:
         return jsonify({"error": "Unauthorized"}), 403
-
     db.session.delete(comment)
     db.session.commit()
     return jsonify({"message": "Deleted"})
@@ -384,14 +377,11 @@ def edit_comment(comment_id):
     current_user = session.get("user")
     if not current_user:
         return jsonify({"error": "Unauthorized"}), 401
-
     comment = Comment.query.get(comment_id)
     if not comment:
         return jsonify({"error": "Not found"}), 404
-
     if comment.username != current_user:
         return jsonify({"error": "Unauthorized"}), 403
-
     data = request.get_json()
     comment.text = data.get("text")
     db.session.commit()
