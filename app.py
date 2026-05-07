@@ -315,6 +315,14 @@ def api_posts():
     db.session.commit()
     return jsonify(serialize_post(post)), 201
 
+@csrf.exempt
+@app.route("/api/posts/cafe/<cafe_name>", methods=["GET"])
+def api_cafe_posts(cafe_name):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    posts = Post.query.filter_by(shop=cafe_name).order_by(Post.created_at.desc()).all()
+    return jsonify([serialize_post(post) for post in posts])
 
 @csrf.exempt
 @app.route("/api/posts/<int:post_id>", methods=["DELETE"])
@@ -436,6 +444,14 @@ def shop_satchmo():
 @login_required
 def shop_marystreet():
     return render_template("shop-marystreet.html")
+
+@app.route("/cafe/<cafe_name>")
+@login_required
+def cafe_feed(cafe_name):
+    cafe = next((c for c in CAFES if c["name"] == cafe_name), None)
+    if not cafe:
+        return redirect(url_for("home"))
+    return render_template("cafe-feed.html", cafe=cafe)
 
 @app.route("/home")
 @login_required
