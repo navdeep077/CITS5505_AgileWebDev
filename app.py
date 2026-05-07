@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, j
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
-from models import db, User, Post
+from models import db, User, Post, Comment
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -37,7 +37,6 @@ def save_uploaded_image(file):
         return None
     if not allowed_image(file.filename):
         raise ValueError("Only png, jpg, jpeg, gif and webp images are allowed")
-
     original_name = secure_filename(file.filename)
     extension = original_name.rsplit('.', 1)[1].lower()
     filename = f"{uuid4().hex}.{extension}"
@@ -48,17 +47,13 @@ def save_uploaded_image(file):
 def delete_uploaded_image(image_path):
     if not image_path or not image_path.startswith('/static/uploads/'):
         return
-
     filename = os.path.basename(image_path)
     if not filename:
         return
-
     upload_dir = os.path.abspath(app.config['UPLOAD_FOLDER'])
     target_path = os.path.abspath(os.path.join(upload_dir, filename))
-
     if os.path.commonpath([upload_dir, target_path]) != upload_dir:
         return
-
     if os.path.exists(target_path):
         os.remove(target_path)
 
@@ -72,9 +67,21 @@ def serialize_post(post):
         "text": post.text,
         "shop": post.shop or "",
         "image": post.image or "",
+        "likes": post.likes or 0,
+        "liked_by": post.liked_by.split(",") if post.liked_by else [],
+        "comments": [
+            {
+                "id": c.id,
+                "username": c.username,
+                "text": c.text,
+                "time": c.created_at.isoformat()
+            }
+            for c in post.comments
+        ],
         "created_at": post.created_at.isoformat(),
         "time": f"post-{post.id}"
     }
+
 
 CAFES = [
     {
@@ -181,18 +188,14 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-
         if not username or not password:
             return redirect(url_for("login", error="Please fill all fields"))
-
         user = User.query.filter_by(username=username).first()
-
         if user and bcrypt.check_password_hash(user.password, password):
             session["user"] = username
             return redirect(url_for("home"))
         else:
             return redirect(url_for("login", error="Invalid username or password"))
-
     error = request.args.get("error")
     message = request.args.get("message")
     return render_template("login.html", error=error, message=message)
@@ -204,21 +207,17 @@ def signup():
         username = request.form.get("username")
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
-
         if not username or not password or not confirm_password:
             return redirect(url_for("signup", error="Please fill all fields"))
         if password != confirm_password:
             return redirect(url_for("signup", error="Passwords do not match"))
         if User.query.filter_by(username=username).first():
             return redirect(url_for("signup", error="Username already exists"))
-
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-
         return redirect(url_for("login", message="Account created. Please log in."))
-
     error = request.args.get("error")
     return render_template("signup.html", error=error)
 
@@ -247,32 +246,27 @@ def social():
     return render_template("social.html")
 
 
-# API Routes
+# ── API Routes ──────────────────────────────────────────
 @app.route("/api/avatar", methods=["GET", "POST", "DELETE"])
 def api_avatar():
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-
     if request.method == "GET":
         return jsonify({"avatar": user.avatar or ""})
-
     if request.method == "DELETE":
         delete_uploaded_image(user.avatar)
         user.avatar = None
         db.session.commit()
         return jsonify({"avatar": ""})
-
     file = request.files.get("avatar")
     if not file:
         return jsonify({"error": "No avatar file uploaded"}), 400
-
     try:
         old_avatar = user.avatar
         user.avatar = save_uploaded_image(file)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
-
     db.session.commit()
     delete_uploaded_image(old_avatar)
     return jsonify({"avatar": user.avatar})
@@ -311,16 +305,89 @@ def api_delete_post(post_id):
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
-
     post = Post.query.get_or_404(post_id)
     if post.author != user:
         return jsonify({"error": "You can only delete your own posts"}), 403
-
     image_path = post.image
     db.session.delete(post)
     db.session.commit()
     delete_uploaded_image(image_path)
     return jsonify({"deleted": True})
+
+
+@app.route("/api/posts/<int:post_id>/like", methods=["POST"])
+def like_post(post_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    post = Post.query.get_or_404(post_id)
+    liked_users = post.liked_by.split(",") if post.liked_by else []
+
+    if current_user in liked_users:
+        liked_users.remove(current_user)
+        post.likes = max(post.likes - 1, 0)
+    else:
+        liked_users.append(current_user)
+        post.likes += 1
+
+    post.liked_by = ",".join(filter(None, liked_users))
+    db.session.commit()
+    return jsonify({"likes": post.likes, "liked": current_user in liked_users})
+
+
+@app.route("/api/posts/<int:post_id>/comment", methods=["POST"])
+def add_comment(post_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.json
+    new_comment = Comment(
+        post_id=post_id,
+        username=current_user,
+        text=data.get("text")
+    )
+    db.session.add(new_comment)
+    db.session.commit()
+    return jsonify({"message": "Comment added"})
+
+
+@app.route("/api/comments/<int:comment_id>", methods=["DELETE"])
+def delete_comment(comment_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    comment = Comment.query.get(comment_id)
+    if not comment:
+        return jsonify({"error": "Not found"}), 404
+
+    if comment.username != current_user and comment.post.author.username != current_user:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({"message": "Deleted"})
+
+
+@app.route("/api/comments/<int:comment_id>", methods=["PUT"])
+def edit_comment(comment_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    comment = Comment.query.get(comment_id)
+    if not comment:
+        return jsonify({"error": "Not found"}), 404
+
+    if comment.username != current_user:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json()
+    comment.text = data.get("text")
+    db.session.commit()
+    return jsonify({"message": "Updated"})
 
 
 # ── Shop Routes ──────────────────────────────────────────
