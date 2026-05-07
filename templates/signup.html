@@ -24,6 +24,7 @@
             {% endif %}
 
             <form method="POST" action="{{ url_for('signup') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label>Username</label>
                 <input type="text" name="username" placeholder="Choose username" required>
 
