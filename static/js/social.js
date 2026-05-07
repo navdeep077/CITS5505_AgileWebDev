@@ -3,63 +3,51 @@ const currentUser = window.currentUser || "guest";
 const defaultPosts = [
     {
         username: "CoffeeLover",
-        owner: "CoffeeLover",   // ✅ ADD THIS
+        owner: "CoffeeLover",
         avatar: "https://i.pravatar.cc/40?img=1",
-        text: "Best latte I’ve had in Perth ☕",
+        text: "Best latte I have had in Perth",
         shop: "La Veen Coffee",
         image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
         likes: 5,
         likedBy: [],
         comments: [
-    {
-        username: "brewmaster",
-        owner: "brewmaster",
-        text: "This place is amazing!",
-        time: new Date().toISOString()
-    },
-]
-,
-        time: "seed1"
+            { username: "brewmaster", owner: "brewmaster", text: "This place is amazing!", time: new Date().toISOString() }
+        ],
+        time: "seed1",
+        created_at: "2026-01-01T00:00:00"
     },
     {
         username: "BrewMaster",
         owner: "BrewMaster",
         avatar: "https://i.pravatar.cc/40?img=2",
-        text: "Morning espresso hit 🔥",
+        text: "Morning espresso hit",
         shop: "Blacklist Coffee Roasters",
         image: "https://images.unsplash.com/photo-1511920170033-f8396924c348",
         likes: 8,
         likedBy: [],
-        comments: [{
-        username: "coffeelover",
-        owner: "coffeelover",
-        text: "This place is amazing!",
-        time: new Date().toISOString()
-    }
-],
-
-        time: "seed2"
+        comments: [
+            { username: "coffeelover", owner: "coffeelover", text: "This place is amazing!", time: new Date().toISOString() }
+        ],
+        time: "seed2",
+        created_at: "2026-01-02T00:00:00"
     },
     {
         username: "BeanHunter",
         owner: "BeanHunter",
         avatar: "https://i.pravatar.cc/40?img=3",
-        text: "Chill vibes and cold brew ❄️",
+        text: "Chill vibes and cold brew",
         shop: "Venn Coffee",
         image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
         likes: 3,
         likedBy: [],
-        comments: [{
-        username: "coffeelover",
-        owner: "coffeelover",
-        text: "Awesome!",
-        time: new Date().toISOString()
-    }
-],
-        time: "seed3"
+        comments: [
+            { username: "coffeelover", owner: "coffeelover", text: "Awesome!", time: new Date().toISOString() }
+        ],
+        time: "seed3",
+        created_at: "2026-01-03T00:00:00"
     }
 ];
-// ── TIME AGO ─────────────────────────
+
 function timeAgo(timestamp) {
     if (!timestamp) return "";
     const now = new Date();
@@ -71,35 +59,38 @@ function timeAgo(timestamp) {
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return `${Math.floor(hours / 24)}d ago`;
 }
 
-// ── RANDOM USERS ─────────────────────────
-const users = [
-    { name: "CoffeeLover", avatar: "https://i.pravatar.cc/40?img=1" },
-    { name: "LatteKing", avatar: "https://i.pravatar.cc/40?img=2" },
-    { name: "BeanHunter", avatar: "https://i.pravatar.cc/40?img=3" },
-    { name: "EspressoSoul", avatar: "https://i.pravatar.cc/40?img=4" },
-    { name: "BrewMaster", avatar: "https://i.pravatar.cc/40?img=5" }
-];
-
-function getRandomUser() {
-    return users[Math.floor(Math.random() * users.length)];
+function getPostInteractions() {
+    return JSON.parse(localStorage.getItem("postInteractions")) || {};
 }
 
-const activeUser = typeof currentUser === "string" && currentUser.trim()
-    ? currentUser
-    : "User";
-
-function getSavedAvatar(username = activeUser) {
-    return localStorage.getItem(`profileAvatar:${username}`) || "";
+function savePostInteractions(interactions) {
+    localStorage.setItem("postInteractions", JSON.stringify(interactions));
 }
 
-function getDisplayAvatar(postData) {
-    if (postData.username === activeUser) return getSavedAvatar() || postData.avatar || "";
-    if (postData.avatar) return postData.avatar;
-    return "";
+function withSavedInteractions(post) {
+    const interactions = getPostInteractions()[post.time];
+    if (!interactions) return post;
+
+    return {
+        ...post,
+        likes: interactions.likes ?? post.likes,
+        likedBy: interactions.likedBy || post.likedBy || [],
+        comments: interactions.comments || post.comments || []
+    };
+}
+
+async function fetchServerPosts() {
+    const response = await fetch("/api/posts");
+    if (!response.ok) return [];
+    return response.json();
+}
+
+async function getAllPosts() {
+    const serverPosts = await fetchServerPosts();
+    return [...serverPosts, ...defaultPosts].map(withSavedInteractions);
 }
 
 function avatarMarkup(username, avatar) {
@@ -110,244 +101,202 @@ function avatarMarkup(username, avatar) {
     return `<div class="avatar avatar-placeholder">${(username || "U").charAt(0).toUpperCase()}</div>`;
 }
 
-// ── INIT ─────────────────────────
-window.onload = function () {
-    if (document.getElementById("feed")) {
-        loadPosts(); // only run on social page
-    }
-};
-
-// ── STORAGE ─────────────────────────
-function savePost(post) {
-    let posts = JSON.parse(localStorage.getItem("posts")) || [];
-    posts.unshift(post);
-    localStorage.setItem("posts", JSON.stringify(posts));
-}
-
-function updateStorage(posts) {
-    localStorage.setItem("posts", JSON.stringify(posts));
-}
-
-// ── LOAD POSTS ─────────────────────────
-function loadPosts() {
-    let posts = JSON.parse(localStorage.getItem("posts"));
-
-    // ✅ restore default posts ONLY if empty
-    if (!posts || posts.length === 0) {
-        posts = defaultPosts.map(p => ({
-            ...p,
-            comments: p.comments || [], // 🔥 remove old broken comments
-            time: new Date().toISOString() + Math.random() // unique
-        }));
-
-        localStorage.setItem("posts", JSON.stringify(posts));
-    }
-
-    posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-
+async function loadPosts() {
     const feedEl = document.getElementById("feed");
-    if (!feedEl) return;   // 🔥 STOP if not social page
+    if (!feedEl) return;
+
+    const posts = await getAllPosts();
+    posts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
     feedEl.innerHTML = "";
     posts.forEach(post => renderPost(post));
 }
 
-// ── RENDER POST ─────────────────────────
 function renderPost(postData, prepend = false) {
     const feed = document.getElementById("feed");
+    if (!feed) return;
+
     const username = postData.username || "Anonymous";
-    const avatar = getDisplayAvatar(postData);
     const postImage = postData.image
-        ? `<div class="post-image-wrapper">
-        <img src="${postData.image}" alt="Coffee post image">
-    </div>`
+        ? `<div class="post-image-wrapper"><img src="${postData.image}" alt="Coffee post image"></div>`
         : "";
-
-    const post = document.createElement("div");
-    post.classList.add("post");
-
     const isLiked = postData.likedBy?.includes(currentUser);
     const canDelete = postData.owner === currentUser;
 
+    const post = document.createElement("div");
+    post.classList.add("post");
     post.innerHTML = `
-    <div class="post-header">
-        ${avatarMarkup(username, avatar)}
-        <div class="user-info">
-            <strong>${username}</strong>
-            <span class="location">${postData.shop || ""}</span>
-        </div>
-    </div>
-
-    ${postImage}
-
-    <div class="post-actions">
-        <button onclick="likePost('${postData.time}')">
-            <i class="bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
-             ${postData.likes || 0}
-        </button>
-
-        
-        ${canDelete
-            ? `<button onclick="deletePost('${postData.time}')">
-                <i class="bi bi-trash"></i>
-           </button>`
-        : ""
-    }
-    </div>
-
-    <div class="post-caption">
-    <strong>${username}</strong> ${postData.text || ""}
-</div>
-
-<div class="comment-list">
-${(postData.comments || [])
-    .filter(c => typeof c === "object")
-    .map((c, index) => {
-        const canDelete = c.owner === currentUser || postData.owner === currentUser;
-        const canEdit = c.owner === currentUser;
-
-        return `
-        <div class="comment">
-            <div class="comment-top">
-                <strong>${c.username}</strong>
-                <span class="comment-time">${timeAgo(c.time)}</span>
-            </div>
-
-            <div class="comment-text">${c.text}</div>
-
-            <div class="comment-actions">
-                ${
-                    canEdit
-                    ? `<span onclick="editComment('${postData.time}', ${index}, this)">Edit</span>`
-                    : ""
-                }
-
-                ${
-                    canDelete
-                    ? `<span onclick="deleteComment('${postData.time}', ${index})">
-                        <i class="bi bi-trash"></i>
-                       </span>`
-                    : ""
-                }
+        <div class="post-header">
+            ${avatarMarkup(username, postData.avatar || "")}
+            <div class="user-info">
+                <strong>${username}</strong>
+                <span class="location">${postData.shop || ""}</span>
             </div>
         </div>
-        `;
-    }).join("")}
-</div>
 
-    <input
-        type="text"
-        class="comment-input"
-        placeholder="Add a comment..."
-        onkeypress="addComment(event, '${postData.time}', this)"
-    >
+        ${postImage}
+
+        <div class="post-actions">
+            <button onclick="likePost('${postData.time}')">
+                <i class="bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+                ${postData.likes || 0}
+            </button>
+            ${canDelete ? `<button onclick="deletePost('${postData.time}')"><i class="bi bi-trash"></i></button>` : ""}
+        </div>
+
+        <div class="post-caption"><strong>${username}</strong> ${postData.text || ""}</div>
+
+        <div class="comment-list">
+            ${(postData.comments || []).filter(c => typeof c === "object").map((c, index) => {
+                const canDeleteComment = c.owner === currentUser || postData.owner === currentUser;
+                const canEdit = c.owner === currentUser;
+                return `
+                    <div class="comment">
+                        <div class="comment-top">
+                            <strong>${c.username}</strong>
+                            <span class="comment-time">${timeAgo(c.time)}</span>
+                        </div>
+                        <div class="comment-text">${c.text}</div>
+                        <div class="comment-actions">
+                            ${canEdit ? `<span onclick="editComment('${postData.time}', ${index}, this)">Edit</span>` : ""}
+                            ${canDeleteComment ? `<span onclick="deleteComment('${postData.time}', ${index})"><i class="bi bi-trash"></i></span>` : ""}
+                        </div>
+                    </div>
+                `;
+            }).join("")}
+        </div>
+
+        <input type="text" class="comment-input" placeholder="Add a comment..."
+            onkeypress="addComment(event, '${postData.time}', this)">
     `;
 
     if (prepend) feed.prepend(post);
     else feed.appendChild(post);
 }
 
-// ── LIKE ─────────────────────────
-function likePost(postTime, btn) {
-    let posts = JSON.parse(localStorage.getItem("posts")) || [];
+async function createServerPost({ text, shop, imageFile }) {
+    const formData = new FormData();
+    formData.append("text", text);
+    formData.append("shop", shop || "");
+    if (imageFile) formData.append("image", imageFile);
 
-    posts = posts.map(p => {
-        if (p.time === postTime) {
-
-            if (!p.likedBy) p.likedBy = [];
-
-            const alreadyLiked = p.likedBy.includes(currentUser);
-
-            if (alreadyLiked) {
-                // ❌ UNLIKE
-                p.likes = Math.max((p.likes || 1) - 1, 0);
-                p.likedBy = p.likedBy.filter(u => u !== currentUser);
-            } else {
-                // ✅ LIKE
-                p.likes = (p.likes || 0) + 1;
-                p.likedBy.push(currentUser);
-            }
-        }
-        return p;
+    const response = await fetch("/api/posts", {
+        method: "POST",
+        body: formData
     });
-
-    localStorage.setItem("posts", JSON.stringify(posts));
-    if (document.getElementById("profile-feed")) {
-        loadProfilePosts();   // profile page
-    } else {
-        loadPosts();          // social page
-    }
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Could not save post");
+    return data;
 }
 
-// ── ADD COMMENT ─────────────────────────
-function addComment(e, postTime, input) {
-    if (e.key === "Enter" && input.value.trim() !== "") {
+async function savePost(post) {
+    return createServerPost(post);
+}
 
-        const commentText = input.value.trim();
-        let posts = JSON.parse(localStorage.getItem("posts")) || [];
-        const user = {
-            name: currentUser || "Anonymous",
-            avatar: "https://i.pravatar.cc/40"
-        };
+async function deletePost(postTime) {
+    if (!confirm("Are you sure you want to delete this post?")) return;
 
-        posts = posts.map(p => {
-            if (p.time === postTime) {
-                if (!p.comments) p.comments = [];
-
-                p.comments.push({
-    username: currentUser,
-    owner: currentUser,
-    text: commentText,
-    time: new Date().toISOString()
-});
-            }
-            return p;
-        });
-
-        updateStorage(posts);
-        if (document.getElementById("profile-feed")) {
-            loadProfilePosts();
-        } else {
-            loadPosts();
+    if (postTime.startsWith("post-")) {
+        const postId = postTime.replace("post-", "");
+        const response = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
+        if (!response.ok) {
+            const data = await response.json();
+            alert(data.error || "Could not delete post");
+            return;
         }
     }
+
+    await refreshCurrentFeed();
 }
 
+function likePost(postTime) {
+    getAllPosts().then(posts => {
+        const post = posts.find(p => p.time === postTime);
+        if (!post) return;
 
-// ── EDIT COMMENT ─────────────────────────
+        const likedBy = post.likedBy || [];
+        const liked = likedBy.includes(currentUser);
+        const interactions = getPostInteractions();
+        interactions[postTime] = {
+            likes: liked ? Math.max((post.likes || 1) - 1, 0) : (post.likes || 0) + 1,
+            likedBy: liked ? likedBy.filter(u => u !== currentUser) : [...likedBy, currentUser],
+            comments: post.comments || []
+        };
+        savePostInteractions(interactions);
+        refreshCurrentFeed();
+    });
+}
+
+function addComment(e, postTime, input) {
+    if (e.key !== "Enter" || input.value.trim() === "") return;
+
+    getAllPosts().then(posts => {
+        const post = posts.find(p => p.time === postTime);
+        if (!post) return;
+
+        const interactions = getPostInteractions();
+        interactions[postTime] = {
+            likes: post.likes || 0,
+            likedBy: post.likedBy || [],
+            comments: [
+                ...(post.comments || []),
+                { username: currentUser, owner: currentUser, text: input.value.trim(), time: new Date().toISOString() }
+            ]
+        };
+        savePostInteractions(interactions);
+        input.value = "";
+        refreshCurrentFeed();
+    });
+}
+
 function editComment(postTime, index, el) {
     const commentDiv = el.closest(".comment");
     const textDiv = commentDiv.querySelector(".comment-text");
-
     const input = document.createElement("input");
     input.value = textDiv.innerText;
     input.classList.add("edit-input");
-
     textDiv.replaceWith(input);
     input.focus();
 
     input.onkeypress = function(e) {
-        if (e.key === "Enter") {
-            let posts = JSON.parse(localStorage.getItem("posts")) || [];
+        if (e.key !== "Enter") return;
 
-            posts = posts.map(p => {
-                if (p.time === postTime) {
-                    p.comments[index].text = input.value;
-                }
-                return p;
-            });
+        getAllPosts().then(posts => {
+            const post = posts.find(p => p.time === postTime);
+            if (!post || !post.comments[index]) return;
 
-            updateStorage(posts);
-            if (document.getElementById("profile-feed")) {
-                loadProfilePosts();   // profile page
-            } else {
-                loadPosts();          // social page
-            }
-        }
+            post.comments[index].text = input.value;
+            const interactions = getPostInteractions();
+            interactions[postTime] = {
+                likes: post.likes || 0,
+                likedBy: post.likedBy || [],
+                comments: post.comments
+            };
+            savePostInteractions(interactions);
+            refreshCurrentFeed();
+        });
     };
 }
 
-// ── MODAL ─────────────────────────
+function deleteComment(postTime, index) {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+
+    getAllPosts().then(posts => {
+        const post = posts.find(p => p.time === postTime);
+        if (!post) return;
+
+        post.comments.splice(index, 1);
+        const interactions = getPostInteractions();
+        interactions[postTime] = {
+            likes: post.likes || 0,
+            likedBy: post.likedBy || [],
+            comments: post.comments
+        };
+        savePostInteractions(interactions);
+        refreshCurrentFeed();
+    });
+}
+
 function openModal() {
     document.getElementById("post-modal").classList.add("active");
 }
@@ -358,25 +307,21 @@ function closeModal() {
 }
 
 function resetModal() {
-    // clear text
-    document.getElementById("modal-text").value = "";
-
-    // reset dropdowns
-    document.getElementById("modal-shop").selectedIndex = 0;
-    document.getElementById("aspect-ratio").selectedIndex = 0;
-
-    // clear file input
+    const text = document.getElementById("modal-text");
+    const shop = document.getElementById("modal-shop");
+    const aspect = document.getElementById("aspect-ratio");
     const fileInput = document.getElementById("modal-image");
-    fileInput.value = "";
-
-    // clear preview
     const preview = document.getElementById("image-preview");
-    preview.src = "";
-    
     const container = document.querySelector(".preview-container");
-    container.style.display = "none";
+
+    if (text) text.value = "";
+    if (shop) shop.selectedIndex = 0;
+    if (aspect) aspect.selectedIndex = 0;
+    if (fileInput) fileInput.value = "";
+    if (preview) preview.src = "";
+    if (container) container.style.display = "none";
 }
-// ── IMAGE PREVIEW (modal) ─────────────────────────
+
 function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -389,94 +334,47 @@ function previewImage(event) {
 
         preview.src = e.target.result;
         container.style.display = "block";
-
-        if (ratio === "square")    preview.style.aspectRatio = "1 / 1";
-        else if (ratio === "portrait")  preview.style.aspectRatio = "4 / 5";
+        if (ratio === "square") preview.style.aspectRatio = "1 / 1";
+        else if (ratio === "portrait") preview.style.aspectRatio = "4 / 5";
         else if (ratio === "landscape") preview.style.aspectRatio = "16 / 9";
         else preview.style.aspectRatio = "auto";
     };
     reader.readAsDataURL(file);
 }
-// ── CREATE POST ─────────────────────────
-function submitModalPost() {
+
+async function submitModalPost() {
     const text = document.getElementById("modal-text").value.trim();
     const shop = document.getElementById("modal-shop").value;
     const imageInput = document.getElementById("modal-image");
-    if (!imageInput) return; // 🔥 not social page
 
     if (!text || imageInput.files.length === 0) {
         alert("Add caption + image");
         return;
     }
 
-    const aspect = document.getElementById("aspect-ratio")?.value || "original";
-
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        const img = new Image();
-        img.src = e.target.result;
-
-        img.onload = function () {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            let width = img.width;
-            let height = img.height;
-
-            // 🎯 Apply aspect ratio logic
-            if (aspect === "square") {
-                const size = Math.min(width, height);
-                width = height = size;
-            } 
-            else if (aspect === "portrait") {
-                height = width * (5 / 4);
-            } 
-            else if (aspect === "landscape") {
-                height = width * (9 / 16);
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            ctx.drawImage(img, 0, 0, width, height);
-
-            const finalImage = canvas.toDataURL();
-
-            document.getElementById("image-preview").src = finalImage;
-
-            const user = {
-                name: currentUser,
-                avatar: "https://i.pravatar.cc/40?u=" + currentUser
-            };
-
-            const postData = {
-                username: user.name,
-                owner: currentUser,
-                avatar: user.avatar,
-                text,
-                shop,
-                image: finalImage, // ✅ processed image
-                likes: 0,
-                comments: [],
-                time: new Date().toISOString()
-            };
-
-            savePost(postData);
-            loadPosts();
-            resetModal();
-            closeModal();
-
-            // 🔥 Reset modal (clean UX)
-            document.getElementById("modal-text").value = "";
-            imageInput.value = "";
-        };
-    };
-
-    reader.readAsDataURL(imageInput.files[0]);
+    try {
+        await createServerPost({ text, shop, imageFile: imageInput.files[0] });
+        resetModal();
+        closeModal();
+        await loadPosts();
+    } catch (error) {
+        alert(error.message);
+    }
 }
-// ── LOGOUT ─────────────────────────
+
+async function refreshCurrentFeed() {
+    if (document.getElementById("profile-feed") && typeof loadProfilePosts === "function") {
+        await loadProfilePosts();
+    } else {
+        await loadPosts();
+    }
+}
+
 function logout() {
-    localStorage.clear();
+    localStorage.removeItem("postInteractions");
     window.location.href = routes.landing;
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("feed")) loadPosts();
+});
