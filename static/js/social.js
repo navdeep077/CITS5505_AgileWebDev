@@ -60,7 +60,16 @@ function renderPost(postData, targetId = "feed") {
         ${avatarMarkup(username, postData.avatar || "")}
         <div class="user-info">
             <strong>${username}</strong>
-            <span class="location">${postData.shop || ""}</span>
+            <span class="location">
+    ${postData.shop 
+        ? `<a href="/cafe/${encodeURIComponent(postData.shop)}" 
+              style="color:var(--muted);text-decoration:none;"
+              onmouseover="this.style.color='var(--caramel)'"
+              onmouseout="this.style.color='var(--muted)'">
+              <i class="bi bi-geo-alt-fill"></i> ${postData.shop}
+           </a>` 
+        : ""}
+</span>
         </div>
     </div>
     ${postImage}

@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, j
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from flask_login import LoginManager, login_user, logout_user, login_required
 from werkzeug.utils import secure_filename
 from models import db, User, Post, Comment
 from config import Config
@@ -20,6 +21,13 @@ db.init_app(app)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 def allowed_image(filename):
@@ -193,6 +201,7 @@ def login():
             return redirect(url_for("login", error="Please fill all fields"))
         user = User.query.filter_by(username=username).first()
         if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
             session["user"] = username
             return redirect(url_for("home"))
         else:
@@ -225,6 +234,7 @@ def signup():
 
 @app.route("/logout")
 def logout():
+    logout_user()
     session.pop("user", None)
     return redirect(url_for("login"))
 
@@ -235,14 +245,17 @@ def landing():
     return render_template("index.html")
 
 @app.route("/brew")
+@login_required
 def brew():
     return render_template("brew.html")
 
 @app.route("/profile")
+@login_required
 def profile():
     return render_template("profile.html")
 
 @app.route("/social")
+@login_required
 def social():
     return render_template("social.html")
 
@@ -302,6 +315,14 @@ def api_posts():
     db.session.commit()
     return jsonify(serialize_post(post)), 201
 
+@csrf.exempt
+@app.route("/api/posts/cafe/<cafe_name>", methods=["GET"])
+def api_cafe_posts(cafe_name):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    posts = Post.query.filter_by(shop=cafe_name).order_by(Post.created_at.desc()).all()
+    return jsonify([serialize_post(post) for post in posts])
 
 @csrf.exempt
 @app.route("/api/posts/<int:post_id>", methods=["DELETE"])
@@ -390,37 +411,51 @@ def edit_comment(comment_id):
 
 # ── Shop Routes ──────────────────────────────────────────
 @app.route("/shop/blacklist")
+@login_required
 def shop_blacklist():
     return render_template("shop-blacklist.html")
 
 @app.route("/shop/laveen")
+@login_required
 def shop_laveen():
     return render_template("shop-laveen.html")
 
 @app.route("/shop/venn")
+@login_required
 def shop_venn():
     return render_template("shop-venn.html")
 
 @app.route("/shop/harvest")
+@login_required
 def shop_harvest():
     return render_template("shop-harvest.html")
 
 @app.route("/shop/telegram")
+@login_required
 def shop_telegram():
     return render_template("shop-telegram.html")
 
 @app.route("/shop/satchmo")
+@login_required
 def shop_satchmo():
     return render_template("shop-satchmo.html")
 
 @app.route("/shop/marystreet")
+@login_required
 def shop_marystreet():
     return render_template("shop-marystreet.html")
 
+@app.route("/cafe/<cafe_name>")
+@login_required
+def cafe_feed(cafe_name):
+    cafe = next((c for c in CAFES if c["name"] == cafe_name), None)
+    if not cafe:
+        return redirect(url_for("home"))
+    return render_template("cafe-feed.html", cafe=cafe)
+
 @app.route("/home")
+@login_required
 def home():
-    if "user" not in session:
-        return redirect(url_for("login"))
     return render_template("home.html")
 
 
