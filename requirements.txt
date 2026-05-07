@@ -3,4 +3,5 @@ Flask-SQLAlchemy
 Flask-Bcrypt
 Flask-Migrate
 Flask-WTF
+Flask-Login
 python-dotenv
