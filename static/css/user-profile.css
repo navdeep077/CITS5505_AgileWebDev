@@ -1,0 +1,229 @@
+body {
+    background-color: #f7f3ee;
+}
+
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.profile-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+
+    display: block;
+    margin: 0 auto 20px auto;
+
+    border: 4px solid #c58a5c;
+}
+
+.profile-username {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2d2d2d;
+}
+
+.profile-bio {
+    color: #666;
+    margin-top: 10px;
+}
+
+.profile-stats {
+    margin-top: 15px;
+    color: #444;
+    font-weight: 500;
+}
+
+.posts-section {
+    margin-top: 40px;
+}
+
+.post {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.post-image-wrapper {
+    width: 80%;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 15px;
+    background: #000;
+}
+
+.post-image-wrapper img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+.post-shop {
+    color: #a56b3f;
+    font-weight: bold;
+    margin-top: 8px;
+}
+.comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-left: 8px;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.comment-actions span {
+    cursor: pointer;
+}
+
+.comment-actions span:hover {
+    color: #c69c6d;
+}
+
+/* ── INSTAGRAM STYLE GRID ───────────────────────── */
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.grid-post {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 14px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.25s ease;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.grid-post:hover {
+    transform: scale(1.02);
+}
+
+.grid-image {
+    width: 100%;
+    height: 110%;
+    object-fit: cover;
+    object-position: top;
+    background: #f5f5f5;
+    display: block;
+}
+
+.grid-no-image {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    text-align: center;
+
+    color: #555;
+    font-size: 0.95rem;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .posts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+.post-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    z-index: 2;
+
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+
+    animation: modalPop 0.2s ease;
+}
+
+.close-modal {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+
+    border: none;
+    background: none;
+
+    font-size: 32px;
+    cursor: pointer;
+}
+
+.fallback-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #c8a27a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+}
+
+@keyframes modalPop {
+
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

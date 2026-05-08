@@ -529,3 +529,17 @@ input[type="text"] {
 .bi {
     margin-right: 5px;
 }
+.post a,
+.comment a,
+.post-caption a {
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.post a:hover,
+.comment a:hover,
+.post-caption a:hover {
+    color: var(--caramel);
+}

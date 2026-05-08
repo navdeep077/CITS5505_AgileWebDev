@@ -232,6 +232,38 @@ def signup():
     return render_template("signup.html", error=error)
 
 
+@app.route("/user/<username>")
+def public_profile(username):
+
+    current_username = session.get("user")
+
+    if not current_username:
+        return redirect(url_for("login"))
+
+    # If user clicks their own username
+    if current_username == username:
+        return redirect(url_for("profile"))
+
+    profile_user = User.query.filter_by(username=username).first()
+
+    if not profile_user:
+        return "User not found", 404
+
+    posts = Post.query.filter_by(user_id=profile_user.id)\
+        .order_by(Post.created_at.desc())\
+        .all()
+
+    total_likes = sum(post.likes for post in posts)
+
+    return render_template(
+        "user-profile.html",
+        profile_user=profile_user,
+        posts=posts,
+        total_likes=total_likes
+    )
+
+
+
 @app.route("/logout")
 def logout():
     logout_user()
@@ -373,7 +405,10 @@ def add_comment(post_id):
     )
     db.session.add(new_comment)
     db.session.commit()
-    return jsonify({"message": "Comment added"})
+    return jsonify({
+        "message": "Comment added",
+        "comment_id": new_comment.id
+    })
 
 
 @csrf.exempt

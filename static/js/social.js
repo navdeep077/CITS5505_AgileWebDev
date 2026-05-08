@@ -40,9 +40,51 @@ function loadPosts() {
 }
 
 // ── RENDER POST ─────────────────────────
-function renderPost(postData, targetId = "feed") {
+function renderPost(postData, targetId = "feed", mode = "feed") {
+    const isModal = targetId === "modal-post-container";
     const feed = document.getElementById(targetId);
     if (!feed) return;
+
+    if (mode === "profile") {
+
+    const gridPost = document.createElement("div");
+    gridPost.classList.add("grid-post");
+
+    if (postData.image) {
+
+        gridPost.innerHTML = `
+            <img
+                src="${postData.image}"
+                class="grid-image"
+            >
+        `;
+
+    } else {
+
+        gridPost.innerHTML = `
+            <div class="grid-no-image">
+                <p>${postData.text || ""}</p>
+            </div>
+        `;
+    }
+    gridPost.addEventListener("click", () => {
+
+    const modal = document.getElementById("post-modal");
+
+    const container = document.getElementById("modal-post-container");
+
+    container.innerHTML = "";
+
+    renderPost(postData, "modal-post-container");
+
+    modal.classList.remove("hidden");
+
+    });
+
+    feed.appendChild(gridPost);
+
+    return;
+}
 
     const username = postData.username || "Anonymous";
     const isLiked = postData.liked_by?.includes(currentUser);
@@ -59,7 +101,9 @@ function renderPost(postData, targetId = "feed") {
     <div class="post-header">
         ${avatarMarkup(username, postData.avatar || "")}
         <div class="user-info">
-            <strong>${username}</strong>
+            <a href="/user/${username}">
+                <strong>${username}</strong>
+            </a>
             <span class="location">
     ${postData.shop 
         ? `<a href="/cafe/${encodeURIComponent(postData.shop)}" 
@@ -73,14 +117,44 @@ function renderPost(postData, targetId = "feed") {
         </div>
     </div>
     ${postImage}
-    <div class="post-actions">
-        <button onclick="likePost(${postData.id})">
-            <i class="bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
-            ${postData.likes || 0}
-        </button>
-        ${canDelete ? `<button onclick="deletePost(${postData.id})"><i class="bi bi-trash"></i></button>` : ""}
+    ${!isModal ? `
+
+<div class="post-actions">
+
+    <button onclick="likePost(${postData.id})">
+
+        <i class="bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+
+        ${postData.likes || 0}
+
+    </button>
+
+    ${canDelete
+        ? `<button onclick="deletePost(${postData.id})">
+            <i class="bi bi-trash"></i>
+           </button>`
+        : ""
+    }
+
+</div>
+
+` : `
+
+<div class="post-actions">
+
+    <span>${postData.likes || 0} likes</span>
+
+</div>
+
+`}
+    <div class="post-caption">
+        <strong>
+            <a href="/user/${username}">
+                ${username}
+            </a>
+        </strong>
+        ${postData.text || ""}
     </div>
-    <div class="post-caption"><strong>${username}</strong> ${postData.text || ""}</div>
     <div class="comment-list">
         ${(postData.comments || []).map(c => {
             const canEdit = c.username === currentUser;
@@ -88,7 +162,11 @@ function renderPost(postData, targetId = "feed") {
             return `
             <div class="comment">
                 <div class="comment-top">
-                    <strong>${c.username}</strong>
+                    <strong>
+                        <a href="/user/${c.username}">
+                            ${c.username}
+                        </a>
+                    </strong>
                     <span class="comment-time">${timeAgo(c.time)}</span>
                 </div>
                 <div class="comment-text">${c.text}</div>
@@ -99,10 +177,15 @@ function renderPost(postData, targetId = "feed") {
             </div>`;
         }).join("")}
     </div>
-    <input type="text" class="comment-input" placeholder="Add a comment..."
-        onkeypress="addComment(event, ${postData.id}, this)">
-    `;
-
+    ${!isModal ? `
+<input
+    type="text"
+    class="comment-input"
+    placeholder="Add a comment..."
+    onkeypress="addComment(event, ${postData.id}, this)"
+>
+` : ""}
+`;
     feed.appendChild(post);
 }
 
