@@ -95,3 +95,103 @@
 .brew-grid .btn-outline-nav {
     margin-top: auto !important;
 }
+
+/* ── ONBOARDING TOUR MODAL ──────────────────────────────── */
+.onboarding-modal-content {
+    background: var(--cream);
+    border: none;
+    border-radius: 20px;
+    padding: 2.5rem 2rem 1.5rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.onboarding-step {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.onboarding-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--caramel), var(--roast));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem;
+    color: #fff;
+}
+
+.onboarding-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    color: var(--espresso);
+    margin-bottom: 0.75rem;
+}
+
+.onboarding-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.onboarding-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+}
+
+.onboarding-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--latte);
+    transition: all 0.25s ease;
+}
+
+.onboarding-dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: var(--caramel);
+}
+
+.onboarding-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.5rem;
+}
+
+.btn-onboarding-skip {
+    color: var(--muted);
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.btn-onboarding-skip:hover { color: var(--espresso); }
+
+.btn-onboarding-next {
+    background: var(--caramel);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-onboarding-next:hover {
+    background: var(--roast);
+    color: var(--latte);
+}

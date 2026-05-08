@@ -106,6 +106,56 @@
     </div>
 
 </div>
+<!-- ── Onboarding Tour Modal ─────────────────────────────── -->
+<div class="modal fade" id="onboardingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="onboardingModalLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content onboarding-modal-content">
+
+            <!-- Step 1: Welcome -->
+            <div class="onboarding-step" id="onboarding-step-1">
+                <div class="onboarding-icon">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <h4 class="onboarding-title" id="onboardingModalLabel">Discover Perth Cafes</h4>
+                <p class="onboarding-desc">Welcome! Explore the Brew Map to find the best coffee spots around Perth — filtered by your vibe.</p>
+            </div>
+
+            <!-- Step 2: Share -->
+            <div class="onboarding-step d-none" id="onboarding-step-2">
+                <div class="onboarding-icon">
+                    <i class="bi bi-camera-fill"></i>
+                </div>
+                <h4 class="onboarding-title">Post Your Coffee Moments</h4>
+                <p class="onboarding-desc">Tap the <strong>+</strong> button to share a photo or thought from your latest cafe visit. Tag the shop to earn kudos.</p>
+            </div>
+
+            <!-- Step 3: Connect -->
+            <div class="onboarding-step d-none" id="onboarding-step-3">
+                <div class="onboarding-icon">
+                    <i class="bi bi-heart-fill"></i>
+                </div>
+                <h4 class="onboarding-title">Like &amp; Comment on Posts</h4>
+                <p class="onboarding-desc">Connect with fellow Perth coffee lovers — like their moments and join the conversation.</p>
+            </div>
+
+            <!-- Progress dots -->
+            <div class="onboarding-dots" aria-hidden="true">
+                <span class="onboarding-dot active" id="onboarding-dot-1"></span>
+                <span class="onboarding-dot" id="onboarding-dot-2"></span>
+                <span class="onboarding-dot" id="onboarding-dot-3"></span>
+            </div>
+
+            <!-- Navigation buttons -->
+            <div class="onboarding-actions">
+                <button class="btn-onboarding-skip" id="onboarding-skip" type="button">Skip</button>
+                <button class="btn-onboarding-next" id="onboarding-next" type="button">
+                    Next <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -114,4 +164,48 @@
 </script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 <script src="{{ url_for('static', filename='js/brew.js') }}"></script>
+<script>
+(function () {
+    const user = window.currentUser;
+    if (!user) return;
+
+    const STORAGE_KEY = 'coffee_onboarding_seen_' + user;
+    if (localStorage.getItem(STORAGE_KEY)) return;
+
+    const TOTAL_STEPS = 3;
+    let currentStep = 1;
+
+    const bsModal = new bootstrap.Modal(document.getElementById('onboardingModal'));
+    bsModal.show();
+
+    function goToStep(next) {
+        document.getElementById('onboarding-step-' + currentStep).classList.add('d-none');
+        document.getElementById('onboarding-dot-' + currentStep).classList.remove('active');
+        currentStep = next;
+        document.getElementById('onboarding-step-' + currentStep).classList.remove('d-none');
+        document.getElementById('onboarding-dot-' + currentStep).classList.add('active');
+
+        const nextBtn = document.getElementById('onboarding-next');
+        if (currentStep === TOTAL_STEPS) {
+            nextBtn.innerHTML = 'Got it! <i class="bi bi-check-lg"></i>';
+        } else {
+            nextBtn.innerHTML = 'Next <i class="bi bi-arrow-right"></i>';
+        }
+    }
+
+    function finishTour() {
+        localStorage.setItem(STORAGE_KEY, '1');
+        bsModal.hide();
+    }
+
+    document.getElementById('onboarding-skip').addEventListener('click', finishTour);
+    document.getElementById('onboarding-next').addEventListener('click', function () {
+        if (currentStep < TOTAL_STEPS) {
+            goToStep(currentStep + 1);
+        } else {
+            finishTour();
+        }
+    });
+})();
+</script>
 {% endblock %}
