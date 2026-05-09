@@ -1,3 +1,27 @@
+.back-home-btn {
+    display: inline-block;
+    margin: 20px;
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.back-home-btn:hover {
+    color: var(--caramel);
+}
+
+.user-reviews {
+    margin-top: 20px;
+}
+
+.review-card {
+    background: #f8f8f8;
+    padding: 12px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
 body {
     background-color: #f7f3ee;
 }

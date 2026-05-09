@@ -6,6 +6,9 @@
 {% endblock %}
 
 {% block content %}
+<a href="{{ url_for('home') }}" class="back-home-btn">
+    ← Back to Home
+</a>
 
 <div class="profile-container">
 
@@ -32,9 +35,15 @@
             {{ profile_user.username }}
         </h2>
 
-        <p class="profile-bio">
-            {{ profile_user.bio or "No bio yet" }}
-        </p>
+        <div class="user-reviews">
+
+            <h4>Recent Reviews</h4>
+
+            <div id="profile-reviews">
+                <p>No reviews yet</p>
+            </div>
+
+        </div>
 
         <p class="profile-stats">
             <strong>{{ posts|length }}</strong> posts
@@ -160,5 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<script>
+    window.profileUsername = "{{ profile_user.username }}";
+</script>
 
+<script src="{{ url_for('static', filename='js/profile-reviews.js') }}"></script>
 {% endblock %}
