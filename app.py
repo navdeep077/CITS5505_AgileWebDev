@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, login_required
 from werkzeug.utils import secure_filename
-from models import db, User, Post, Comment
+from models import db, User, Post, Comment, Review
 from config import Config
 
 app = Flask(__name__)
@@ -442,7 +442,82 @@ def edit_comment(comment_id):
     comment.text = data.get("text")
     db.session.commit()
     return jsonify({"message": "Updated"})
+@csrf.exempt
+@app.route("/api/reviews", methods=["POST"])
+def submit_review():
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
 
+    data = request.json
+    shop = data.get("shop")
+    rating = data.get("rating")
+    text = data.get("text")
+
+    if not shop or not rating or not text:
+        return jsonify({"error": "Missing fields"}), 400
+
+    existing = Review.query.filter_by(username=current_user, shop=shop).first()
+    if existing:
+        return jsonify({"error": "You have already reviewed this cafe"}), 400
+
+    review = Review(username=current_user, shop=shop, rating=rating, text=text)
+    db.session.add(review)
+    db.session.commit()
+    return jsonify({"message": "Review submitted"}), 201
+
+@csrf.exempt
+@app.route("/api/reviews/shop/<shop_name>", methods=["GET"])
+def get_shop_reviews(shop_name):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    reviews = Review.query.filter_by(shop=shop_name).order_by(Review.created_at.desc()).all()
+    return jsonify([{
+        "id": r.id,
+        "shop": r.shop,
+        "rating": r.rating,
+        "text": r.text,
+        "username": r.username,
+        "created_at": r.created_at.isoformat()
+    } for r in reviews])
+
+@csrf.exempt
+@app.route("/api/reviews/<username>", methods=["GET"])
+def get_user_reviews(username):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    reviews = Review.query.filter_by(username=username).order_by(Review.created_at.desc()).all()
+    return jsonify([{
+        "id": r.id,
+        "shop": r.shop,
+        "rating": r.rating,
+        "text": r.text,
+        "username": r.username,
+        "created_at": r.created_at.isoformat()
+    } for r in reviews])
+
+
+@csrf.exempt
+@app.route("/api/reviews/<int:review_id>", methods=["DELETE"])
+def delete_review(review_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({"error": "Not found"}), 404
+
+    if review.username != current_user:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    db.session.delete(review)
+    db.session.commit()
+    return jsonify({"message": "Deleted"})
 
 # ── Shop Routes ──────────────────────────────────────────
 @app.route("/shop/blacklist")

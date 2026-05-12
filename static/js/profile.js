@@ -1,3 +1,15 @@
+function cafeSlug(name) {
+    const map = {
+        'Blacklist Coffee Roasters': 'blacklist',
+        'La Veen Coffee': 'laveen',
+        'Venn Coffee': 'venn',
+        'Harvest Espresso': 'harvest',
+        'Telegram Cafe': 'telegram',
+        'Satchmo': 'satchmo',
+        'Mary Street Bakery': 'marystreet'
+    };
+    return map[name] || '';
+}
 // ── PROFILE PAGE ─────────────────────────
 let currentAvatar = "";
 
@@ -159,29 +171,49 @@ window.addEventListener('pageshow', (e) => {
     if (e.persisted) loadMyReviews();
 });
 
+function cafeSlug(name) {
+    const map = {
+        'Blacklist Coffee Roasters': 'blacklist',
+        'La Veen Coffee': 'laveen',
+        'Venn Coffee': 'venn',
+        'Harvest Espresso': 'harvest',
+        'Telegram Cafe': 'telegram',
+        'Satchmo': 'satchmo',
+        'Mary Street Bakery': 'marystreet'
+    };
+    return map[name] || '';
+}
+
 function loadMyReviews() {
+    localStorage.removeItem('shopReviews');
     const container = document.getElementById('my-reviews-list');
     if (!container) return;
 
-    const reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
-    const myReviews = reviews.filter(r => r.username === window.currentUser);
+    fetch(`/api/reviews/${window.currentUser}`)
+        .then(res => res.json())
+        .then(reviews => {
+            if (reviews.length === 0) {
+                container.innerHTML = "<p class='text-muted small'>No reviews yet. Visit a cafe and share your experience!</p>";
+                return;
+            }
 
-    if (myReviews.length === 0) {
-        container.innerHTML = "<p class='text-muted small'>No reviews yet. Visit a cafe and share your experience!</p>";
-        return;
-    }
-
-    container.innerHTML = myReviews.map(r => `
-        <div class="card p-3 mb-3" data-review-id="${r.id}">
-            <div class="d-flex justify-content-between mb-1">
-                <strong>${r.shop}</strong>
-                <span style="color:var(--caramel);">
-                    ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
-                    ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
-                </span>
-            </div>
-            <p class="small text-muted mb-0">${r.text}</p>
-            <p class="small mt-1" style="color:var(--caramel);">Visit the cafe page to delete this review.</p>
+            container.innerHTML = reviews.map(r => `
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between mb-1">
+            <strong>${r.shop}</strong>
+            <span style="color:var(--caramel);">
+                ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
+                ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
+            </span>
         </div>
-    `).join('');
+        <p class="small text-muted mb-0">${r.text}</p>
+        <a href="/shop/${cafeSlug(r.shop)}" 
+           class="small mt-1" 
+           style="color:var(--caramel);display:block;">
+            Visit ${r.shop} to delete this review →
+        </a>
+    </div>
+`).join('');
+        })
+        .catch(err => console.error('Error loading reviews:', err));
 }

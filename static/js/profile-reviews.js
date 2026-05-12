@@ -1,37 +1,31 @@
+
 window.addEventListener('DOMContentLoaded', () => {
-
+     localStorage.removeItem('shopReviews'); // clear old localStorage reviews
     const reviewContainer = document.getElementById('profile-reviews');
-
-    if (!reviewContainer) return;
-
     const username = window.profileUsername;
 
-    const reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
+    fetch(`/api/reviews/${username}`)
+        .then(res => res.json())
+        .then(reviews => {
+            if (reviews.length === 0) {
+                reviewContainer.innerHTML = "<p>No reviews yet</p>";
+                return;
+            }
 
-    const userReviews = reviews.filter(r => r.username === username);
+            reviewContainer.innerHTML = '';
 
-    if (userReviews.length === 0) {
-        reviewContainer.innerHTML = "<p>No reviews yet</p>";
-        return;
-    }
-
-    reviewContainer.innerHTML = '';
-
-    userReviews.forEach(r => {
-
-        const div = document.createElement('div');
-
-        div.className = 'review-card';
-
-        div.innerHTML = `
-            <strong>${r.shop}</strong>
-            <div>
-                ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
-            </div>
-        `;
-
-        reviewContainer.appendChild(div);
-
-    });
-
+            reviews.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'review-card';
+                div.innerHTML = `
+                    <strong>${r.shop}</strong>
+                    <div style="color:var(--caramel)">
+                        ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+                    </div>
+                    <p style="font-size:0.85rem;color:var(--muted)">${r.text}</p>
+                `;
+                reviewContainer.appendChild(div);
+            });
+        })
+        .catch(err => console.error('Error loading reviews:', err));
 });

@@ -135,48 +135,42 @@ const reviewTextarea = document.querySelector('.review-textarea');
 
 if (submitBtn && reviewTextarea) {
     submitBtn.addEventListener('click', () => {
-        const text = reviewTextarea.value.trim();
+    const text = reviewTextarea.value.trim();
 
-        if (selectedRating === 0) {
-            alert('Please select a star rating.');
-            return;
-        }
-        if (!text) {
-            alert('Please write a review.');
-            return;
-        }
+    if (selectedRating === 0) {
+        alert('Please select a star rating.');
+        return;
+    }
+    if (!text) {
+        alert('Please write a review.');
+        return;
+    }
 
-        const shopName = document.querySelector('.shop-hero-title')?.innerText || 'Unknown Shop';
-        const currentUser = window.currentUser || 'guest';
+    const shopName = document.querySelector('.shop-hero-title')?.innerText || 'Unknown Shop';
 
-        const review = {
-            id: Date.now().toString(),
+    fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
             shop: shopName,
-            username: currentUser,
             rating: selectedRating,
-            text: text,
-            date: 'Just now',
-            seed: false,
-            time: new Date().toISOString()
-        };
-
-        let reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
-        const alreadyReviewed = reviews.find(r => r.shop === shopName && r.username === currentUser);
-        if (alreadyReviewed) {
-            alert('You have already reviewed this cafe. Delete your existing review first.');
+            text: text
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
             return;
         }
-
-        reviews.unshift(review);
-        localStorage.setItem('shopReviews', JSON.stringify(reviews));
-
         alert(`Review submitted! ${selectedRating}★ for ${shopName}`);
         reviewTextarea.value = '';
         selectedRating = 0;
         document.querySelectorAll('.star-pick').forEach(s => s.style.color = '#ccc');
-
         loadShopReviews();
-    });
+    })
+    .catch(err => console.error('Review error:', err));
+});
 }
 
 // ── RENDER SINGLE REVIEW ─────────────────────────
@@ -216,41 +210,53 @@ function loadShopReviews() {
     const shopName = document.querySelector('.shop-hero-title')?.innerText || '';
     const currentUser = window.currentUser || 'guest';
     const deletedIds = JSON.parse(localStorage.getItem('deletedReviews')) || [];
-    const userReviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
 
-    // combine seed + user reviews for this shop, skip deleted
-    const allForShop = [
-        ...seedReviews.filter(r => r.shop === shopName),
-        ...userReviews.filter(r => r.shop === shopName)
-    ].filter(r => !deletedIds.includes(r.id));
+    fetch(`/api/reviews/shop/${encodeURIComponent(shopName)}`)
+        .then(res => res.json())
+        .then(dbReviews => {
+            const allForShop = [
+                ...seedReviews.filter(r => r.shop === shopName),
+                ...dbReviews
+            ].filter(r => !deletedIds.includes(String(r.id)));
 
-    if (allForShop.length === 0) {
-        reviewList.innerHTML = "<p class='text-muted'>No reviews yet. Be the first!</p>";
-        return;
-    }
+            if (allForShop.length === 0) {
+                reviewList.innerHTML = "<p class='text-muted'>No reviews yet. Be the first!</p>";
+                return;
+            }
 
-    allForShop.forEach(r => {
-        reviewList.appendChild(renderReview(r, currentUser));
-    });
+            allForShop.forEach(r => {
+                reviewList.appendChild(renderReview(r, currentUser));
+            });
+        })
+        .catch(err => console.error('Error loading reviews:', err));
 }
 
 // ── DELETE REVIEW ─────────────────────────
 window.deleteReview = function(id) {
     if (!confirm('Are you sure you want to delete this review?')) return;
 
-    // remove from user submitted reviews
-    let reviews = JSON.parse(localStorage.getItem('shopReviews')) || [];
-    reviews = reviews.filter(r => r.id !== id);
-    localStorage.setItem('shopReviews', JSON.stringify(reviews));
-
-    // track deleted IDs (covers both seed and user reviews)
-    let deletedIds = JSON.parse(localStorage.getItem('deletedReviews')) || [];
-    if (!deletedIds.includes(id)) {
-        deletedIds.push(id);
-        localStorage.setItem('deletedReviews', JSON.stringify(deletedIds));
+    // seed reviews only tracked in localStorage
+    if (String(id).includes('-')) {
+        let deletedIds = JSON.parse(localStorage.getItem('deletedReviews')) || [];
+        if (!deletedIds.includes(String(id))) {
+            deletedIds.push(String(id));
+            localStorage.setItem('deletedReviews', JSON.stringify(deletedIds));
+        }
+        loadShopReviews();
+        return;
     }
 
-    loadShopReviews();
+    // DB reviews deleted via API
+    fetch(`/api/reviews/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            loadShopReviews();
+        })
+        .catch(err => console.error('Delete error:', err));
 }
 
 // ── INIT ─────────────────────────
