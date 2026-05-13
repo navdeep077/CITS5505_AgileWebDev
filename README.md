@@ -89,17 +89,26 @@ python3 app.py
 http://127.0.0.1:5000
 ```
 
-## 🧪 How to Run Tests
+## How to Run Tests
 
+### Unit Tests
 ```bash
-# Unit tests
-python -m pytest tests/test_models.py tests/test_routes.py -v
-
-# Selenium tests (requires running server)
-python -m pytest tests/test_selenium.py -v
+pip install pytest
+python -m pytest tests/test_routes.py -v
 ```
 
----
+### Selenium Tests
+Requires Flask server running on port 5000.
+
+```bash
+pip install selenium webdriver-manager
+
+# Terminal 1 — start server
+python app.py
+
+# Terminal 2 — run tests
+python -m pytest tests/test_selenium.py -v
+```
 
 ## Git Workflow
 - Do not work directly on `main`  
