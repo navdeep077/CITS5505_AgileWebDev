@@ -2,79 +2,119 @@
 {% block title %}My Profile | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
+<!-- Profile-specific layout and avatar styles -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<!-- Shared social feed card styles (post cards, like button, comment threads) -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
 
+    <!-- Back navigation to the main home feed -->
     <div class="mb-3">
         <a href="{{ url_for('home') }}" class="btn btn-outline-coffee btn-sm">
             <i class="bi bi-arrow-left"></i> Back to Home
         </a>
     </div>
 
+    <!-- ── Profile Header ──────────────────────────────────────────────── -->
+    <!-- Displays the user's avatar, name, and photo upload controls -->
     <div class="profile-header d-flex align-items-center gap-4 mb-4">
         <div class="profile-avatar-wrapper">
+            <!-- Actual photo: hidden by default; shown by profile.js once an image is stored -->
             <img id="profile-avatar-image" class="profile-avatar-image" style="display:none;" alt="Profile photo">
+            <!-- Fallback initials placeholder shown when no photo is set -->
             <div id="profile-avatar-placeholder" class="profile-avatar-placeholder">
                 {{ session.get('user', 'U')[0].upper() }}
             </div>
         </div>
+
         <div>
             <h2 class="mb-1">{{ session.get('user', 'User') }}</h2>
             <p class="text-muted mb-0">Coffee enthusiast · Perth WA</p>
+
+            <!-- Label acts as the clickable trigger for the hidden file input -->
             <label for="profile-avatar-upload" class="btn btn-outline-coffee btn-sm mt-2">
                 <i class="bi bi-camera-fill"></i> Change photo
             </label>
-            <button type="button" id="profile-avatar-remove" class="btn btn-outline-danger btn-sm mt-2 ms-2" style="display:none;">
+
+            <!-- Remove button: only shown by profile.js when a custom photo exists -->
+            <button type="button" id="profile-avatar-remove"
+                    class="btn btn-outline-danger btn-sm mt-2 ms-2"
+                    style="display:none;">
                 <i class="bi bi-trash"></i> Remove photo
             </button>
+
+            <!-- Visually hidden file input; triggers profile.js avatar upload logic -->
             <input type="file" id="profile-avatar-upload" class="visually-hidden" accept="image/*">
         </div>
     </div>
 
+    <!-- ── Main Content Row ────────────────────────────────────────────── -->
     <div class="row g-4">
+
+        <!-- Left column: post composer and personal feed -->
         <div class="col-lg-8">
+
+            <!-- ── Post Composer Card ──────────────────────────────────── -->
             <div class="card mb-4 p-3">
                 <h6 class="mb-3">Share a coffee moment</h6>
+
+                <!-- Post body text -->
                 <textarea id="profile-post-text" class="form-control mb-2"
                     placeholder="What are you brewing today?" rows="3"></textarea>
+
+                <!-- Cafe tag dropdown; options mirrored from home.html -->
                 <select id="profile-post-shop" class="form-select mb-2">
                     <option value="">Tag a cafe...</option>
                     {% for cafe in cafes %}
                     <option>{{ cafe.name }}</option>
                     {% endfor %}
                 </select>
+
+                <!-- Image aspect ratio selector; mirrors the modal on home.html -->
                 <select id="aspect-ratio" class="form-select mb-2">
                     <option value="original">Original</option>
                     <option value="square">Square (1:1)</option>
                     <option value="portrait">Portrait (4:5)</option>
                     <option value="landscape">Landscape (16:9)</option>
                 </select>
+
+                <!-- Image picker; triggers live preview via previewProfileImage() -->
                 <input type="file" id="profile-post-image" class="form-control mb-2"
                     accept="image/*" onchange="previewProfileImage(event)">
+
+                <!-- Preview rendered here before submission; hidden until an image is chosen -->
                 <img id="profile-image-preview"
                     style="width:100%; display:none; border-radius:10px; margin-top:8px; object-fit:cover;">
+
+                <!-- Calls submitProfilePost() which POSTs to the backend via AJAX -->
                 <button class="btn btn-primary-custom w-100 mt-2" onclick="submitProfilePost()">Post</button>
             </div>
 
+            <!-- ── User's Post Feed ────────────────────────────────────── -->
+            <!-- profile.js fetches only the current user's posts and renders them here -->
             <h5 class="mb-3">My Posts</h5>
             <div id="profile-feed" class="feed"></div>
         </div>
 
+        <!-- Right column: reviews submitted by this user across all cafes -->
         <div class="col-lg-4">
-    <h5 class="mb-3">My Reviews</h5>
-    <div id="my-reviews-list">
-        <p class="text-muted small">No reviews yet. Visit a cafe and share your experience!</p>
-    </div>
-</div>
+            <h5 class="mb-3">My Reviews</h5>
+            <!-- profile.js populates this list; placeholder shown when no reviews exist -->
+            <div id="my-reviews-list">
+                <p class="text-muted small">No reviews yet. Visit a cafe and share your experience!</p>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- social.js: shared feed rendering helpers (post cards, likes, comments) -->
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
+<!-- profile.js: avatar upload/removal, profile feed fetch, review list population -->
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

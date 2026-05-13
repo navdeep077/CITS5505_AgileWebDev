@@ -6,7 +6,10 @@ body {
 }
 
 
-/* MAIN CONTAINER */
+/* ── MAIN CONTAINER ───────────────────────────────────── */
+
+/* Two-column card centred on the page: form on the left, hero image on the right.
+   Uses min() so the card never overflows on small screens and clamp() caps the height. */
 .login-container {
     display: flex;
     width: min(900px, calc(100% - 48px));
@@ -18,26 +21,31 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
-/* LEFT SIDE */
+/* ── LEFT SIDE — Login / Register Form ───────────────── */
+
 .left {
     width: 50%;
-    padding: clamp(24px, 4vw, 40px);
+    padding: clamp(24px, 4vw, 40px); /* fluid padding that compresses on narrow viewports */
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
+/* App name / brand heading inside the form panel */
 .logo {
     font-family: 'Cormorant Garamond', serif;
     color: var(--espresso);
 }
 
+/* Descriptive sub-heading beneath the logo */
 .subtitle {
     color: var(--muted);
     margin-bottom: 16px;
 }
 
-/* TABS */
+/* ── Tab Switcher (Login / Register) ─────────────────── */
+
+/* Row of tab links for toggling between Login and Register forms */
 .tabs {
     display: flex;
     gap: 10px;
@@ -54,13 +62,15 @@ body {
     text-decoration: none;
 }
 
+/* Active tab gets the caramel fill to indicate the current form */
 .tabs .active {
     background: var(--caramel);
     border-color: var(--caramel);
     color: #fff;
 }
 
-/* FORM */
+/* ── Form Elements ────────────────────────────────────── */
+
 form {
     display: flex;
     flex-direction: column;
@@ -80,7 +90,8 @@ input {
     border: 1px solid rgba(138,112,96,0.35);
 }
 
-/* BUTTON */
+/* ── Submit Button ────────────────────────────────────── */
+
 .login-btn {
     margin-top: 16px;
     padding: 12px;
@@ -92,12 +103,15 @@ input {
     font-weight: 600;
 }
 
+/* Darken to roast brown on hover for interactive feedback */
 .login-btn:hover {
     background: var(--roast);
     color: var(--latte);
 }
 
-/* LINKS */
+/* ── Helper Links ─────────────────────────────────────── */
+
+/* Row of small secondary links (e.g. "Forgot password?") beneath the form */
 .links {
     margin-top: 20px;
     display: flex;
@@ -106,7 +120,9 @@ input {
     color: var(--muted);
 }
 
-/* RIGHT SIDE */
+/* ── RIGHT SIDE — Hero Image ──────────────────────────── */
+
+/* Right half of the login card is a full-bleed decorative image */
 .right {
     width: 50%;
 }
@@ -114,21 +130,28 @@ input {
 .right img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* crop-fills the panel without distorting the image */
 }
 
+/* ── Status Messages ──────────────────────────────────── */
+
+/* Inline error message displayed above the submit button on failed login/register */
 .error {
     color: #b42318;
     font-size: 14px;
     margin: 0 0 12px;
 }
 
+/* Inline success message (e.g. "Account created — please log in") */
 .success {
     color: var(--roast);
     font-size: 14px;
     margin: 0 0 12px;
 }
 
+/* ── Responsive ───────────────────────────────────────── */
+
+/* Mobile: stack form and image vertically; give the image a fixed height */
 @media (max-width: 768px) {
     .login-container {
         flex-direction: column;
@@ -141,6 +164,7 @@ input {
         width: 100%;
     }
 
+    /* Fixed height for the image panel so it doesn't collapse on mobile */
     .right {
         height: 240px;
     }

@@ -1,5 +1,6 @@
 /* ── PROFILE STYLES ──────────────────────────────────── */
 
+/* Hero banner used on public-facing profile pages (gradient dark background) */
 .hero-profile {
     background: linear-gradient(140deg, var(--espresso) 0%, var(--roast) 100%);
     padding: 80px 0 60px;
@@ -10,11 +11,13 @@
 
 /* ── Profile Avatar ───────────────────────────────────── */
 
+/* Wrapper keeps the avatar and any overlaid badges in a stacking context */
 .profile-avatar-wrapper {
     position: relative;
     display: inline-block;
 }
 
+/* Circular photo shown on the hero section of public profile pages */
 .profile-img {
     width: 130px;
     height: 130px;
@@ -26,9 +29,10 @@
     margin: 0 auto 1.25rem; 
 }
 
+/* Hero heading — uses the serif display font for elegance */
 .hero-profile h1 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1.9rem, 4vw, 2.8rem); 
+    font-size: clamp(1.9rem, 4vw, 2.8rem); /* fluid type between mobile and desktop */
     font-weight: 700;
     color: var(--cream);
     margin-bottom: 0.75rem;
@@ -36,16 +40,18 @@
 
 /* ── Profile Bio ──────────────────────────────────────── */
 
+/* Bio paragraph beneath the hero heading */
 .profile-bio {
     font-family: 'DM Sans', sans-serif;
     font-size: 1rem;
     line-height: 1.6;
-    color: rgba(253, 246, 237, 0.85); 
+    color: rgba(253, 246, 237, 0.85); /* cream at 85% opacity for readability on dark bg */
     font-weight: 400;
     max-width: 600px;
-    margin: 0 auto; 
+    margin: 0 auto; /* horizontally centres the capped-width paragraph */
 }
 
+/* Decorative caramel underline rule rendered after the hero container */
 .hero-profile .container::after {
     content: "";
     display: block;
@@ -58,12 +64,14 @@
 
 /* ── Post Gallery ─────────────────────────────────────── */
 
+/* Auto-filling masonry-style grid for the user's post photo thumbnails */
 .post-masonry {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1.5rem;
 }
 
+/* Individual thumbnail card with fixed height and lift-on-hover */
 .post-card-mini {
     position: relative;
     border-radius: var(--radius);
@@ -77,17 +85,19 @@
     transform: translateY(-5px);
 }
 
+/* Image fills the card entirely, cropping to fit */
 .post-card-mini img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
+/* Caption overlay at the bottom of each thumbnail — gradient ensures readability */
 .post-tag {
     position: absolute;
     bottom: 0;
     width: 100%;
-    background: linear-gradient(transparent, rgba(26, 14, 0, 0.9)); 
+    background: linear-gradient(transparent, rgba(26, 14, 0, 0.9)); /* dark scrim */
     padding: 20px 15px 10px;
     color: var(--latte);
     font-size: 0.85rem;
@@ -96,20 +106,27 @@
 
 /* ── Review Cards ─────────────────────────────────────── */
 
+/* Individual review item in the "My Reviews" sidebar list */
 .review-item {
     margin-bottom: 1rem;
     padding: 1.25rem !important;
-    border-left: 4px solid var(--caramel) !important;
+    border-left: 4px solid var(--caramel) !important; /* accent stripe identifies review cards */
 }
 
+/* Star rating icons */
 .stars {
     color: var(--caramel);
     font-size: 0.8rem;
 }
 
+/* Utility for espresso-coloured text (used on reviewer names, card titles) */
 .text-espresso {
     color: var(--espresso);
 }
+
+/* ── Avatar — logged-in user's profile page ───────────────────────────── */
+
+/* Initials placeholder shown before a photo is uploaded */
 .profile-avatar-placeholder {
     width: 90px;
     height: 90px;
@@ -124,14 +141,18 @@
     font-weight: 700;
     border: 3px solid var(--latte);
 }
+
+/* Like button default state (grey heart icon) */
 .like-btn i {
     color: #999;
 }
 
+/* Like button active/toggled state (red heart icon) */
 .like-btn.active i {
     color: red;
 }
 
+/* Actual photo avatar; hidden by default, shown by profile.js once an image is available */
 .profile-avatar-image {
     width: 90px;
     height: 90px;
@@ -141,6 +162,9 @@
     display: none;
 }
 
+/* ── Post Card Header ─────────────────────────────────── */
+
+/* Row layout for avatar + username + timestamp at the top of each post card */
 .profile-post-header {
     display: flex;
     align-items: center;
@@ -148,18 +172,21 @@
     margin-bottom: 0.75rem;
 }
 
+/* Shared size/shape rules for both the image and placeholder post avatars */
 .post-avatar-image,
 .post-avatar-placeholder {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    flex-shrink: 0;
+    flex-shrink: 0; /* prevents avatar from shrinking in tight containers */
 }
 
+/* Photo variant of the in-post avatar */
 .post-avatar-image {
     object-fit: cover;
 }
 
+/* Initials fallback for users without a profile photo, used inside post cards */
 .post-avatar-placeholder {
     background: var(--caramel);
     color: #fff;
