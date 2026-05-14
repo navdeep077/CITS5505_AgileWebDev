@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Dynamic page title injected by child templates via {% block title %} -->
     <title>{% block title %}Coffee Social Hub{% endblock %}</title>
+
+    <!-- Google Fonts: Cormorant Garamond for headings, DM Sans for body text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS for grid/utilities and Bootstrap Icons for iconography -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Global site-wide stylesheet (CSS variables, shared components) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Slot for page-specific stylesheets injected by child templates -->
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    <!-- NAVBAR -->
+    <!-- ── NAVBAR ──────────────────────────────────────────────────────── -->
+    <!-- Collapses into a hamburger menu on smaller screens via Bootstrap -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
+            <!-- Brand link is only shown on the landing page (when no user is logged in) -->
             {% if not session.get('user') %}
             <a class="navbar-brand" href="{{ url_for('landing') }}">Coffee Social Hub</a>
             {% endif %}
+
+            <!-- Hamburger toggle for mobile viewports -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
+
                     {% if session.get("user") %}
+                    <!-- Authenticated state: show profile avatar link and logout button -->
                     <li class="nav-item">
                         <a class="nav-link nav-profile-link" href="{{ url_for('profile') }}">
+                            <!-- Avatar is populated dynamically by navbar.js (image or icon fallback) -->
                             <span class="nav-profile-avatar" data-navbar-avatar>
                                 <i class="bi bi-person-circle"></i>
                             </span>
@@ -36,20 +53,24 @@
                     <li class="nav-item">
                         <a class="btn btn-nav" href="{{ url_for('logout') }}">Logout</a>
                     </li>
+
                     {% else %}
+                    <!-- Unauthenticated state: single Login / Sign Up CTA -->
                     <li class="nav-item">
                         <a class="btn btn-nav" href="{{ url_for('login') }}">Login / Sign Up</a>
                     </li>
                     {% endif %}
+
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- PAGE CONTENT -->
+    <!-- ── PAGE CONTENT ────────────────────────────────────────────────── -->
+    <!-- Each child template renders its unique body content here -->
     {% block content %}{% endblock %}
 
-    <!-- FOOTER -->
+    <!-- ── FOOTER ──────────────────────────────────────────────────────── -->
     <footer>
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
             <span class="footer-brand">Coffee Social Hub</span>
@@ -57,14 +78,22 @@
         </div>
     </footer>
 
+    <!-- Bootstrap JS bundle (includes Popper) — required for dropdowns, modals, collapse -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Expose the currently logged-in username to client-side JS as a global variable.
+         Outputs null when no user is in session. -->
     <script>
         window.currentUser = {{ session.get('user') | tojson }};
     </script>
+
+    <!-- navbar.js: handles dynamic avatar rendering in the nav bar -->
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+
+    <!-- delete.js: handles post/review deletion across all pages -->
     <script src="{{ url_for('static', filename='js/delete.js') }}"></script>
 
+    <!-- Slot for page-specific scripts injected by child templates -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>
