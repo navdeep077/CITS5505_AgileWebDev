@@ -1,4 +1,15 @@
-// ── SEED REVIEWS ─────────────────────────
+/*
+  Shop review system
+
+  Handles:
+  - Review submission
+  - Star rating interactions
+  - Loading and rendering reviews
+  - Review deletion
+  - Seed/demo review data
+*/
+
+// Predefined sample reviews displayed for café pages
 const seedReviews = [
     // Blacklist Coffee Roasters
     {
@@ -99,13 +110,14 @@ const seedReviews = [
     }
 ];
 
-// ── STAR PICKER ─────────────────────────
+// Interactive star rating selector for review submissions
 const starPicker = document.getElementById('starPicker');
 let selectedRating = 0;
 
 if (starPicker) {
     const stars = starPicker.querySelectorAll('.star-pick');
 
+    // Handle hover and click interactions for rating stars
     stars.forEach(star => {
         star.addEventListener('mouseover', () => {
             const val = parseInt(star.dataset.val);
@@ -129,7 +141,7 @@ if (starPicker) {
     });
 }
 
-// ── SUBMIT REVIEW ─────────────────────────
+// Handles validation and submission of user reviews.
 const submitBtn = document.querySelector('.sidebar-card .btn-primary-custom');
 const reviewTextarea = document.querySelector('.review-textarea');
 
@@ -147,6 +159,8 @@ if (submitBtn && reviewTextarea) {
     }
 
     const shopName = document.querySelector('.shop-hero-title')?.innerText || 'Unknown Shop';
+
+    // Send review data to backend API.
 
     fetch('/api/reviews', {
         method: 'POST',
@@ -173,9 +187,11 @@ if (submitBtn && reviewTextarea) {
 });
 }
 
-// ── RENDER SINGLE REVIEW ─────────────────────────
+// Creates and returns a single review card element.
 function renderReview(r, currentUser) {
     const starsHtml = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+
+    // Determine whether the current user can delete this review
     const canDelete = r.username === currentUser;
 
     const div = document.createElement('div');
@@ -200,7 +216,7 @@ function renderReview(r, currentUser) {
     return div;
 }
 
-// ── LOAD REVIEWS FOR THIS SHOP ─────────────────────────
+// Loads all reviews associated with the current café/shop
 function loadShopReviews() {
     const reviewList = document.querySelector('.review-list');
     if (!reviewList) return;
@@ -214,6 +230,8 @@ function loadShopReviews() {
     fetch(`/api/reviews/shop/${encodeURIComponent(shopName)}`)
         .then(res => res.json())
         .then(dbReviews => {
+            
+            // Combine seed reviews and database reviews while filtering by shop
             const allForShop = [
                 ...seedReviews.filter(r => r.shop === shopName),
                 ...dbReviews
@@ -224,6 +242,7 @@ function loadShopReviews() {
                 return;
             }
 
+            // Render each review into the review list container
             allForShop.forEach(r => {
                 reviewList.appendChild(renderReview(r, currentUser));
             });
@@ -231,7 +250,7 @@ function loadShopReviews() {
         .catch(err => console.error('Error loading reviews:', err));
 }
 
-// ── DELETE REVIEW ─────────────────────────
+// Handles deletion of both seed and database reviews
 window.deleteReview = function(id) {
     if (!confirm('Are you sure you want to delete this review?')) return;
 
@@ -246,7 +265,7 @@ window.deleteReview = function(id) {
         return;
     }
 
-    // DB reviews deleted via API
+    // Database reviews are deleted through the backend API
     fetch(`/api/reviews/${id}`, { method: 'DELETE' })
         .then(res => res.json())
         .then(data => {
@@ -259,7 +278,7 @@ window.deleteReview = function(id) {
         .catch(err => console.error('Delete error:', err));
 }
 
-// ── INIT ─────────────────────────
+// Load reviews automatically when the page finishes loading
 window.addEventListener('DOMContentLoaded', () => {
     loadShopReviews();
 });

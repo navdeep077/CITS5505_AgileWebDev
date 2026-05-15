@@ -1,10 +1,19 @@
-// ── NAVBAR AVATAR ─────────────────────────
+/*
+  Navbar avatar management.
+
+  Handles:
+  - Loading the current user's avatar
+  - Updating navbar avatar display dynamically
+*/
+
+// Self-executing function to isolate navbar avatar logic
 (function () {
     const currentUser = window.currentUser || "";
     if (!currentUser) return;
 
     const avatarSlot = document.querySelector('[data-navbar-avatar]');
 
+    // Updates the navbar avatar image or fallback initials dynamically
     function updateNavbarAvatar(avatarData) {
         if (!avatarSlot) return;
         if (avatarData) {
@@ -14,6 +23,7 @@
         }
     }
 
+    // Fetches the current user's avatar from the backend API
     async function loadNavbarAvatar() {
         const response = await fetch("/api/avatar");
         if (!response.ok) return;
@@ -21,6 +31,7 @@
         updateNavbarAvatar(data.avatar || "");
     }
 
+    // Expose avatar update function globally for reuse across pages
     window.updateNavbarAvatar = updateNavbarAvatar;
     loadNavbarAvatar();
 })();

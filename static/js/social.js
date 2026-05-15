@@ -1,5 +1,18 @@
+/*
+ Social feed functionality for the application.
+
+ Handles:
+ - Loading and rendering posts
+ - Likes and comments
+ - Post creation and deletion
+ - Modal interactions
+ - Profile/grid post rendering
+ - UI refresh behaviour
+*/
+
 const currentUser = window.currentUser || "guest";
 
+//converts a timestamp into a human-readable "time ago" format.
 // ── TIME AGO ─────────────────────────
 function timeAgo(timestamp) {
     if (!timestamp) return "";
@@ -14,6 +27,7 @@ function timeAgo(timestamp) {
     return `${Math.floor(hours / 24)}d ago`;
 }
 
+// Generates either a user avatar image or a placeholder avatar.
 function avatarMarkup(username, avatar) {
     if (avatar) {
         return `<img class="avatar" src="${avatar}" alt="${username} profile photo">`;
@@ -21,11 +35,12 @@ function avatarMarkup(username, avatar) {
     return `<div class="avatar avatar-placeholder">${(username || "U").charAt(0).toUpperCase()}</div>`;
 }
 
-// ── INIT ─────────────────────────
+// Initialize social feed when the page finishes loading.
 window.onload = function () {
     if (document.getElementById("feed")) loadPosts();
 };
 
+// Fetches all posts from the backend API and renders them into the feed
 // ── LOAD POSTS ─────────────────────────
 function loadPosts() {
     fetch("/api/posts")
@@ -39,6 +54,7 @@ function loadPosts() {
         .catch(err => console.error("Error loading posts:", err));
 }
 
+// Renders a post either in the main feed, profile grid, or modal view
 // ── RENDER POST ─────────────────────────
 function renderPost(postData, targetId = "feed", mode = "feed") {
     const isModal = targetId === "modal-post-container";
@@ -67,6 +83,8 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
             </div>
         `;
     }
+
+    // Open selected profile post inside modal view
     gridPost.addEventListener("click", () => {
 
     const modal = document.getElementById("post-modal");
@@ -86,6 +104,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     return;
 }
 
+// Determine post interaction permissions and state for current user
     const username = postData.username || "Anonymous";
     const isLiked = postData.liked_by?.includes(currentUser);
     const canDelete = postData.username === currentUser;
@@ -97,6 +116,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     const post = document.createElement("div");
     post.classList.add("post");
 
+    // Build the main post HTML structure dynamically
     post.innerHTML = `
     <div class="post-header">
         ${avatarMarkup(username, postData.avatar || "")}
@@ -155,7 +175,9 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
         </strong>
         ${postData.text || ""}
     </div>
+
     <div class="comment-list">
+
         ${(postData.comments || []).map(c => {
             const canEdit = c.username === currentUser;
             const canDeleteComment = c.username === currentUser || postData.username === currentUser;
@@ -189,7 +211,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     feed.appendChild(post);
 }
 
-// ── LIKE ─────────────────────────
+// Sends a like request for a specific post and refreshes the UI
 function likePost(postId) {
     fetch(`/api/posts/${postId}/like`, {
         method: "POST",
@@ -200,7 +222,8 @@ function likePost(postId) {
     .catch(err => console.error("Like error:", err));
 }
 
-// ── COMMENTS ─────────────────────────
+// comment management functionality.
+// Adds a new comment when the Enter key is pressed
 function addComment(e, postId, input) {
     if (e.key !== "Enter" || input.value.trim() === "") return;
     const text = input.value.trim();
@@ -212,7 +235,7 @@ function addComment(e, postId, input) {
     .then(() => { input.value = ""; refreshUI(); })
     .catch(err => console.error("Comment error:", err));
 }
-
+// updates an existing comment using the API.
 function editComment(commentId, currentText) {
     const newText = prompt("Edit comment:", currentText);
     if (!newText) return;
@@ -225,6 +248,7 @@ function editComment(commentId, currentText) {
     .catch(err => console.error("Edit error:", err));
 }
 
+//deletes a selected comment after confirmation.
 function deleteComment(commentId) {
     if (!confirm("Delete comment?")) return;
     fetch(`/api/comments/${commentId}`, { method: "DELETE" })
@@ -232,7 +256,7 @@ function deleteComment(commentId) {
     .catch(err => console.error("Delete error:", err));
 }
 
-// ── MODAL ─────────────────────────
+// Modal handling functions for creating and viewing posts
 function openModal() {
     document.getElementById("post-modal").classList.add("active");
 }
@@ -253,6 +277,7 @@ function resetModal() {
     if (container) container.style.display = "none";
 }
 
+// Displays a live preview of the selected image before upload
 function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -266,7 +291,7 @@ function previewImage(event) {
     reader.readAsDataURL(file);
 }
 
-// ── CREATE POST ─────────────────────────
+// Handles creation and submission of new social posts
 function submitModalPost() {
     const text = document.getElementById("modal-text").value.trim();
     const shop = document.getElementById("modal-shop").value;
@@ -288,6 +313,7 @@ function submitModalPost() {
     .catch(err => console.error("Error creating post:", err));
 }
 
+// Deletes a post after user confirmation.
 function deletePost(postId) {
     if (!confirm("Delete this post?")) return;
     fetch(`/api/posts/${postId}`, { method: "DELETE" })
@@ -295,6 +321,7 @@ function deletePost(postId) {
     .catch(err => console.error("Delete error:", err));
 }
 
+// Refreshes either the profile feed or global feed depending on page context
 function refreshUI() {
     if (document.getElementById("profile-feed") && typeof loadProfilePosts === "function") {
         loadProfilePosts();
@@ -303,6 +330,7 @@ function refreshUI() {
     }
 }
 
+// Redirects the user back to the landing page.
 function logout() {
     window.location.href = routes.landing;
 }
