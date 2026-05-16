@@ -5,3 +5,6 @@ Flask-Migrate
 Flask-WTF
 Flask-Login
 python-dotenv
+pytest
+selenium
+webdriver-manager

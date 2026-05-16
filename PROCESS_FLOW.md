@@ -1,86 +1,168 @@
-# Coffee Social Hub – Process Flow
+# Coffee Social Hub - Process Flow
 
 ## Overview
-This document outlines the user flow of the Coffee Social Hub application to ensure consistency in navigation and feature integration across all pages.
+This document outlines the complete user flow of the Coffee Social Hub
+application, covering all pages, routes and feature interactions.
 
 ---
 
 ## Application Flow
 
-### 1. Landing Page (landing.html)
-- Acts as the entry point of the application
-- Introduces the platform and its purpose
-- Provides navigation options:
-  - Log In
-  - Sign Up
-  - Explore Brew Map
-
-➡️ User proceeds to:
-- Login/Signup page OR
-- Directly to Brew Map (if no authentication is enforced)
+### 1. Landing Page (`/`)
+- Public entry point - no login required
+- Introduces the platform with hero section, features and how-it-works
+- Navigation options:
+  - Join as a Barista - `/signup`
+  - See the Brew Map - `/home` (if logged in) or `/login`
 
 ---
 
-### 2. Login / Signup (login.html / signup.html)
-- Allows users to create or access their account
-- After successful login/signup:
-
-➡️ Redirect to:
-- Brew Map (Home Page)
-
----
-
-### 3. Coffee Hub / Home Page (brew.html)
-- Main functional page of the application
-- Displays a list of coffee shops (from JSON data)
-- Features:
-  - View shop name, location, ratings, opening hours
-  - Apply filters (pet-friendly, price range)
-  - Navigate to shop details
-
-➡️ User can:
-- Click on a shop → Shop Detail Page
-- Navigate to Social Feed or Profile
+### 2. Login / Signup (`/login`, `/signup`)
+- Login: validates credentials against bcrypt-hashed passwords
+- Signup: creates new User record with hashed password
+- CSRF token on both forms for security
+- On success - redirect to `/home`
 
 ---
 
-### 4. Shop Detail Page (shop.html)
-- Displays detailed information about a selected coffee shop
-- Includes:
-  - Menu and pricing
-  - Dine-in and pet-friendly status
-  - Ratings and reviews
-  - Discount codes
+### 3. Home Page (`/home`)
+**Split layout: Social Grounds (left) + Brew Map (right)**
 
-➡️ User can:
-- Rate the shop
-- Return to Brew Map
+**Social Grounds (left):**
+- Loads all posts via `GET /api/posts`
+- Users can create posts via the + FAB button (with image upload)
+- Posts show likes, comments, cafe tag link, username link
+- Clicking a cafe name - `/cafe/<cafe_name>`
+- Clicking a username - `/user/<username>`
 
----
+**Brew Map (right):**
+- Displays 7 Perth cafes as filter-able cards
+- Filter chips: All, Open Now, Pet Friendly, Cold Brew, Pour Over
+- View Details button - individual shop pages
 
-### 5. Social Feed (feed.html)
-- Displays posts from users
-- Users can:
-  - Create posts
-  - Upload images (optional)
-  - Tag coffee shops
+**Onboarding Tour:**
+- First-time users see a 3-step modal
+- Completion tracked per username in localStorage
 
 ---
 
-### 6. User Profile (profile.html)
-- Displays user information
-- Shows:
-  - User posts
-  - Ratings given
+### 4. Shop Detail Pages (`/shop/<name>`)
+7 individual cafe pages: Blacklist, La Veen, Venn, Harvest,
+Telegram, Satchmo, Mary Street
+
+Each page includes:
+- Hero section with cafe name, tags and rating pill
+- Info strip: hours, wifi, parking
+- Menu sections with item names, descriptions and prices
+- Community reviews loaded from `GET /api/reviews/shop/<name>`
+- Review submission form - `POST /api/reviews`
+- Star picker for rating (1–5)
+- Quick facts sidebar
+- User's own reviews linkable back to profile
 
 ---
 
-## Summary
-The application flow follows a structured path:
+### 5. Cafe Feed Page (`/cafe/<cafe_name>`)
+- Shows all community posts tagged with this cafe
+- Posts loaded via `GET /api/posts/cafe/<cafe_name>`
+- Reviews loaded via `GET /api/reviews/shop/<cafe_name>`
+- Right sidebar shows cafe info, tags and recent reviews
+- Link to full shop detail page
 
-Landing Page → Login/Signup → Brew Map → Shop Detail → Social/Profile
+---
 
-This ensures a clear separation between:
-- Entry experience (Landing Page)
-- Core functionality (Brew Map)
-- Extended features (Social & Profile)
+### 6. Social Page (`/social`)
+- Standalone social feed page
+- Trending cafes sidebar (top 3 by rating)
+- Same post feed as home page
+- Create post via FAB button
+
+---
+
+### 7. Profile Page (`/profile`)
+**Private profile for the logged-in user**
+
+- Avatar upload and removal via `POST/DELETE /api/avatar`
+- Post composer with image, cafe tag and aspect ratio selector
+- Own posts feed filtered from `GET /api/posts`
+- Own reviews list from `GET /api/reviews/<username>`
+- Clickable link to each cafe page for review deletion
+
+---
+
+### 8. Public User Profile (`/user/<username>`)
+**Viewable by other logged-in users**
+
+- Shows target user's avatar, username, post count and total likes
+- Two-column layout: post grid (left) + reviews (right)
+- Posts rendered as Instagram-style grid
+- Reviews loaded via `GET /api/reviews/<username>`
+- Clicking a post opens a detail modal
+
+---
+
+### 9. Brew Map Page (`/brew`)
+- Standalone Brew Map page
+- Same filter chips and cafe grid as home page right column
+- Filters: All, Open Now, Pet Friendly, Cold Brew, Pour Over
+
+---
+
+### 10. Logout (`/logout`)
+- Clears Flask-Login session and Flask session
+- Redirects to `/login`
+
+---
+
+## API Endpoints Summary
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST/DELETE | `/api/avatar` | Manage user avatar |
+| GET/POST | `/api/posts` | Get all posts / create post |
+| GET | `/api/posts/cafe/<name>` | Posts filtered by cafe |
+| DELETE | `/api/posts/<id>` | Delete own post |
+| POST | `/api/posts/<id>/like` | Toggle like on post |
+| POST | `/api/posts/<id>/comment` | Add comment |
+| DELETE/PUT | `/api/comments/<id>` | Delete/edit comment |
+| POST | `/api/reviews` | Submit a review |
+| GET | `/api/reviews/shop/<name>` | Reviews for a cafe |
+| GET | `/api/reviews/<username>` | Reviews by a user |
+| DELETE | `/api/reviews/<id>` | Delete own review |
+
+---
+
+## Security Architecture
+
+| Feature | Implementation |
+|---------|---------------|
+| Authentication | Flask-Login with @login_required |
+| Passwords | bcrypt salted hashes |
+| CSRF | Flask-WTF CSRFProtect on all forms |
+| Secret Key | Loaded from .env via python-dotenv |
+| File uploads | UUID filenames, extension whitelist |
+| XSS protection | SQLAlchemy parameterised queries |
+
+---
+
+## Database Schema
+
+```text
+User        id, username (unique), password (bcrypt), avatar, bio
+Post        id, text, shop, image, likes, liked_by, created_at, user_id (FK)
+Comment     id, post_id (FK), username, text, created_at
+Review      id, username, shop, rating, text, created_at
+```
+
+---
+
+## Flow Summary
+
+```
+Landing - Login/Signup - Home
+                           ├── Shop Page - Review submission
+                           ├── Cafe Feed Page
+                           ├── Social Page
+                           ├── Profile Page
+                           └── Public User Profile
+```
