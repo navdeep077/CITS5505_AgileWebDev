@@ -1,20 +1,17 @@
-.back-home-btn {
-    display: inline-block;
-    margin: 20px;
-    color: black;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
+/*
+ * user-profile.css
+ * Styles for the public user profile page (/user/<username>).
+ * Covers the back button, profile header, avatar, stats,
+ * post grid, review cards, and the post detail modal.
+ */
 
-.back-home-btn:hover {
-    color: var(--caramel);
-}
-
+/* ── Reviews Section ──────────────────────────────────────────────────── */
+/* Container for the user's submitted cafe reviews */
 .user-reviews {
     margin-top: 20px;
 }
 
+/* Individual review card with a light grey background */
 .review-card {
     background: #f8f8f8;
     padding: 12px;
@@ -22,63 +19,74 @@
     margin-top: 10px;
 }
 
+/* ── Page Background ──────────────────────────────────────────────────── */
 body {
-    background-color: #f7f3ee;
+    background-color: #f7f3ee; /* Warm cream background */
 }
 
+/* ── Profile Container ────────────────────────────────────────────────── */
+/* Centred content wrapper with a max width for readability */
 .profile-container {
     max-width: 900px;
     margin: 40px auto;
     padding: 20px;
 }
 
+/* ── Profile Header ───────────────────────────────────────────────────── */
+/* Centred header section containing avatar, username, bio and stats */
 .profile-header {
     text-align: center;
     margin-bottom: 40px;
 }
 
+/* ── Profile Avatar ───────────────────────────────────────────────────── */
+/* Large circular profile photo with caramel border */
 .profile-avatar {
     width: 140px;
     height: 140px;
     border-radius: 50%;
     object-fit: cover;
-
     display: block;
     margin: 0 auto 20px auto;
-
-    border: 4px solid #c58a5c;
+    border: 4px solid #c58a5c; /* Caramel accent border */
 }
 
+/* Username heading beneath the avatar */
 .profile-username {
     font-size: 32px;
     font-weight: bold;
     color: #2d2d2d;
 }
 
+/* Optional bio text beneath the username */
 .profile-bio {
     color: #666;
     margin-top: 10px;
 }
 
+/* Post count and total likes stats line */
 .profile-stats {
     margin-top: 15px;
     color: #444;
     font-weight: 500;
 }
 
+/* ── Posts Section ────────────────────────────────────────────────────── */
+/* Container for the user's posts below the header */
 .posts-section {
     margin-top: 40px;
 }
 
+/* Individual post card — white rounded card with subtle shadow */
 .post {
     background: white;
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 25px;
-
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* Post image container — constrained width to prevent oversized images */
 .post-image-wrapper {
     width: 80%;
     border-radius: 12px;
@@ -87,6 +95,7 @@ body {
     background: #000;
 }
 
+/* Post image fills its container */
 .post-image-wrapper img {
     width: 100%;
     height: auto;
@@ -94,11 +103,15 @@ body {
     object-fit: cover;
 }
 
+/* Cafe name tag shown below the post image */
 .post-shop {
     color: #a56b3f;
     font-weight: bold;
     margin-top: 8px;
 }
+
+/* ── Comment Actions ──────────────────────────────────────────────────── */
+/* Row of edit/delete links beneath each comment */
 .comment-actions {
     display: flex;
     gap: 12px;
@@ -111,12 +124,13 @@ body {
     cursor: pointer;
 }
 
+/* Highlight in caramel on hover */
 .comment-actions span:hover {
     color: #c69c6d;
 }
 
-/* ── INSTAGRAM STYLE GRID ───────────────────────── */
-
+/* ── Post Grid (Instagram-style) ──────────────────────────────────────── */
+/* Three-column square grid of post thumbnails */
 .posts-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -124,6 +138,7 @@ body {
     margin-top: 30px;
 }
 
+/* Individual square grid cell — opens post modal on click */
 .grid-post {
     aspect-ratio: 1 / 1;
     overflow: hidden;
@@ -134,14 +149,15 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: 0.25s ease;
-
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* Slight scale-up on hover for interactive feedback */
 .grid-post:hover {
     transform: scale(1.02);
 }
 
+/* Post image inside the grid cell — fills and crops from top */
 .grid-image {
     width: 100%;
     height: 110%;
@@ -151,45 +167,44 @@ body {
     display: block;
 }
 
+/* Fallback for posts without an image — centred text preview */
 .grid-no-image {
     width: 100%;
     height: 100%;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     padding: 20px;
     text-align: center;
-
     color: #555;
     font-size: 0.95rem;
 }
 
-/* MOBILE */
-
+/* ── Mobile Responsive ────────────────────────────────────────────────── */
+/* Collapse the post grid to two columns on narrow screens */
 @media (max-width: 768px) {
-
     .posts-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-
 }
 
+/* ── Post Detail Modal ────────────────────────────────────────────────── */
+/* Full-screen modal overlay for viewing a post in detail */
 .post-modal {
     position: fixed;
     inset: 0;
     z-index: 9999;
-
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+/* Utility class to hide the modal */
 .hidden {
     display: none;
 }
 
+/* Dark blurred backdrop behind the modal content */
 .modal-overlay {
     position: absolute;
     inset: 0;
@@ -197,35 +212,32 @@ body {
     backdrop-filter: blur(4px);
 }
 
+/* Modal content box — scrollable for tall posts */
 .modal-content {
     position: relative;
     z-index: 2;
-
     width: 90%;
     max-width: 900px;
     max-height: 90vh;
-
     overflow-y: auto;
-
     background: white;
     border-radius: 18px;
     padding: 20px;
-
     animation: modalPop 0.2s ease;
 }
 
+/* Close button positioned in the top-right corner of the modal */
 .close-modal {
     position: absolute;
     top: 14px;
     right: 16px;
-
     border: none;
     background: none;
-
     font-size: 32px;
     cursor: pointer;
 }
 
+/* Initials fallback avatar shown when no profile photo is set */
 .fallback-avatar {
     width: 120px;
     height: 120px;
@@ -239,15 +251,45 @@ body {
     font-weight: bold;
 }
 
+/* Pop-in animation for the modal content box */
 @keyframes modalPop {
-
     from {
         transform: scale(0.95);
         opacity: 0;
     }
-
     to {
         transform: scale(1);
         opacity: 1;
     }
+}
+/* Override back button to match the styled button on other pages */
+.back-home-btn {
+    display: inline-block;
+    margin: 20px;
+    color: var(--espresso);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    border: 1.5px solid rgba(26,14,0,0.2);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.back-home-btn:hover {
+    color: var(--caramel);
+    border-color: var(--caramel);
+    background: rgba(196,122,43,0.05);
+}
+/* Make close button visible in post modal */
+.close-modal {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    border: none;
+    background: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: var(--espresso);
+    z-index: 10;
 }

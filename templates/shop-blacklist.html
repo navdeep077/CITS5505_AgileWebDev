@@ -2,20 +2,30 @@
 {% block title %}Blacklist Coffee Roasters | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
+<!-- Shop detail page styles: hero, info strip, menu grid, review cards, sidebar -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
 {% endblock %}
 
 {% block content %}
+
+<!-- HERO: Dark gradient banner with cafe name, tags and rating pill -->
 <section class="hero-shop">
+    <!-- Decorative radial glow overlay on the hero background -->
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
+
+        <!-- Back navigation link -->
         <a href="{{ url_for('home') }}" class="shop-back-link">
             <span class="shop-back-arrow">←</span> Back to Home
         </a>
+
+        <!-- Two-column hero body: identity on left, rating pill on right -->
         <div class="shop-hero-body">
             <div class="shop-identity">
+                <!-- Square logo badge showing the cafe's initial letter -->
                 <div class="shop-logo-badge">B</div>
                 <div>
+                    <!-- Feature tags (e.g. Cold Brew, Dine-in, Open Now) -->
                     <div class="shop-hero-tags">
                         <span class="shop-badge">Cold Brew</span>
                         <span class="shop-badge">Dine-in</span>
@@ -27,6 +37,7 @@
                     </p>
                 </div>
             </div>
+            <!-- Frosted-glass rating pill showing aggregate star rating -->
             <div class="shop-rating-pill">
                 <span class="rating-num">4.8</span>
                 <div>
@@ -38,9 +49,14 @@
     </div>
 </section>
 
+<!-- MAIN CONTENT: info strip, menu and reviews on left; review form and facts on right -->
 <main class="container py-5">
     <div class="row g-5">
+
+        <!-- LEFT COLUMN: Info, menu sections and community reviews -->
         <div class="col-lg-8">
+
+            <!-- Info strip: key facts displayed as a horizontal grid -->
             <div class="info-strip mb-5">
                 <div class="info-strip-item">
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
@@ -65,9 +81,11 @@
                 </div>
             </div>
 
+            <!-- Menu section heading -->
             <span class="section-eyebrow">What's On Offer</span>
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
+            <!-- Cold Brew menu category -->
             <div class="menu-category mb-4">
                 <div class="menu-category-label">Cold Brew Specials</div>
                 <div class="menu-grid">
@@ -89,6 +107,7 @@
                 </div>
             </div>
 
+            <!-- Espresso menu category -->
             <div class="menu-category mb-5">
                 <div class="menu-category-label">Espresso</div>
                 <div class="menu-grid">
@@ -105,15 +124,20 @@
                 </div>
             </div>
 
+            <!-- Community reviews section — populated by shop.js via /api/reviews/shop/ -->
             <span class="section-eyebrow">Community Takes</span>
             <h2 class="section-title mb-4">Ratings & Reviews</h2>
             <div class="review-list"></div>
         </div>
 
+        <!-- RIGHT COLUMN: Review submission form and quick facts sidebar -->
         <div class="col-lg-4">
+
+            <!-- Review submission form -->
             <div class="sidebar-card mb-4">
                 <span class="section-eyebrow">Your Take</span>
                 <h3 class="sidebar-title">Rate This Shop</h3>
+                <!-- Star picker: shop.js handles hover/click interactions -->
                 <div class="star-picker" id="starPicker">
                     <span class="star-pick" data-val="1">★</span>
                     <span class="star-pick" data-val="2">★</span>
@@ -122,8 +146,11 @@
                     <span class="star-pick" data-val="5">★</span>
                 </div>
                 <textarea class="review-textarea" placeholder="Share your experience…" rows="4"></textarea>
+                <!-- Submit button triggers shop.js submitBtn click handler -->
                 <button class="btn-primary-custom w-100 mt-3">Submit Review</button>
             </div>
+
+            <!-- Quick facts card — dark sidebar variant -->
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
@@ -134,14 +161,18 @@
                     <li><i class="bi bi-credit-card"></i> Card and cash accepted</li>
                 </ul>
             </div>
+
+            <!-- Back to home CTA -->
             <a href="{{ url_for('home') }}" class="btn-primary-custom w-100 text-center d-block">
                 Back to Home
             </a>
         </div>
+
     </div>
 </main>
 {% endblock %}
 
 {% block extra_js %}
+<!-- shop.js: handles star picker, review submission and review loading -->
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 {% endblock %}

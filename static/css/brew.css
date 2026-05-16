@@ -1,27 +1,40 @@
-/* ── BREW PAGE ───────────────────────────────────────── */
+/* ── BREW PAGE STYLES ─────────────────────────────────────────────────────── */
+/*
+ * brew.css
+ * Styles for the Brew Map page and the cafe card grid used on the home page.
+ * Covers the hero section, filter chips, shop cards, and shop tags.
+ */
 
+/* ── Hero Section ─────────────────────────────────────────────────────────── */
+/* Centred hero banner at the top of the standalone Brew Map page */
 .hero-brew {
     text-align: center;
     padding: 80px 20px;
 }
+
+/* White heading on the dark hero background */
 .hero-brew h1 {
     color: #ffffff;
 }
+
+/* Stack hero content vertically and centre it */
 .hero-brew .container {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* ── Filters ─────────────────────────────────────────── */
+/* ── Filter Chips ─────────────────────────────────────────────────────────── */
+/* Row of pill-shaped filter buttons for filtering cafes by category */
 .filters {
     display: flex;
     justify-content: center;
     gap: 12px;
     margin: 40px 0;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* wraps to a new line on narrow viewports */
 }
 
+/* Individual filter chip — pill shaped with a subtle border */
 .filter-chip {
     background: rgba(0,0,0,0.04);
     border: 1.5px solid rgba(0,0,0,0.12);
@@ -34,51 +47,60 @@
     transition: all 0.25s;
     font-family: 'DM Sans', sans-serif;
 }
+
+/* Hover state — fills with caramel to show interactivity */
 .filter-chip:hover {
     background: var(--caramel);
     color: #fff;
     border-color: var(--caramel);
 }
 
-/* Active filter chip — currently selected */
+/* Active/selected filter chip — dark espresso fill */
 .filter-chip.active-filter {
     background: var(--espresso);
     color: var(--latte);
     border-color: var(--espresso);
 }
 
-/* ── Shop Cards ──────────────────────────────────────── */
+/* ── Shop Cards ───────────────────────────────────────────────────────────── */
+/* Cafe card in the brew map grid — lifts on hover for interactive feedback */
 .shop-card {
     transition: transform 0.25s, box-shadow 0.25s;
 }
+
 .shop-card:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
 }
+
+/* Cafe name heading inside the card — serif font for elegance */
 .shop-card h5 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.2rem;
     color: var(--espresso);
 }
+
+/* Secondary info text (location, rating) inside the card */
 .shop-card p {
     font-size: 0.9rem;
     color: var(--muted);
     margin-bottom: 4px;
 }
 
-/* Shop type tag */
+/* ── Shop Tag ─────────────────────────────────────────────────────────────── */
+/* Small pill badge showing a cafe feature (e.g. "Cold Brew", "Pet Friendly") */
 .shop-tag {
     display: inline-block;
     font-size: 0.75rem;
     font-weight: 600;
     padding: 3px 10px;
     border-radius: 20px;
-    background: rgba(196,122,43,0.12);
+    background: rgba(196,122,43,0.12);   /* caramel at low opacity */
     color: var(--caramel);
     border: 1px solid rgba(196,122,43,0.25);
 }
 
-/* View Details button inside card */
+/* View Details button inside the card — slightly smaller than default */
 .shop-card .btn-outline-nav {
     font-size: 0.88rem;
     padding: 0.45rem 1rem;

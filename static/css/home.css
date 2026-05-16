@@ -1,49 +1,61 @@
-/* ── HOME SPLIT LAYOUT ───────────────────────────────── */
+/*
+ * home.css
+ * Styles for the main home page split layout.
+ * Left column: Social Grounds feed.
+ * Right column: Brew Map cafe grid.
+ * Also contains styles for the onboarding tour modal.
+ */
+
+/* ── Split Layout ─────────────────────────────────────────────────────── */
+/* Two-column flex layout filling the full viewport height below the navbar */
 .home-split-layout {
     display: flex;
     gap: 0;
-    min-height: calc(100vh - 70px);
+    min-height: calc(100vh - 70px); /* 70px accounts for the navbar height */
 }
 
+/* Left column — social feed (wider at 62%) */
 .home-left {
     width: 62%;
-    padding: 1.5rem 4rem;  /* more side padding to center posts */
+    padding: 1.5rem 4rem;
     display: flex;
     flex-direction: column;
-    align-items: center;   /* center everything */
+    align-items: center; /* Centre posts within the column */
 }
 
-/* Center the feed posts */
+/* Constrain the feed width for readability */
 #feed {
     width: 100%;
     max-width: 650px;
 }
 
-/* Center the section header */
+/* Constrain the section header to match the feed width */
 .home-left .home-section-header {
     width: 100%;
     max-width: 550px;
 }
 
-/* RIGHT — Brew Map — smaller sidebar */
+/* Right column — brew map sidebar (narrower at 38%) */
 .home-right {
     width: 38%;
     padding: 1.5rem;
-    overflow-y: auto;
+    overflow-y: auto; /* Allows scrolling independently of the left column */
     background: var(--cream);
 }
 
-/* Section headers */
+/* ── Section Headers ──────────────────────────────────────────────────── */
+/* Sticky section headers that remain visible as the user scrolls the column */
 .home-section-header {
     position: sticky;
     top: 0;
     background: var(--cream);
     padding: 0.75rem 0;
-    border-bottom: 2px solid rgba(196,122,43,0.15);
+    border-bottom: 2px solid rgba(196,122,43,0.15); /* Subtle caramel divider */
     margin-bottom: 1rem;
-    z-index: 10;
+    z-index: 10; /* Stays above scrolling content */
 }
 
+/* Section heading — serif font matching the site design system */
 .home-section-header h5 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.3rem;
@@ -51,21 +63,8 @@
     margin: 0;
 }
 
-
-
-/* Responsive */
-@media (max-width: 900px) {
-    .home-split-layout {
-        flex-direction: column;
-    }
-    .home-left,
-    .home-right {
-        width: 100%;
-        border-right: none;
-        border-bottom: 2px solid rgba(196,122,43,0.15);
-    }
-}
-/* Brew map cards grid — 3 equal columns */
+/* ── Brew Map Grid ────────────────────────────────────────────────────── */
+/* Three-column grid of cafe cards in the brew map sidebar */
 .brew-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -73,10 +72,12 @@
     align-items: stretch;
 }
 
+/* Each grid item stretches to fill its cell */
 .brew-grid .shop-item {
     display: flex;
 }
 
+/* Cafe feature card fills the grid cell and spaces content vertically */
 .brew-grid .feature-card {
     display: flex;
     flex-direction: column;
@@ -86,17 +87,19 @@
     height: auto;
 }
 
+/* Cafe name heading — minimum height keeps cards aligned across rows */
 .brew-grid h6 {
     font-size: 0.88rem;
     min-height: 2.5rem;
 }
 
-/* Force View Details button to always stick to bottom */
+/* View Details button always sticks to the bottom of each card */
 .brew-grid .btn-outline-nav {
     margin-top: auto !important;
 }
 
-/* ── ONBOARDING TOUR MODAL ──────────────────────────────── */
+/* ── Onboarding Tour Modal ────────────────────────────────────────────── */
+/* Custom modal styling for the first-time user onboarding tour */
 .onboarding-modal-content {
     background: var(--cream);
     border: none;
@@ -106,6 +109,7 @@
     text-align: center;
 }
 
+/* Each step panel has a minimum height to prevent layout jumps between steps */
 .onboarding-step {
     min-height: 180px;
     display: flex;
@@ -113,6 +117,7 @@
     align-items: center;
 }
 
+/* Circular icon badge at the top of each step */
 .onboarding-icon {
     width: 72px;
     height: 72px;
@@ -126,6 +131,7 @@
     color: #fff;
 }
 
+/* Step heading — serif font for elegance */
 .onboarding-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.6rem;
@@ -133,6 +139,7 @@
     margin-bottom: 0.75rem;
 }
 
+/* Step description paragraph */
 .onboarding-desc {
     color: var(--muted);
     font-size: 1rem;
@@ -141,6 +148,8 @@
     margin: 0 auto;
 }
 
+/* ── Progress Dots ────────────────────────────────────────────────────── */
+/* Row of dots indicating which step the user is on */
 .onboarding-dots {
     display: flex;
     justify-content: center;
@@ -148,6 +157,7 @@
     margin: 1.5rem 0 1rem;
 }
 
+/* Inactive dot — small circle in latte colour */
 .onboarding-dot {
     width: 8px;
     height: 8px;
@@ -156,12 +166,15 @@
     transition: all 0.25s ease;
 }
 
+/* Active dot — wider pill shape in caramel to indicate current step */
 .onboarding-dot.active {
     width: 24px;
     border-radius: 4px;
     background: var(--caramel);
 }
 
+/* ── Navigation Buttons ───────────────────────────────────────────────── */
+/* Row with Skip on left and Next/Got it on right */
 .onboarding-actions {
     display: flex;
     justify-content: space-between;
@@ -169,6 +182,7 @@
     padding-top: 0.5rem;
 }
 
+/* Skip button — minimal styling, muted colour */
 .btn-onboarding-skip {
     color: var(--muted);
     background: none;
@@ -180,6 +194,7 @@
 }
 .btn-onboarding-skip:hover { color: var(--espresso); }
 
+/* Next / Got it button — filled caramel */
 .btn-onboarding-next {
     background: var(--caramel);
     color: #fff;
@@ -194,4 +209,18 @@
 .btn-onboarding-next:hover {
     background: var(--roast);
     color: var(--latte);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+/* Mobile: stack columns vertically and add a divider between them */
+@media (max-width: 900px) {
+    .home-split-layout {
+        flex-direction: column;
+    }
+    .home-left,
+    .home-right {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid rgba(196,122,43,0.15);
+    }
 }

@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- HERO: Dark gradient banner with cafe identity and rating -->
 <section class="hero-shop">
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
@@ -40,6 +42,8 @@
 <main class="container py-5">
     <div class="row g-5">
         <div class="col-lg-8">
+
+            <!-- Info strip: hours, wifi, parking -->
             <div class="info-strip mb-5">
                 <div class="info-strip-item">
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
@@ -67,6 +71,7 @@
             <span class="section-eyebrow">What's On Offer</span>
             <h2 class="section-title mb-4">Menu & Pricing</h2>
 
+            <!-- Pour Over menu category -->
             <div class="menu-category mb-4">
                 <div class="menu-category-label">Pour Over</div>
                 <div class="menu-grid">
@@ -83,6 +88,7 @@
                 </div>
             </div>
 
+            <!-- Espresso menu category -->
             <div class="menu-category mb-5">
                 <div class="menu-category-label">Espresso</div>
                 <div class="menu-grid">
@@ -99,11 +105,13 @@
                 </div>
             </div>
 
+            <!-- Community reviews — populated by shop.js -->
             <span class="section-eyebrow">Community Takes</span>
             <h2 class="section-title mb-4">Ratings & Reviews</h2>
             <div class="review-list"></div>
         </div>
 
+        <!-- RIGHT COLUMN: Review form and quick facts -->
         <div class="col-lg-4">
             <div class="sidebar-card mb-4">
                 <span class="section-eyebrow">Your Take</span>

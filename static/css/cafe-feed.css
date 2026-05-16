@@ -1,3 +1,12 @@
+/*
+ * cafe-feed.css
+ * Styles for the cafe-specific feed page (/cafe/<cafe_name>).
+ * Provides a two-column layout: posts feed on the left,
+ * cafe info card on the right. Collapses to single column on mobile.
+ */
+
+/* ── Main Layout ──────────────────────────────────────────────────────── */
+/* Two-column grid: posts feed (flexible) + cafe info sidebar (fixed 380px) */
 .cafe-feed-layout {
     display: grid;
     grid-template-columns: 1fr 380px;
@@ -7,6 +16,8 @@
     padding: 0 1rem;
 }
 
+/* ── Feed Header ──────────────────────────────────────────────────────── */
+/* Card at the top of the feed showing the cafe name and subtitle */
 .cafe-feed-header {
     background: var(--card);
     border-radius: 16px;
@@ -15,6 +26,7 @@
     border: 1px solid var(--border);
 }
 
+/* Cafe name heading in the feed header */
 .cafe-feed-title {
     font-size: 1.4rem;
     font-weight: 700;
@@ -22,20 +34,24 @@
     margin-bottom: 0.25rem;
 }
 
+/* Subtitle beneath the cafe name */
 .cafe-feed-sub {
     color: var(--muted);
     font-size: 0.9rem;
 }
 
+/* ── Cafe Info Card ───────────────────────────────────────────────────── */
+/* Sticky right-column card showing cafe details, tags and reviews */
 .cafe-info-card {
     background: var(--card);
     border-radius: 16px;
     padding: 1.5rem;
     border: 1px solid var(--border);
     position: sticky;
-    top: 80px;
+    top: 80px; /* Stays visible as the user scrolls the left column */
 }
 
+/* Cafe name heading at the top of the info card */
 .cafe-info-name {
     font-size: 1.2rem;
     font-weight: 700;
@@ -43,6 +59,7 @@
     margin-bottom: 0.5rem;
 }
 
+/* Individual info row — icon + text for location, hours, rating etc. */
 .cafe-info-row {
     display: flex;
     align-items: center;
@@ -52,9 +69,11 @@
     margin-bottom: 0.5rem;
 }
 
+/* ── Cafe Tags ────────────────────────────────────────────────────────── */
+/* Small pill badges showing cafe features (e.g. "Cold Brew", "Pet Friendly") */
 .cafe-tag {
     display: inline-block;
-    background: rgba(0,212,180,0.1);
+    background: rgba(0,212,180,0.1);  /* Teal tint */
     color: #00d4b4;
     border-radius: 20px;
     padding: 0.2rem 0.7rem;
@@ -62,6 +81,8 @@
     margin: 0.2rem;
 }
 
+/* ── Empty Feed State ─────────────────────────────────────────────────── */
+/* Shown when no posts exist yet for this cafe */
 .empty-feed {
     text-align: center;
     padding: 3rem;
@@ -71,11 +92,14 @@
     border: 1px solid var(--border);
 }
 
+/* ── Responsive ───────────────────────────────────────────────────────── */
+/* Mobile: stack the two columns vertically */
 @media (max-width: 768px) {
     .cafe-feed-layout {
         grid-template-columns: 1fr;
     }
 
+    /* Remove sticky positioning on mobile since columns are stacked */
     .cafe-info-card {
         position: static;
     }

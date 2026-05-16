@@ -2,12 +2,13 @@
 {% block title %}Brew Map | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
+<!-- Brew map page styles: hero, filter chips and shop cards -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/brew.css') }}">
 {% endblock %}
 
 {% block content %}
 
-<!-- HERO -->
+<!-- HERO: Dark gradient banner at the top of the page -->
 <section class="hero hero-brew">
     <div class="container">
         <h1>Brew Map</h1>
@@ -15,10 +16,11 @@
     </div>
 </section>
 
-<!-- MAIN -->
+<!-- MAIN: Filter chips and cafe card grid -->
 <main class="container">
 
-    <!-- FILTERS -->
+    <!-- FILTER CHIPS: Pill buttons for filtering cafes by category -->
+    <!-- brew.js listens for clicks and updates card visibility -->
     <div class="filters">
         <button class="filter-chip active-filter" data-filter="all">All</button>
         <button class="filter-chip" data-filter="open">Open Now</button>
@@ -27,41 +29,65 @@
         <button class="filter-chip" data-filter="pour-over">Pour Over</button>
     </div>
 
-    <!-- NO RESULTS -->
-    <div id="no-results" style="display:none; text-align:center; padding:3rem 0; color:var(--muted);">
+    <!-- NO RESULTS: Shown by brew.js when no cafes match the active filter -->
+    <div id="no-results"
+         style="display:none; text-align:center; padding:3rem 0; color:var(--muted);">
         <i class="bi bi-search" style="font-size:2rem;"></i>
         <p class="mt-2">No cafes match this filter. Try another one!</p>
     </div>
 
-    <!-- SHOPS -->
+    <!-- CAFE GRID: Cards generated from the CAFES list via Jinja -->
+    <!-- data-* attributes are read by brew.js to apply filter logic -->
     <div class="row g-4" id="shop-grid">
         {% for cafe in cafes %}
-        <div class="col-md-4 shop-item" data-open="{{ cafe.open|lower }}" data-pet="{{ cafe.pet|lower }}" data-cold-brew="{{ cafe.cold_brew|lower }}" data-pour-over="{{ cafe.pour_over|lower }}">
+        <div class="col-md-4 shop-item"
+             data-open="{{ cafe.open|lower }}"
+             data-pet="{{ cafe.pet|lower }}"
+             data-cold-brew="{{ cafe.cold_brew|lower }}"
+             data-pour-over="{{ cafe.pour_over|lower }}">
+
             <div class="feature-card shop-card h-100">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="mb-0">{{ cafe.name }}</h5>
-                    <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
+                    <!-- Open status badge — green pill -->
+                    <span class="badge"
+                          style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">
+                        Open
+                    </span>
                 </div>
+
+                <!-- Cafe info rows with Bootstrap Icons -->
                 <p><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> {{ cafe.location }}</p>
                 <p><i class="bi bi-star-fill" style="color:var(--caramel)"></i> {{ cafe.rating }}</p>
                 <p><i class="bi bi-clock" style="color:var(--caramel)"></i> {{ cafe.hours }}</p>
+
+                <!-- Feature tags (e.g. "Cold Brew", "Pet Friendly") -->
                 <div class="mt-2">
                     {% for tag in cafe.tags %}
                     <span class="shop-tag">{{ tag }}</span>
                     {% endfor %}
                 </div>
+
+                <!-- View Details button links to the cafe's shop page if a route exists -->
                 {% if cafe.route %}
-                <a href="{{ url_for(cafe.route) }}" class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
+                <a href="{{ url_for(cafe.route) }}"
+                   class="btn btn-outline-nav mt-3 d-block text-center">View Details</a>
                 {% else %}
-                <span class="btn btn-outline-nav mt-3 d-block text-center disabled">Details coming soon</span>
+                <!-- Disabled placeholder for cafes without a detail page yet -->
+                <span class="btn btn-outline-nav mt-3 d-block text-center disabled">
+                    Details coming soon
+                </span>
                 {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
+
 </main>
+
 {% endblock %}
 
 {% block extra_js %}
+<!-- brew.js: filter chip click handling and cafe card visibility toggling -->
 <script src="{{ url_for('static', filename='js/brew.js') }}"></script>
 {% endblock %}
