@@ -1,25 +1,34 @@
-body{
+/*
+ * social.css
+ * Styles for the social feed, post cards, modal, comments,
+ * avatars, and the left sidebar on the Social Grounds page.
+ * Also used on the home page feed and profile page feed.
+ */
+
+/* Override body background to use the cream design token */
+body {
     background: var(--cream) !important;
 }
-/* ── LAYOUT (IMPROVED BALANCE) ───────────────────────── */
+
+/* ── Social Layout ────────────────────────────────────────────────────── */
+/* Two-column layout: left sidebar (trending cafes) + main feed */
 .social-layout {
     display: flex;
     align-items: flex-start;
-    max-width: 1000px; /* 🔥 reduced for tighter layout */
+    max-width: 1000px;
     margin: 10px auto;
     padding: 0 20px;
-    gap: 30px; /* 🔥 increased gap for better separation */
+    gap: 30px;
 }
 
-/* LEFT SIDEBAR */
+/* ── Left Sidebar ─────────────────────────────────────────────────────── */
+/* Sticky sidebar showing trending cafes — offset slightly left */
 .sidebar-left {
     width: 240px;
     flex-shrink: 0;
     position: sticky;
     top: 125px;
-
-    transform: translateX(-30px);  /* 🔥 move left slightly */
-
+    transform: translateX(-30px);
     background: var(--cream);
     padding: 16px;
     border-radius: 14px;
@@ -31,74 +40,76 @@ body{
     font-weight: 600;
 }
 
-/* SIDEBAR ITEMS */
+/* Individual cafe row in the sidebar */
 .shop-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     padding: 10px 0;
     border-bottom: 1px solid #eee;
-
     cursor: pointer;
     font-size: 0.9rem;
     transition: 0.2s ease;
 }
 
+/* Remove border from last item */
 .shop-item:last-child {
     border-bottom: none;
 }
 
+/* Subtle slide and colour change on hover */
 .shop-item:hover {
     color: #c69c6d;
-    transform: translateX(3px); /* 🔥 subtle movement */
+    transform: translateX(3px);
 }
 
-/* ⭐ Rating style */
+/* Rating value displayed on the right side of each sidebar item */
 .shop-item span:last-child {
     font-weight: 500;
     color: #c69c6d;
 }
 
-/* FEED WIDTH FIX */
+/* ── Feed Container ───────────────────────────────────────────────────── */
+/* Main feed area fills remaining space up to a max width */
 .feed {
     flex: 1;
-    max-width: 720px; /* 🔥 tighter feed */
+    max-width: 720px;
 }
 
-/* ── FEED ───────────────────────── */
+/* Remove extra padding from the feed container */
 #feed {
-    padding: 0 0 40px; /* 🔥 removed extra side padding */
+    padding: 0 0 40px;
     margin-top: -2.5px;
 }
 
-/* ── POSTS ───────────────────────── */
+/* ── Post Cards ───────────────────────────────────────────────────────── */
+/* Individual post card — white rounded card with shadow */
 .post {
     display: flex;
     flex-direction: column;
     margin-top: 12px;
     margin-bottom: 25px;
     padding: 15px;
-
     border-radius: 12px;
     background: #fff;
-
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     transition: 0.25s ease;
 }
 
+/* Lift with caramel glow on hover */
 .post:hover {
     transform: translateY(-3px);
-    box-shadow: 
+    box-shadow:
         0 12px 28px rgba(0,0,0,0.08),
         0 0 12px rgba(198,156,109,0.15);
 }
 
-/* TEXT */
+/* Username text in post card */
 .post strong {
     font-size: 0.95rem;
 }
 
+/* Secondary text (e.g. cafe location) */
 .post em {
     display: block;
     margin-bottom: 6px;
@@ -106,12 +117,14 @@ body{
     color: #888;
 }
 
+/* Post body text */
 .post p {
     margin: 10px 0;
     line-height: 1.5;
 }
 
-/* ── HERO ───────────────────────── */
+/* ── Hero (Social Page) ───────────────────────────────────────────────── */
+/* Compact dark hero banner used on the standalone social page */
 .hero {
     padding: 30px 0;
     min-height: 140px;
@@ -137,83 +150,151 @@ body{
     text-align: center;
 }
 
-/* ── FLOATING BUTTON ───────────────────────── */
+/* ── Floating Action Button ───────────────────────────────────────────── */
+/* Fixed position + button in the bottom-right corner for creating new posts */
 .fab {
     position: fixed;
     bottom: 25px;
     right: 25px;
-
     width: 55px;
     height: 55px;
-
     border-radius: 50%;
     border: none;
-
     background: linear-gradient(135deg, #c69c6d, #a67c52);
     color: white;
-
     font-size: 26px;
     cursor: pointer;
-
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
-/* ── MODAL ───────────────────────── */
-.modal-box{z-index: 10000;}
-
+/* ── Post Creation Modal ──────────────────────────────────────────────── */
+/* Full-screen blurred overlay behind the modal */
 .modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
     backdrop-filter: blur(6px);
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     z-index: 9999;
-
     opacity: 0;
     pointer-events: none;
     transition: 0.25s ease;
 }
 
+/* Visible state: overlay becomes opaque and interactive */
 .modal-overlay.active {
     opacity: 1;
     pointer-events: all;
 }
 
+/* Modal content box — sits above the overlay */
 .modal-box {
     width: 90%;
-    max-width: 500px;
-    position: relative;
-    background: var(--cream) !important;
-    padding: 20px;
-    border-radius: 14px;
+    max-width: 480px;
+    background: #fff;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    animation: modalFade 0.25s ease;
+    z-index: 10000;
 }
 
+/* Fade-in animation for the modal box */
+@keyframes modalFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal header row — title on left, close button on right */
 .modal-header {
     display: flex;
     justify-content: space-between;
 }
 
+/* Modal heading text colour */
+.modal-header h4 {
+    font-weight: 600;
+    color: #3e2c1c;
+}
+
+/* Close X button */
 .close-btn {
     cursor: pointer;
     font-size: 20px;
 }
 
-/* INPUTS */
+/* Field labels inside the modal */
+.modal-box label {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #777;
+}
+
+/* All form inputs inside the modal */
 .modal-box textarea,
 .modal-box select,
 .modal-box input {
     width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    margin-top: 6px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
 }
 
-/* HEADER */
+/* Focus highlight matching the caramel design token */
+.modal-box textarea:focus,
+.modal-box select:focus,
+.modal-box input:focus {
+    border-color: #c69c6d;
+    box-shadow: 0 0 0 3px rgba(198,156,109,0.15);
+    outline: none;
+}
+
+/* Prevent textarea resizing and set minimum height */
+.modal-box textarea {
+    min-height: 80px;
+    resize: none;
+}
+
+/* Styled file input */
+.modal-box input[type="file"] {
+    padding: 8px;
+    background: #fafafa;
+}
+
+/* Post submit button — caramel gradient */
+.post-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #c69c6d, #a67c52);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+/* Lift effect on button hover */
+.post-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+
+/* ── Post Card Header ─────────────────────────────────────────────────── */
+/* Row containing avatar + username + cafe location */
 .post-header {
     display: flex;
     align-items: center;
@@ -221,7 +302,7 @@ body{
     margin-bottom: 10px;
 }
 
-/* AVATAR */
+/* Circular avatar — shared between image and placeholder variants */
 .avatar {
     width: 36px;
     height: 36px;
@@ -229,6 +310,7 @@ body{
     object-fit: cover;
 }
 
+/* Initials placeholder when no avatar photo is set */
 .avatar-placeholder {
     background: #c69c6d;
     color: #fff;
@@ -240,19 +322,21 @@ body{
     font-weight: 700;
 }
 
-/* USER INFO */
+/* Username and location stacked vertically */
 .user-info {
     display: flex;
     flex-direction: column;
     line-height: 1.2;
 }
 
+/* Muted cafe location text beneath username */
 .location {
     font-size: 0.75rem;
     color: #777;
 }
 
-/* IMAGE WRAPPER */
+/* ── Post Image ───────────────────────────────────────────────────────── */
+/* Constrained image container — prevents tall images from dominating the feed */
 .post-image-wrapper {
     width: 100%;
     max-height: 500px;
@@ -261,7 +345,7 @@ body{
     margin-top: 10px;
 }
 
-/* IMAGE */
+/* Image fills the container, object-contain preserves aspect ratio */
 .post-image-wrapper img {
     width: 100%;
     height: 100%;
@@ -270,13 +354,14 @@ body{
     display: block;
 }
 
-/* CAPTION */
+/* ── Post Caption ─────────────────────────────────────────────────────── */
 .post-caption {
     margin-top: 10px;
     font-size: 0.9rem;
 }
 
-/* ACTIONS */
+/* ── Post Actions Row ─────────────────────────────────────────────────── */
+/* Like and delete buttons row beneath the image */
 .post-actions {
     margin: 10px 0;
 }
@@ -288,92 +373,37 @@ body{
     cursor: pointer;
 }
 
-/* COMMENTS */
-.comments {
-    margin-top: 5px;
-}
-
-.comments p {
-    margin: 3px 0;
-    font-size: 14px;
-}
-
-input[type="text"] {
-    width: 100%;
-    border: none;
-    border-top: 1px solid #eee;
-    padding: 8px;
-    outline: none;
-    font-size: 14px;
-}
-
+/* ── Comments ─────────────────────────────────────────────────────────── */
+/* Comment thread container */
 .comment-list {
     margin-top: 8px;
 }
 
-.comment-list p {
-    margin: 4px 0;
-    font-size: 14px;
-}
-
+/* Individual comment row */
 .comment {
     font-size: 0.9rem;
-    margin-bottom: 4px;
-}
-
-.comment strong {
-    margin-right: 4px;
-}
-
-/* PREVIEW */
-.preview-container {
-    width: 100%;
-    margin-top: 10px;
-    display: none;
-}
-
-.preview-container img {
-    width: 100%;
-    border-radius: 12px;
-    max-height: 300px;
-    object-fit: cover;
-}
-
-/* ── MOBILE FIX ───────────────────────── */
-@media (max-width: 900px) {
-    .sidebar-left {
-        display: none;
-    }
-
-    .social-layout {
-        grid-template-columns: 1fr;
-        padding: 10px;
-    }
-
-    .feed {
-        max-width: 100%;
-    }
-}
-/* ── COMMENT UPGRADE ───────────────────────── */
-.comment {
     margin-bottom: 10px;
 }
 
+/* Top row: username + timestamp */
 .comment-top {
     display: flex;
     justify-content: space-between;
     font-size: 0.8rem;
 }
 
+/* Muted timestamp on the right side of each comment */
 .comment-time {
     color: #888;
 }
 
+/* Comment body text */
 .comment-text {
     font-size: 0.9rem;
     margin: 2px 0;
 }
 
+/* Edit and delete action links beneath each comment */
 .comment-actions {
     font-size: 0.75rem;
     color: #c69c6d;
@@ -386,128 +416,57 @@ input[type="text"] {
     text-decoration: underline;
 }
 
+/* Inline edit input field */
 .edit-input {
     width: 100%;
     border: none;
     border-bottom: 1px solid #ccc;
     outline: none;
 }
-/* ── MODAL UPGRADE ───────────────────────── */
 
-.modal-box {
-    width: 90%;
-    max-width: 480px;
-
-    background: #fff;
-    padding: 22px;
-    border-radius: 16px;
-
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-
-    animation: modalFade 0.25s ease;
-}
-
-@keyframes modalFade {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.97);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.modal-header h4 {
-    font-weight: 600;
-    color: #3e2c1c; /* coffee brown */
-}
-
-/* LABELS */
-.modal-box label {
-    margin-top: 12px;
-    font-size: 0.8rem;
-    color: #777;
-}
-
-/* INPUTS */
-.modal-box textarea,
-.modal-box select,
-.modal-box input {
+/* Comment text input at the bottom of each post */
+input[type="text"] {
     width: 100%;
-    margin-top: 6px;
-    padding: 12px;
-
-    border-radius: 10px;
-    border: 1px solid #e5e5e5;
-
-    font-size: 0.9rem;
-
-    transition: 0.2s ease;
-}
-
-/* FOCUS EFFECT */
-.modal-box textarea:focus,
-.modal-box select:focus,
-.modal-box input:focus {
-    border-color: #c69c6d;
-    box-shadow: 0 0 0 3px rgba(198,156,109,0.15);
-    outline: none;
-}
-
-/* TEXTAREA STYLE */
-.modal-box textarea {
-    min-height: 80px;
-    resize: none;
-}
-
-/* FILE INPUT */
-.modal-box input[type="file"] {
-    padding: 8px;
-    background: #fafafa;
-}
-
-/* POST BUTTON */
-.post-btn {
-    margin-top: 16px;
-    width: 100%;
-    padding: 12px;
-
     border: none;
-    border-radius: 12px;
-
-    background: linear-gradient(135deg, #c69c6d, #a67c52);
-    color: white;
-
-    font-size: 1rem;
-    font-weight: 500;
-
-    cursor: pointer;
-    transition: 0.2s ease;
+    border-top: 1px solid #eee;
+    padding: 8px;
+    outline: none;
+    font-size: 14px;
 }
 
-/* BUTTON HOVER */
-.post-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-}
-
-/* PREVIEW IMAGE */
-.preview-container img {
+/* ── Image Preview ────────────────────────────────────────────────────── */
+/* Preview container shown after selecting an image in the modal */
+.preview-container {
+    width: 100%;
     margin-top: 10px;
+    display: none; /* Shown by JS once an image is selected */
+}
+
+.preview-container img {
+    width: 100%;
     border-radius: 12px;
     max-height: 220px;
     object-fit: cover;
 }
 
-.shop-item {
-    cursor: pointer;
+/* ── Links inside Posts ───────────────────────────────────────────────── */
+/* Username and caption links default to black — turn caramel on hover */
+.post a,
+.comment a,
+.post-caption a {
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
 }
 
-.shop-item:hover {
-    background: #f8f5f2;
-    border-radius: 8px;
+.post a:hover,
+.comment a:hover,
+.post-caption a:hover {
+    color: var(--caramel);
 }
+
+/* ── Navbar Overrides ─────────────────────────────────────────────────── */
 .navbar {
     background-color: #1a1a1a;
 }
@@ -522,24 +481,30 @@ input[type="text"] {
     color: #f5c16c;
 }
 
+/* Active nav link highlight */
 .navbar .nav-link.active {
     color: #f5c16c;
     font-weight: 600;
 }
+
+/* Default icon spacing */
 .bi {
     margin-right: 5px;
 }
-.post a,
-.comment a,
-.post-caption a {
-    color: black;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-}
 
-.post a:hover,
-.comment a:hover,
-.post-caption a:hover {
-    color: var(--caramel);
+/* ── Mobile Responsive ────────────────────────────────────────────────── */
+/* Hide the left sidebar and collapse to single column on narrow screens */
+@media (max-width: 900px) {
+    .sidebar-left {
+        display: none;
+    }
+
+    .social-layout {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .feed {
+        max-width: 100%;
+    }
 }

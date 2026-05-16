@@ -1,21 +1,33 @@
-/* ── Coffee Social Hub — style.css ───────────────────────────────────── */
+/*
+ * style.css
+ * Global stylesheet for Coffee Social Hub.
+ * Contains CSS custom properties (design tokens), shared component styles,
+ * the landing page hero, features section, how-it-works section, and footer.
+ * Imported by base.html and shared across all pages.
+ */
 
+/* ── Design Tokens ────────────────────────────────────────────────────── */
+/* CSS custom properties used consistently across all stylesheets */
 :root {
-    --espresso:  #1a0e00;
-    --roast:     #3b1f00;
-    --caramel:   #c47a2b;
-    --latte:     #e8c99a;
-    --cream:     #fdf6ed;
-    --muted:     #8a7060;
-    --radius:    14px;
-    --shadow:    0 6px 28px rgba(26,14,0,0.10);
-    --shadow-lg: 0 12px 48px rgba(26,14,0,0.18);
+    --espresso:  #1a0e00;  /* Darkest brown — used for text, navbar, footer */
+    --roast:     #3b1f00;  /* Dark roast brown — used for gradients and hover states */
+    --caramel:   #c47a2b;  /* Primary accent colour — buttons, highlights, stars */
+    --latte:     #e8c99a;  /* Light warm beige — used on dark backgrounds */
+    --cream:     #fdf6ed;  /* Page background — warm off-white */
+    --muted:     #8a7060;  /* Secondary text colour — captions, placeholders */
+    --radius:    14px;     /* Standard border radius for cards and buttons */
+    --shadow:    0 6px 28px rgba(26,14,0,0.10);    /* Subtle card shadow */
+    --shadow-lg: 0 12px 48px rgba(26,14,0,0.18);   /* Lifted card shadow on hover */
 }
 
+/* ── Reset ────────────────────────────────────────────────────────────── */
+/* Apply border-box sizing globally and remove default margin/padding */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Enable smooth scrolling for anchor links */
 html { scroll-behavior: smooth; }
 
+/* Base body styles — sets font, background and prevents horizontal overflow */
 body {
     font-family: 'DM Sans', sans-serif;
     background: var(--cream);
@@ -23,16 +35,18 @@ body {
     overflow-x: hidden;
 }
 
-/* ── Navbar ──────────────────────────────────────────────────────────── */
+/* ── Navbar ───────────────────────────────────────────────────────────── */
+/* Sticky top navigation bar with espresso background and caramel border */
 .navbar {
     background: var(--espresso);
     border-bottom: 2px solid var(--caramel);
     padding: 0.85rem 0;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 100; /* Stays above all page content */
 }
 
+/* Brand name in the navbar — serif font for elegance */
 .navbar-brand {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.45rem;
@@ -40,6 +54,7 @@ body {
     letter-spacing: 0.01em;
 }
 
+/* Standard nav link styling */
 .navbar-nav .nav-link {
     color: rgba(232, 154, 154, 0.75) !important;
     font-size: 0.95rem;
@@ -52,12 +67,14 @@ body {
     color: var(--latte) !important;
 }
 
+/* Profile link row in the navbar — avatar + username inline */
 .nav-profile-link {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
 }
 
+/* Circular avatar container in the navbar */
 .nav-profile-avatar {
     width: 22px;
     height: 22px;
@@ -69,10 +86,12 @@ body {
     flex-shrink: 0;
 }
 
+/* Remove default icon margin inside the avatar slot */
 .nav-profile-avatar .bi {
     margin-right: 0;
 }
 
+/* Avatar image fills the circular container */
 .nav-profile-avatar img {
     width: 100%;
     height: 100%;
@@ -81,6 +100,7 @@ body {
     display: block;
 }
 
+/* Primary caramel-filled nav button (Login, Logout) */
 .btn-nav {
     background: var(--caramel);
     color: #fff !important;
@@ -95,6 +115,7 @@ body {
     color: var(--latte) !important;
 }
 
+/* Outlined nav button used on dark hero backgrounds */
 .btn-outline-nav {
     color: var(--latte) !important;
     border: 1.5px solid rgba(232,201,154,0.4);
@@ -109,7 +130,8 @@ body {
     background: rgba(232,201,154,0.08);
 }
 
-/* ── Shared Buttons ──────────────────────────────────────────────────── */
+/* ── Shared Buttons ───────────────────────────────────────────────────── */
+/* Primary caramel CTA button — used on landing page and forms */
 .btn-primary-custom {
     display: inline-block;
     background: var(--caramel);
@@ -131,6 +153,7 @@ body {
     box-shadow: 0 6px 22px rgba(59,31,0,0.25);
 }
 
+/* Ghost/outlined button for secondary CTAs on dark backgrounds */
 .btn-ghost {
     display: inline-block;
     color: #ffffff !important;
@@ -150,7 +173,8 @@ body {
     color: var(--roast);
 }
 
-/* ── Hero ────────────────────────────────────────────────────────────── */
+/* ── Hero Section ─────────────────────────────────────────────────────── */
+/* Full-width dark gradient hero banner on the landing page */
 .hero {
     background: linear-gradient(140deg, var(--espresso) 0%, var(--roast) 55%, #5c2e00 100%);
     padding: 6rem 0 5rem;
@@ -158,24 +182,31 @@ body {
     overflow: hidden;
 }
 
+/* Decorative radial glow circles overlaid on the hero background */
 .hero-bg-circle {
     position: absolute;
     border-radius: 50%;
-    pointer-events: none;
+    pointer-events: none; /* Must not block user interaction */
 }
+
+/* Large caramel glow — top right */
 .circle-1 {
     width: 500px; height: 500px;
     top: -120px; right: -100px;
     background: radial-gradient(circle, rgba(196,122,43,0.18) 0%, transparent 70%);
 }
+
+/* Smaller latte glow — bottom left */
 .circle-2 {
     width: 300px; height: 300px;
     bottom: -80px; left: -60px;
     background: radial-gradient(circle, rgba(232,201,154,0.10) 0%, transparent 70%);
 }
 
+/* Lifts hero text content above the decorative circles */
 .hero-content { position: relative; z-index: 2; }
 
+/* Small uppercase label above the main heading */
 .eyebrow {
     font-size: 0.8rem;
     font-weight: 600;
@@ -185,6 +216,7 @@ body {
     margin-bottom: 1rem;
 }
 
+/* Main hero heading — fluid size scales between mobile and desktop */
 .hero-text h1 {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(2.6rem, 5.5vw, 4.2rem);
@@ -193,11 +225,13 @@ body {
     margin-bottom: 1.4rem;
 }
 
+/* Italic latte-coloured highlight within the heading */
 .highlight {
     color: var(--latte);
     font-style: italic;
 }
 
+/* Subtitle paragraph beneath the main heading */
 .hero-sub {
     color: rgba(253,246,237,0.72);
     font-size: 1.05rem;
@@ -206,6 +240,7 @@ body {
     margin-bottom: 2.2rem;
 }
 
+/* Row of CTA buttons in the hero */
 .hero-cta {
     display: flex;
     gap: 1rem;
@@ -213,7 +248,8 @@ body {
     align-items: center;
 }
 
-/* ── Floating Mock Cards ─────────────────────────────────────────────── */
+/* ── Floating Mock Cards ──────────────────────────────────────────────── */
+/* Container for the decorative floating cafe cards on the right side of the hero */
 .hero-visual {
     position: relative;
     min-height: 320px;
@@ -222,6 +258,7 @@ body {
     justify-content: center;
 }
 
+/* Individual frosted-glass mock card */
 .mock-card {
     position: absolute;
     background: rgba(253,246,237,0.10);
@@ -237,10 +274,12 @@ body {
     animation: float 5s ease-in-out infinite;
 }
 
+/* Position each mock card at different points around the visual area */
 .card-1 { top: 0; left: 5%; animation-delay: 0s; }
 .card-2 { top: 40%; right: 0; animation-delay: 1.5s; }
 .card-3 { bottom: 0; left: 15%; animation-delay: 3s; }
 
+/* Square cafe icon badge inside mock cards */
 .shop-icon {
     width: 38px; height: 38px;
     background: var(--caramel);
@@ -249,9 +288,12 @@ body {
     font-size: 1.2rem;
     flex-shrink: 0;
 }
+
+/* Cafe name and meta text inside mock cards */
 .shop-name  { font-weight: 600; font-size: 0.9rem; }
 .shop-meta  { font-size: 0.78rem; color: var(--latte); margin-top: 0.1rem; }
 
+/* Small circular avatar used in mock cards */
 .avatar-sm {
     width: 36px; height: 36px;
     background: var(--caramel);
@@ -262,6 +304,7 @@ body {
     flex-shrink: 0;
 }
 
+/* Decorative rings around the mock card cluster */
 .coffee-ring {
     position: absolute;
     border-radius: 50%;
@@ -271,16 +314,18 @@ body {
 .ring-a { width: 200px; height: 200px; top: 30%; left: 30%; }
 .ring-b { width: 300px; height: 300px; top: 15%; left: 20%; border-style: dashed; opacity: 0.4; }
 
+/* Vertical float animation applied to each mock card with staggered delays */
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50%       { transform: translateY(-10px); }
 }
 
-/* ── Features ────────────────────────────────────────────────────────── */
+/* ── Features Section ─────────────────────────────────────────────────── */
 .features {
     padding: 6rem 0;
 }
 
+/* Small uppercase label above section headings */
 .section-eyebrow {
     font-size: 0.78rem;
     font-weight: 600;
@@ -291,6 +336,7 @@ body {
     display: block;
 }
 
+/* Section heading — serif font with fluid size */
 .section-title {
     font-family: 'Cormorant Garamond', serif;
     font-size: clamp(1.9rem, 4vw, 2.8rem);
@@ -298,6 +344,7 @@ body {
     margin-bottom: 0.5rem;
 }
 
+/* Feature card — white rounded card with lift-on-hover */
 .feature-card {
     background: #fff;
     border: 1px solid rgba(196,122,43,0.12);
@@ -312,6 +359,7 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
+/* Dark variant feature card — used for the middle highlighted card */
 .feature-card--mid {
     background: linear-gradient(160deg, var(--espresso), var(--roast));
     border-color: transparent;
@@ -320,18 +368,21 @@ body {
 .feature-card--mid h5 { color: var(--latte); }
 .feature-card--mid p  { color: rgba(253,246,237,0.72); }
 
+/* Large icon at the top of each feature card */
 .feature-icon {
     font-size: 2.2rem;
     margin-bottom: 1.1rem;
     display: block;
 }
 
+/* Feature card heading — serif font */
 .feature-card h5 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.3rem;
     margin-bottom: 0.6rem;
 }
 
+/* Feature card body text */
 .feature-card p {
     color: var(--muted);
     font-size: 0.95rem;
@@ -339,12 +390,13 @@ body {
     margin: 0;
 }
 
-/* ── How It Works ────────────────────────────────────────────────────── */
+/* ── How It Works Section ─────────────────────────────────────────────── */
 .how-it-works {
     padding: 6rem 0;
     background: var(--cream);
 }
 
+/* Dark rounded inner container for the steps */
 .hiw-inner {
     background: linear-gradient(140deg, var(--espresso), var(--roast));
     border-radius: 24px;
@@ -352,6 +404,7 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
+/* Large step number displayed in caramel */
 .step-num {
     font-family: 'Cormorant Garamond', serif;
     font-size: 3.5rem;
@@ -362,6 +415,7 @@ body {
     opacity: 0.85;
 }
 
+/* Step title label */
 .step-label {
     color: var(--latte);
     font-weight: 600;
@@ -369,6 +423,7 @@ body {
     margin-bottom: 0.4rem;
 }
 
+/* Step description body text */
 .step-desc {
     color: rgba(253,246,237,0.65);
     font-size: 0.9rem;
@@ -376,42 +431,50 @@ body {
     margin: 0;
 }
 
-/* ── Footer ──────────────────────────────────────────────────────────── */
+/* ── Footer ───────────────────────────────────────────────────────────── */
+/* Dark footer bar matching the navbar */
 footer {
     background: var(--espresso);
     border-top: 2px solid var(--caramel);
     padding: 1.4rem 0;
 }
 
+/* Footer brand name in serif font */
 .footer-brand {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.2rem;
     color: var(--latte);
 }
 
+/* Footer secondary note text */
 .footer-note {
     font-size: 0.8rem;
     color: var(--muted);
 }
 
-/* ── Responsive ──────────────────────────────────────────────────────── */
+/* ── Responsive Breakpoints ───────────────────────────────────────────── */
+/* Tablet: reduce hero padding and hide the decorative visual column */
 @media (max-width: 991px) {
     .hero { padding: 4rem 0 3rem; }
     .hero-visual { display: none; }
     .hiw-inner { padding: 3rem 1.5rem; }
 }
 
+/* Mobile: stack CTA buttons vertically */
 @media (max-width: 576px) {
     .hero-cta { flex-direction: column; align-items: flex-start; }
     .hiw-inner { border-radius: 16px; }
 }
-/* ── Fix footer to always stay at bottom ──── */
+
+/* ── Footer Sticky Fix ────────────────────────────────────────────────── */
+/* Ensures the footer always sits at the bottom of the viewport */
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
+/* Page content area grows to fill available space above the footer */
 main, .container {
     flex: 1;
 }

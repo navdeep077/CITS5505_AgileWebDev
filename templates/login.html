@@ -2,34 +2,43 @@
 {% block title %}Login | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
+<!-- Login-specific two-column card layout styles -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 {% endblock %}
 
 {% block content %}
 
+<!-- Two-column login card: form on left, hero image on right -->
 <div class="login-container">
 
-    <!-- LEFT SIDE -->
+    <!-- LEFT SIDE: Login / Signup form panel -->
     <div class="left">
+        <!-- Brand name -->
         <h2 class="logo">Coffee Hub</h2>
         <h3>Welcome Back</h3>
         <p class="subtitle">Find your perfect coffee spot</p>
 
+        <!-- Tab switcher: Login (active) and Signup -->
         <div class="tabs">
             <a class="active" href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('signup') }}">Signup</a>
         </div>
 
+        <!-- Error message shown on failed login -->
         {% if error %}
         <p class="error">{{ error }}</p>
         {% endif %}
 
+        <!-- Success message shown after account creation -->
         {% if message %}
         <p class="success">{{ message }}</p>
         {% endif %}
 
+        <!-- Login form: POST to /login with CSRF token -->
         <form method="POST" action="{{ url_for('login') }}">
+            <!-- CSRF token prevents cross-site request forgery attacks -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <label>Username</label>
             <input type="text" name="username" placeholder="Enter username" required>
 
@@ -38,20 +47,21 @@
 
             <button type="submit" class="login-btn">Login</button>
         </form>
-
-
     </div>
 
-    <!-- RIGHT SIDE -->
+    <!-- RIGHT SIDE: Decorative hero coffee image -->
     <div class="right">
         <img src="{{ url_for('static', filename='images/login-image.jpeg') }}" alt="coffee">
     </div>
 
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    /* Remove the ?error= query parameter from the URL after it has been displayed.
+       Prevents the error message from reappearing on page refresh. */
     if (window.location.search.includes("error")) {
         window.history.replaceState({}, document.title, "/login");
     }

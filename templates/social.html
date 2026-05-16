@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-
 {% block title %}Social Grounds{% endblock %}
 
 {% block extra_css %}
+<!-- Social feed styles: posts, comments, modal, sidebar, avatars -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
 {% endblock %}
 
 {% block content %}
 
-<!-- HERO -->
+<!-- HERO: Compact dark banner at the top of the social page -->
 <section class="hero text-center">
     <div class="container">
         <h1>
@@ -18,16 +18,18 @@
     </div>
 </section>
 
-<!-- MAIN -->
+<!-- MAIN: Two-column layout — trending cafes sidebar + post feed -->
 <div class="social-layout">
 
-    <!-- LEFT SIDEBAR -->
+    <!-- LEFT SIDEBAR: Top-rated cafes from the server-side cafes list -->
     <div class="sidebar-left">
         <h5>
             <i class="bi bi-fire"></i> Trending Cafes
         </h5>
 
+        <!-- Loop through top 3 trending cafes (sorted by rating in app.py) -->
         {% for cafe in trending_cafes %}
+        <!-- Wrap in an anchor if a detail route exists, otherwise a plain div -->
         {% if cafe.route %}
         <a class="shop-item text-decoration-none text-reset" href="{{ url_for(cafe.route) }}">
         {% else %}
@@ -45,20 +47,22 @@
         {% endfor %}
     </div>
 
-    <!-- FEED -->
+    <!-- FEED: Post cards injected here by social.js via loadPosts() -->
     <div id="feed" class="feed"></div>
 
 </div>
 
-<!-- FLOATING BUTTON -->
+<!-- FLOATING ACTION BUTTON: Opens the post creation modal -->
 <button class="fab" onclick="openModal()">
     <i class="bi bi-plus-lg"></i>
 </button>
 
-<!-- MODAL -->
+<!-- POST CREATION MODAL -->
+<!-- Clicking outside the modal box (on the overlay) closes it -->
 <div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
 
+        <!-- Modal header: title and close button -->
         <div class="modal-header">
             <h4>
                 <i class="bi bi-pencil-square"></i> Create Post
@@ -68,8 +72,10 @@
             </span>
         </div>
 
+        <!-- Post text area -->
         <textarea id="modal-text" placeholder="Share your coffee moment..."></textarea>
 
+        <!-- Cafe tag dropdown — populated from the server-side cafes list -->
         <label>
             <i class="bi bi-geo-alt-fill"></i> Cafe
         </label>
@@ -79,6 +85,7 @@
             {% endfor %}
         </select>
 
+        <!-- Aspect ratio selector for the image preview -->
         <label>
             <i class="bi bi-image-fill"></i> Image Style
         </label>
@@ -89,12 +96,15 @@
             <option value="landscape">Landscape (16:9)</option>
         </select>
 
+        <!-- Image file picker — triggers previewImage() on change -->
         <input type="file" id="modal-image" accept="image/*" onchange="previewImage(event)">
 
+        <!-- Live image preview container — hidden until a file is selected -->
         <div class="preview-container">
             <img id="image-preview">
         </div>
 
+        <!-- Submit button calls submitModalPost() which POSTs to /api/posts -->
         <button class="post-btn" onclick="submitModalPost()">
             Post <i class="bi bi-cup-hot"></i>
         </button>
@@ -105,9 +115,11 @@
 
 {% block extra_js %}
 <script>
+    /* Expose the landing route for social.js logout redirect */
     window.routes = {
         landing: "{{ url_for('landing') }}"
     };
 </script>
+<!-- social.js: loads posts, handles likes, comments, modal and post submission -->
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 {% endblock %}

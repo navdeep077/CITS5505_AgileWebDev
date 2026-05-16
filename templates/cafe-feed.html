@@ -2,16 +2,22 @@
 {% block title %}{{ cafe.name }} | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
+<!-- Social feed card styles shared with the home and social pages -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+<!-- Shop detail styles for tags, badges and info strips -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+<!-- Cafe feed specific layout: two-column grid and info card -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cafe-feed.css') }}">
 {% endblock %}
 
 {% block content %}
+
+<!-- Two-column layout: posts feed left, cafe info card right -->
 <div class="cafe-feed-layout">
 
-    <!-- LEFT — Posts Feed -->
+    <!-- LEFT COLUMN: Community posts tagged with this cafe -->
     <div>
+        <!-- Feed header showing cafe name and description -->
         <div class="cafe-feed-header">
             <div class="cafe-feed-title">
                 <i class="bi bi-cup-hot-fill" style="color:var(--caramel)"></i>
@@ -21,14 +27,19 @@
                 All posts from the community about this cafe
             </div>
         </div>
+
+        <!-- Post cards injected here by cafe-feed.js via renderPost() -->
         <div id="cafe-feed"></div>
     </div>
 
-    <!-- RIGHT — Cafe Info -->
+    <!-- RIGHT COLUMN: Cafe details, tags and recent reviews -->
     <div>
         <div class="cafe-info-card">
+
+            <!-- Cafe name heading -->
             <div class="cafe-info-name">{{ cafe.name }}</div>
 
+            <!-- Location, hours, rating and open status rows -->
             <div class="cafe-info-row">
                 <i class="bi bi-geo-alt" style="color:var(--caramel)"></i>
                 {{ cafe.location }}
@@ -42,10 +53,12 @@
                 {{ cafe.rating }} stars
             </div>
             <div class="cafe-info-row">
+                <!-- Green dot indicating the cafe is currently open -->
                 <i class="bi bi-circle-fill" style="color:#4caf50;font-size:0.6rem"></i>
                 Open Now
             </div>
 
+            <!-- Feature tags from the cafe data (e.g. Cold Brew, Pour Over) -->
             <div class="mt-3">
                 {% for tag in cafe.tags %}
                 <span class="cafe-tag">{{ tag }}</span>
@@ -57,6 +70,7 @@
 
             <hr style="border-color:var(--border);margin:1rem 0">
 
+            <!-- Recent reviews section — populated by cafe-feed.js -->
             <div class="mb-2" style="font-weight:600;color:var(--text)">Reviews</div>
             <div id="cafe-reviews">
                 <p class="text-muted small">Loading reviews...</p>
@@ -64,25 +78,37 @@
 
             <hr style="border-color:var(--border);margin:1rem 0">
 
+            <!-- Link to the full cafe shop detail page -->
             <a href="{{ url_for(cafe.route) }}"
                class="btn-primary-custom w-100 text-center d-block mt-2">
                 View Full Cafe Page
             </a>
+
+            <!-- Back to home link -->
             <a href="{{ url_for('home') }}"
                class="btn btn-outline-secondary w-100 mt-2">
-                ← Back to Home
+                Back to Home
             </a>
+
         </div>
     </div>
 
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    /* Expose the landing route for JS logout redirect */
     window.routes = { landing: "{{ url_for('landing') }}" };
+
+    /* Expose the cafe name as a JS variable used by cafe-feed.js to fetch posts */
     const cafeName = {{ cafe.name | tojson }};
 </script>
+
+<!-- social.js: provides renderPost() used by cafe-feed.js -->
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
+
+<!-- cafe-feed.js: fetches and renders posts and reviews for this cafe -->
 <script src="{{ url_for('static', filename='js/cafe-feed.js') }}"></script>
 {% endblock %}

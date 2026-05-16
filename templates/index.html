@@ -1,26 +1,39 @@
 {% extends 'base.html' %}
 {% block title %}Coffee Social Hub - Discover. Rate. Connect.{% endblock %}
+
 {% block content %}
 
-    <!-- HERO -->
+    <!-- HERO: Full-width dark gradient banner with CTA buttons -->
     <section class="hero">
+        <!-- Decorative background glow circles (positioned via CSS) -->
         <div class="hero-bg-circle circle-1"></div>
         <div class="hero-bg-circle circle-2"></div>
+
         <div class="container hero-content">
             <div class="row align-items-center g-5">
+
+                <!-- Left column: headline, subtitle and CTA buttons -->
                 <div class="col-lg-6 hero-text">
                     <p class="eyebrow">Perth's Coffee Community</p>
-                    <h1>Your city.<br>Your coffee.<br><span class="highlight">Your people.</span></h1>
+                    <h1>Your city.<br>Your coffee.<br>
+                        <span class="highlight">Your people.</span>
+                    </h1>
                     <p class="hero-sub">
                         Discover local cafes, rate your favourites,
                         earn Barista XP, and connect with coffee lovers near you.
                     </p>
+                    <!-- CTA buttons: redirect to signup or login depending on auth state -->
                     <div class="hero-cta">
-                        <a href="{{ url_for('signup') if session.get('user') else url_for('login') }}" class="btn btn-primary-custom">Join as a Barista</a>
-                        <a href="{{ url_for('brew') if session.get('user') else url_for('login') }}" class="btn btn-ghost">See the Brew Map</a>
+                        <a href="{{ url_for('signup') if session.get('user') else url_for('login') }}"
+                           class="btn btn-primary-custom">Join as a Barista</a>
+                        <a href="{{ url_for('brew') if session.get('user') else url_for('login') }}"
+                           class="btn btn-ghost">See the Brew Map</a>
                     </div>
                 </div>
+
+                <!-- Right column: decorative floating mock cafe cards -->
                 <div class="col-lg-6 hero-visual">
+                    <!-- Mock card 1: cafe name and details -->
                     <div class="mock-card card-1">
                         <div class="shop-icon">
                             <i class="bi bi-cup-hot"></i>
@@ -30,6 +43,8 @@
                             <div class="shop-meta">4.7 stars - Pet friendly - Open now</div>
                         </div>
                     </div>
+
+                    <!-- Mock card 2: user profile with XP level -->
                     <div class="mock-card card-2">
                         <div class="avatar-sm">B</div>
                         <div>
@@ -37,6 +52,8 @@
                             <div class="shop-meta">Level 4 Barista - 340 XP</div>
                         </div>
                     </div>
+
+                    <!-- Mock card 3: nearby cafes count -->
                     <div class="mock-card card-3">
                         <div class="shop-icon">
                             <i class="bi bi-geo-alt"></i>
@@ -46,77 +63,103 @@
                             <div class="shop-meta">Subiaco - Welshpool - CBD</div>
                         </div>
                     </div>
+
+                    <!-- Decorative concentric ring overlays -->
                     <div class="coffee-ring ring-a"></div>
                     <div class="coffee-ring ring-b"></div>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <!-- FEATURES -->
+    <!-- FEATURES: Three-column card grid explaining app features -->
     <section class="features" id="features">
         <div class="container">
             <p class="section-eyebrow text-center">Everything you need</p>
             <h2 class="section-title text-center">Built for coffee lovers</h2>
             <div class="row g-4 mt-2">
+
+                <!-- Feature 1: Brew Map -->
                 <div class="col-md-4">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="bi bi-map"></i>
                         </div>
                         <h5>Brew Map</h5>
-                        <p>Browse nearby cafes with ratings and filters for pet-friendly, open now, and price range.</p>
+                        <p>Browse nearby cafes with ratings and filters for
+                           pet-friendly, open now, and price range.</p>
                     </div>
                 </div>
+
+                <!-- Feature 2: Rate and Earn (dark middle card) -->
                 <div class="col-md-4">
                     <div class="feature-card feature-card--mid">
                         <div class="feature-icon">
                             <i class="bi bi-star"></i>
                         </div>
                         <h5>Rate and Earn XP</h5>
-                        <p>Review shops, rate specific brews, and level up your Barista profile with every contribution.</p>
+                        <p>Review shops, rate specific brews, and level up
+                           your Barista profile with every contribution.</p>
                     </div>
                 </div>
+
+                <!-- Feature 3: Coffee Gatherings -->
                 <div class="col-md-4">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="bi bi-people"></i>
                         </div>
                         <h5>Coffee Gatherings</h5>
-                        <p>Host or join community meetups. Connect with people who love coffee as much as you do.</p>
+                        <p>Host or join community meetups. Connect with people
+                           who love coffee as much as you do.</p>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <!-- HOW IT WORKS -->
+    <!-- HOW IT WORKS: Three numbered steps inside a dark rounded card -->
     <section class="how-it-works">
         <div class="container">
             <div class="hiw-inner">
                 <p class="section-eyebrow text-center" style="color:var(--latte);">Simple to start</p>
-                <h2 class="section-title text-center" style="color:var(--cream);">Three steps to your first cup</h2>
+                <h2 class="section-title text-center" style="color:var(--cream);">
+                    Three steps to your first cup
+                </h2>
                 <div class="row g-4 mt-3 justify-content-center">
+
+                    <!-- Step 1 -->
                     <div class="col-md-4 text-center">
                         <div class="step-num">01</div>
                         <h6 class="step-label">Sign Up Free</h6>
                         <p class="step-desc">Create your Barista profile in under a minute.</p>
                     </div>
+
+                    <!-- Step 2 -->
                     <div class="col-md-4 text-center">
                         <div class="step-num">02</div>
                         <h6 class="step-label">Explore Nearby Cafes</h6>
                         <p class="step-desc">Browse cafes around Perth and filter by what matters to you.</p>
                     </div>
+
+                    <!-- Step 3 -->
                     <div class="col-md-4 text-center">
                         <div class="step-num">03</div>
                         <h6 class="step-label">Rate and Connect</h6>
                         <p class="step-desc">Leave reviews, earn XP, and meet fellow coffee enthusiasts.</p>
                     </div>
+
                 </div>
+
+                <!-- Final CTA button -->
                 <div class="text-center mt-5">
-                    <a href="{{ url_for('landing') if session.get('user') else url_for('login') }}" class="btn btn-primary-custom">Get Started - It is Free</a>
+                    <a href="{{ url_for('landing') if session.get('user') else url_for('login') }}"
+                       class="btn btn-primary-custom">Get Started - It is Free</a>
                 </div>
             </div>
         </div>
     </section>
+
 {% endblock %}
