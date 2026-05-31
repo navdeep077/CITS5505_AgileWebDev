@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Bookmarks | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bookmarks.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="bookmarks-hero">
+    <h1><i class="bi bi-bookmark-fill"></i> Saved Posts</h1>
+    <p>Posts you have bookmarked</p>
+</div>
+
+<div class="container" style="max-width:680px;">
+
+    <div id="bookmarks-feed">
+        <!-- Skeleton loading -->
+        <div class="skeleton-post">
+            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1;">
+                    <div class="skeleton skeleton-line" style="width:40%;"></div>
+                    <div class="skeleton skeleton-line" style="width:25%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-image"></div>
+        </div>
+        <div class="skeleton-post">
+            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1;">
+                    <div class="skeleton skeleton-line" style="width:35%;"></div>
+                    <div class="skeleton skeleton-line" style="width:20%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-image"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- POST MODAL -->
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
+{% endblock %}

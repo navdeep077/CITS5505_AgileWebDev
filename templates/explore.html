@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Explore | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/explore.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="explore-hero">
+    <h1><i class="bi bi-compass"></i> Explore</h1>
+    <p>Discover posts and people</p>
+</div>
+
+<div class="container" style="max-width:700px;">
+
+    <div class="explore-tabs">
+        <button class="explore-tab active" onclick="showTab('posts', this)">Posts</button>
+        <button class="explore-tab" onclick="showTab('people', this)">People</button>
+        <button class="explore-tab" onclick="showTab('trending', this)">Trending</button>
+    </div>
+
+    <!-- POSTS GRID -->
+    <div id="tab-posts">
+        <div class="explore-grid" id="explore-grid">
+            <div class="explore-item skeleton"></div>
+            <div class="explore-item skeleton"></div>
+            <div class="explore-item skeleton"></div>
+            <div class="explore-item skeleton"></div>
+            <div class="explore-item skeleton"></div>
+            <div class="explore-item skeleton"></div>
+        </div>
+    </div>
+
+    <!-- PEOPLE -->
+    <div id="tab-people" style="display:none;">
+        <div class="suggested-section" id="people-list">
+            <div class="skeleton-post">
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton skeleton-line" style="width:40%;"></div>
+                        <div class="skeleton skeleton-line" style="width:25%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRENDING -->
+    <div id="tab-trending" style="display:none;">
+        <div id="trending-list" style="max-width:600px;margin:0 auto;"></div>
+    </div>
+
+</div>
+
+<!-- POST MODAL -->
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.trendingCafes = {{ trending_cafes | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+<script src="{{ url_for('static', filename='js/explore.js') }}"></script>
+{% endblock %}

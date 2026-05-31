@@ -140,22 +140,19 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     ${!isModal ? `
 
 <div class="post-actions">
-
-    <button onclick="likePost(${postData.id})">
-
+    <button onclick="likePost(${postData.id})" class="action-btn like-btn">
         <i class="bi ${isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
-
         ${postData.likes || 0}
-
     </button>
-
+    <button onclick="toggleBookmark(${postData.id}, this)" class="action-btn">
+        <i class="bi bi-bookmark"></i>
+    </button>
     ${canDelete
-        ? `<button onclick="deletePost(${postData.id})">
+        ? `<button onclick="deletePost(${postData.id})" class="action-btn">
             <i class="bi bi-trash"></i>
            </button>`
         : ""
     }
-
 </div>
 
 ` : `
@@ -258,11 +255,15 @@ function deleteComment(commentId) {
 
 // Modal handling functions for creating and viewing posts
 function openModal() {
-    document.getElementById("post-modal").classList.add("active");
+    const modal = document.getElementById('create-post-modal') || document.getElementById('post-modal');
+    if (modal) modal.classList.add('active');
 }
 
-function closeModal() {
-    document.getElementById("post-modal").classList.remove("active");
+// Closes the post creation modal
+function closeModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    const modal = document.getElementById('create-post-modal') || document.getElementById('post-modal');
+    if (modal) modal.classList.remove('active');
     resetModal();
 }
 
@@ -333,4 +334,22 @@ function refreshUI() {
 // Redirects the user back to the landing page.
 function logout() {
     window.location.href = routes.landing;
+}
+// Toggle bookmark on a post
+function toggleBookmark(postId, btn) {
+    fetch(`/api/bookmarks/${postId}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            const icon = btn.querySelector('i');
+            if (data.bookmarked) {
+                icon.className = 'bi bi-bookmark-fill';
+                icon.style.color = 'var(--caramel)';
+                showToast('Post saved ✓', 'success');
+            } else {
+                icon.className = 'bi bi-bookmark';
+                icon.style.color = '';
+                showToast('Post removed from saved', 'info');
+            }
+        })
+        .catch(err => console.error('Bookmark error:', err));
 }

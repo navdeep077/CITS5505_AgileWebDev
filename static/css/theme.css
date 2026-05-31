@@ -1,0 +1,404 @@
+/* ── WEEK 2 THEME ADDITIONS ──────────────────────────────────── */
+
+/* Dark mode tokens */
+[data-theme="dark"] {
+    --bg:        #0f0f0f;
+    --surface:   #1a1a1a;
+    --text:      #f0e6d3;
+    --text-muted:#9a8a7a;
+    --nav-bg:    #111111;
+    --nav-border:#c47a2b;
+    --border:    rgba(196,122,43,0.2);
+    --shadow:    0 4px 20px rgba(0,0,0,0.4);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,0.6);
+    --cream:     #0f0f0f;
+    --espresso:  #f0e6d3;
+}
+
+[data-theme="dark"] body {
+    background: #0f0f0f;
+    color: #f0e6d3;
+}
+
+[data-theme="dark"] .navbar {
+    background: #111111;
+}
+
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .post,
+[data-theme="dark"] .sidebar-card,
+[data-theme="dark"] .shop-card {
+    background: #1a1a1a;
+    border-color: rgba(196,122,43,0.2);
+    color: #f0e6d3;
+}
+
+[data-theme="dark"] footer {
+    background: #111111;
+}
+
+/* Nav icon buttons */
+.nav-icon-btn {
+    background: none;
+    border: none;
+    color: var(--latte);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+}
+
+.nav-icon-btn:hover {
+    background: rgba(196,122,43,0.15);
+    color: var(--caramel);
+}
+
+/* Notification badge */
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #e53935;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Search bar in navbar */
+.navbar-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(196,122,43,0.3);
+    border-radius: 20px;
+    padding: 6px 14px;
+    gap: 8px;
+    width: 220px;
+}
+
+.navbar-search i {
+    color: var(--latte);
+    font-size: 0.85rem;
+}
+
+.navbar-search input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--latte);
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.navbar-search input::placeholder {
+    color: rgba(232,201,154,0.5);
+}
+
+.search-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--surface, #fff);
+    border: 1px solid rgba(196,122,43,0.15);
+    border-radius: 12px;
+    box-shadow: 0 12px 48px rgba(26,14,0,0.16);
+    z-index: 200;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.search-dropdown.active {
+    display: block;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--espresso);
+    transition: background 0.2s;
+}
+
+.search-result-item:hover {
+    background: rgba(196,122,43,0.08);
+}
+
+.search-result-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--caramel);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.search-result-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Mobile top bar */
+.mobile-top-bar {
+    background: var(--espresso);
+    border-bottom: 2px solid var(--caramel);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mobile-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--latte);
+    font-weight: 700;
+}
+
+/* Mobile bottom navbar — hidden by default, only shown on mobile */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--espresso);
+    border-top: 2px solid var(--caramel);
+    z-index: 100;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0;
+}
+
+/* Only show on mobile screens */
+@media (max-width: 991px) {
+    .mobile-bottom-nav {
+        display: flex;
+    }
+    body {
+        padding-bottom: 80px;
+    }
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: rgba(232,201,154,0.6);
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 8px;
+    transition: color 0.2s;
+}
+
+.mobile-nav-item i {
+    font-size: 1.3rem;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+    color: var(--caramel);
+}
+
+/* Body padding for mobile bottom nav */
+@media (max-width: 992px) {
+    body { padding-bottom: 80px; }
+}
+
+/* Skeleton loading */
+.skeleton {
+    background: linear-gradient(90deg,
+        rgba(196,122,43,0.1) 25%,
+        rgba(196,122,43,0.05) 50%,
+        rgba(196,122,43,0.1) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-post {
+    background: white;
+    border-radius: 14px;
+    padding: 1.2rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid rgba(196,122,43,0.12);
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.skeleton-line {
+    height: 12px;
+    margin: 8px 0;
+    border-radius: 6px;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 280px;
+    margin: 12px 0;
+    border-radius: 8px;
+}
+
+/* Toast notifications */
+#toast-container {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Hide mobile bottom nav on desktop */
+@media (min-width: 992px) {
+    .mobile-bottom-nav { display: none !important; }
+    .mobile-top-bar { display: none !important; }
+    body { padding-bottom: 0; }
+}
+
+.toast-msg {
+    background: white;
+    border: 1px solid rgba(196,122,43,0.15);
+    border-left: 4px solid var(--caramel);
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-width: 200px;
+    max-width: 300px;
+    box-shadow: 0 12px 48px rgba(26,14,0,0.16);
+    font-size: 0.9rem;
+    color: var(--espresso);
+    animation: toast-in 0.3s ease;
+}
+
+.toast-msg.success { border-left-color: #4caf50; }
+.toast-msg.error   { border-left-color: #e53935; }
+.toast-msg.info    { border-left-color: var(--caramel); }
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+/* Profile link in navbar */
+.nav-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--latte);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.nav-profile-link:hover {
+    color: var(--caramel);
+}
+
+.nav-profile-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--caramel);
+    color: white;
+    font-size: 1.1rem;
+}
+
+.nav-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Remove browser autofill white background on search input */
+.navbar-search input:-webkit-autofill,
+.navbar-search input:-webkit-autofill:hover,
+.navbar-search input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+    -webkit-text-fill-color: var(--latte);
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.navbar-search input {
+    background: transparent !important;
+    border: none;
+    outline: none;
+    color: var(--latte);
+    font-size: 0.85rem;
+    width: 100%;
+}
+/* Remove white outline on search bar */
+.navbar-search:focus-within {
+    outline: none;
+    box-shadow: none;
+    border-color: var(--caramel);
+}
+
+.navbar-search input:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+* {
+    outline: none;
+}
+/* Remove Bootstrap navbar border and outline */
+.navbar {
+    border-bottom: 2px solid var(--caramel) !important;
+    box-shadow: none !important;
+}
+
+.navbar .container {
+    border: none !important;
+    outline: none !important;
+}
+
+/* Remove all default borders from navbar inputs */
+.navbar input,
+.navbar input:focus,
+.navbar input:active {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}

@@ -791,7 +791,50 @@ def suggested_users():
         "bio": u.bio,
         "followers": u.follower_count()
     } for u in suggested])
+# ── WEEK 2 PAGE ROUTES ────────────────────────────────────────────────────────
 
+@app.route("/explore")
+@login_required
+def explore():
+    """Explore page — shows posts from all users"""
+    return render_template("explore.html")
+
+
+@app.route("/bookmarks")
+@login_required
+def bookmarks():
+    """Bookmarks page — shows saved posts"""
+    return render_template("bookmarks.html")
+
+
+@app.route("/notifications")
+@login_required
+def notifications():
+    """Notifications page"""
+    return render_template("notifications.html")
+
+
+# ── EDIT PROFILE API ──────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/profile/edit", methods=["POST"])
+def edit_profile():
+    """Update bio, website and location for current user"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    current.bio      = data.get("bio", current.bio)
+    current.website  = data.get("website", current.website)
+    current.location = data.get("location", current.location)
+    db.session.commit()
+
+    return jsonify({
+        "bio": current.bio,
+        "website": current.website,
+        "location": current.location
+    })
 
 #  Application Entry Point
 if __name__ == "__main__":
