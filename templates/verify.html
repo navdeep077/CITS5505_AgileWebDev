@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Email Verification | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="
+    max-width:480px;
+    margin:4rem auto;
+    text-align:center;
+    padding:2rem;
+    background:var(--surface,#fff);
+    border-radius:16px;
+    border:1px solid rgba(196,122,43,0.15);
+    box-shadow:0 4px 20px rgba(26,14,0,0.08);
+">
+    {% if status == 'success' %}
+        <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+        <h2 style="color:var(--espresso);">Email Verified!</h2>
+        <p style="color:var(--muted);margin:1rem 0;">
+            Your email has been verified successfully.
+        </p>
+        <a href="{{ url_for('login') }}" class="btn-primary-custom">
+            Go to Login
+        </a>
+    {% else %}
+        <div style="font-size:3rem;margin-bottom:1rem;">❌</div>
+        <h2 style="color:var(--espresso);">Invalid Link</h2>
+        <p style="color:var(--muted);margin:1rem 0;">
+            This verification link is invalid or has expired.
+        </p>
+        <a href="{{ url_for('signup') }}" class="btn-primary-custom">
+            Sign Up Again
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

@@ -25,10 +25,13 @@ body {
 
 .left {
     width: 50%;
-    padding: clamp(24px, 4vw, 40px); /* fluid padding that compresses on narrow viewports */
+    padding: clamp(24px, 4vw, 40px);
+    padding-top: clamp(40px, 6vh, 30px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    max-height: 100vh;
 }
 
 /* App name / brand heading inside the form panel */

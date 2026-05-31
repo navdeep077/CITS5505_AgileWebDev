@@ -18,6 +18,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+    <!-- SEO Meta Tags -->
+<meta name="description" content="Coffee Social Hub — Discover Perth cafes, share coffee experiences and connect with coffee lovers.">
+<meta name="keywords" content="coffee, Perth, cafes, social, reviews, coffee lovers">
+<meta name="author" content="Coffee Social Hub">
+
+<!-- Open Graph — for link previews on WhatsApp, Facebook etc -->
+<meta property="og:title" content="Coffee Social Hub">
+<meta property="og:description" content="Discover Perth cafes, share coffee experiences and connect with coffee lovers.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg', _external=True) }}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Coffee Social Hub">
+<meta name="twitter:description" content="Discover Perth cafes, share coffee experiences.">
 
     <!-- Page specific CSS -->
     {% block extra_css %}{% endblock %}
