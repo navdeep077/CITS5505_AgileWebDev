@@ -33,14 +33,12 @@ migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
 mail = Mail(app)
 
-# Rate limiter — prevents spam and brute force
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"]
 )
 
-# Cloudinary setup — only if configured in .env
 if app.config.get('CLOUDINARY_CLOUD_NAME'):
     cloudinary.config(
         cloud_name = app.config['CLOUDINARY_CLOUD_NAME'],
@@ -48,9 +46,7 @@ if app.config.get('CLOUDINARY_CLOUD_NAME'):
         api_secret = app.config['CLOUDINARY_API_SECRET']
     )
 
-# Token serializer for email verification and password reset
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -86,7 +82,6 @@ def save_uploaded_image(file):
 
 
 def save_image_cloudinary(file):
-    """Upload image to Cloudinary if configured, else save locally"""
     if not file or file.filename == "":
         return None
     if not allowed_image(file.filename):
@@ -150,7 +145,6 @@ def serialize_post(post):
 # ── Email Helpers ─────────────────────────────────────────────────────────────
 
 def send_verification_email(user):
-    """Send email verification link to new user"""
     token = serializer.dumps(user.email, salt='email-verify')
     verify_url = url_for('verify_email', token=token, _external=True)
     msg = Message(
@@ -171,7 +165,6 @@ def send_verification_email(user):
 
 
 def send_password_reset_email(user):
-    """Send password reset link to user"""
     token = serializer.dumps(user.email, salt='password-reset')
     reset_url = url_for('reset_password', token=token, _external=True)
     msg = Message(
@@ -185,7 +178,7 @@ def send_password_reset_email(user):
             border-radius:8px;text-decoration:none;font-weight:bold;">
             Reset Password
         </a>
-        <p>This link expires in 1 hour. If you did not request this, ignore this email.</p>
+        <p>This link expires in 1 hour.</p>
         '''
     )
     mail.send(msg)
@@ -296,7 +289,6 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 @limiter.limit("10 per minute", methods=["POST"])
 def login():
-    """Handle user login with rate limiting"""
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -324,13 +316,10 @@ def signup():
 
         if not username or not password or not confirm_password:
             return redirect(url_for("signup", error="Please fill all fields"))
-
         if password != confirm_password:
             return redirect(url_for("signup", error="Passwords do not match"))
-
         if User.query.filter_by(username=username).first():
             return redirect(url_for("signup", error="Username already exists"))
-
         if email and User.query.filter_by(email=email).first():
             return redirect(url_for("signup", error="Email already registered"))
 
@@ -360,10 +349,22 @@ def public_profile(username):
         return redirect(url_for("login"))
     if current_username == username:
         return redirect(url_for("profile"))
+
     profile_user = User.query.filter_by(username=username).first()
     if not profile_user:
         return "User not found", 404
-    posts = Post.query.filter_by(user_id=profile_user.id)\
+
+    current = get_current_user()
+
+    # Check if current user has blocked this person
+    is_blocked = Block.query.filter_by(
+        blocker_id=current.id,
+        blocked_id=profile_user.id
+    ).first()
+    if is_blocked:
+        return render_template("blocked.html", username=username)
+
+    posts       = Post.query.filter_by(user_id=profile_user.id)\
         .order_by(Post.created_at.desc()).all()
     total_likes = sum(post.likes for post in posts)
     return render_template(
@@ -484,7 +485,7 @@ def api_avatar():
     if not file:
         return jsonify({"error": "No avatar file uploaded"}), 400
     try:
-        old_avatar = user.avatar
+        old_avatar  = user.avatar
         user.avatar = save_image_cloudinary(file)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
@@ -501,9 +502,22 @@ def api_posts():
     user = get_current_user()
     if not user:
         return jsonify({"error": "Login required"}), 401
+
     if request.method == "GET":
-        posts = Post.query.order_by(Post.created_at.desc()).all()
+        # Filter out posts from blocked users
+        blocked_ids = [
+            b.blocked_id for b in
+            Block.query.filter_by(blocker_id=user.id).all()
+        ]
+        if blocked_ids:
+            posts = Post.query.filter(
+                ~Post.user_id.in_(blocked_ids)
+            ).order_by(Post.created_at.desc()).all()
+        else:
+            posts = Post.query.order_by(Post.created_at.desc()).all()
         return jsonify([serialize_post(post) for post in posts])
+
+    # POST — create new post
     text       = request.form.get("text", "").strip()
     shop       = request.form.get("shop", "").strip()
     image_file = request.files.get("image")
@@ -514,7 +528,6 @@ def api_posts():
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
 
-    # Extract hashtags from text
     tags = re.findall(r'#(\w+)', text)
     post = Post(
         text=text,
@@ -637,7 +650,7 @@ def edit_comment(comment_id):
         return jsonify({"error": "Not found"}), 404
     if comment.username != current_user:
         return jsonify({"error": "Unauthorized"}), 403
-    data = request.get_json()
+    data         = request.get_json()
     comment.text = data.get("text")
     db.session.commit()
     return jsonify({"message": "Updated"})
@@ -805,11 +818,10 @@ def toggle_bookmark(post_id):
         db.session.delete(existing)
         db.session.commit()
         return jsonify({"bookmarked": False})
-    else:
-        bookmark = Bookmark(user_id=current.id, post_id=post_id)
-        db.session.add(bookmark)
-        db.session.commit()
-        return jsonify({"bookmarked": True})
+    bookmark = Bookmark(user_id=current.id, post_id=post_id)
+    db.session.add(bookmark)
+    db.session.commit()
+    return jsonify({"bookmarked": True})
 
 
 @app.route("/api/bookmarks", methods=["GET"])
@@ -1067,14 +1079,13 @@ def block_user(username):
         db.session.delete(existing)
         db.session.commit()
         return jsonify({"blocked": False})
-    else:
-        block = Block(blocker_id=current.id, blocked_id=target.id)
-        db.session.add(block)
-        follow = Follow.query.filter_by(follower_id=current.id, followed_id=target.id).first()
-        if follow:
-            db.session.delete(follow)
-        db.session.commit()
-        return jsonify({"blocked": True})
+    block = Block(blocker_id=current.id, blocked_id=target.id)
+    db.session.add(block)
+    follow = Follow.query.filter_by(follower_id=current.id, followed_id=target.id).first()
+    if follow:
+        db.session.delete(follow)
+    db.session.commit()
+    return jsonify({"blocked": True})
 
 
 @app.route("/api/blocked-users", methods=["GET"])
