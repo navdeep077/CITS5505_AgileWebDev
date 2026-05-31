@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}#{{ tag }} | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="hashtag-hero">
+    <h1><i class="bi bi-hash"></i>{{ tag }}</h1>
+    <p>All posts tagged with #{{ tag }}</p>
+</div>
+
+<!-- BACK BUTTON -->
+<div class="container" style="max-width:680px;">
+    <a href="javascript:history.back()" class="back-home-btn">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<!-- FEED -->
+<div class="container" style="max-width:680px;margin-top:1rem;">
+    <div id="hashtag-feed"></div>
+</div>
+
+<!-- POST MODAL -->
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const hashTag = "{{ tag }}";
+</script>
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hashtag.js') }}"></script>
+{% endblock %}

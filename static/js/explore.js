@@ -118,29 +118,80 @@ function loadTrending() {
     const list = document.getElementById('trending-list');
     const cafes = window.trendingCafes || [];
 
-    if (cafes.length === 0) {
-        list.innerHTML = '<div class="explore-empty"><p>No trending cafes</p></div>';
-        return;
-    }
+    // First show trending posts this week
+    fetch('/api/posts/trending')
+        .then(res => res.json())
+        .then(posts => {
+            let html = '';
 
-    list.innerHTML = cafes.map(cafe => `
-        <div class="trending-card">
-            <div>
-                <h5 style="font-weight:700;margin-bottom:4px;color:var(--text);">${cafe.name}</h5>
-                <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">
-                    <i class="bi bi-geo-alt" style="color:var(--caramel)"></i> ${cafe.location}
-                    &nbsp;•&nbsp;
-                    <i class="bi bi-star-fill" style="color:var(--caramel)"></i> ${cafe.rating}
+            // Trending posts section
+            if (posts.length > 0) {
+                html += `
+                    <div class="trending-section">
+                        <h5><i class="bi bi-fire" style="color:var(--caramel)"></i> Most Liked This Week</h5>
+                        ${posts.map(p => `
+                            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(196,122,43,0.1);">
+                                ${p.image
+                                    ? `<img src="${p.image}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;">`
+                                    : `<div style="width:44px;height:44px;background:linear-gradient(135deg,var(--roast),var(--caramel));border-radius:8px;"></div>`
+                                }
+                                <div style="flex:1;min-width:0;">
+                                    <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${p.username}</div>
+                                    <div style="font-size:0.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.text}</div>
+                                </div>
+                                <div style="font-size:0.8rem;color:var(--caramel);font-weight:700;">
+                                    <i class="bi bi-heart-fill"></i> ${p.likes}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // Trending cafes section
+            html += `<h5 style="font-weight:700;margin-bottom:1rem;color:var(--text);">
+                <i class="bi bi-cup-hot" style="color:var(--caramel)"></i> Top Cafes
+            </h5>`;
+
+            cafes.forEach(cafe => {
+                html += `
+                    <div class="trending-card">
+                        <div>
+                            <h5 style="font-weight:700;margin-bottom:4px;color:var(--text);">${cafe.name}</h5>
+                            <div style="font-size:0.85rem;color:var(--muted);margin-bottom:6px;">
+                                <i class="bi bi-geo-alt" style="color:var(--caramel)"></i> ${cafe.location}
+                                &nbsp;•&nbsp;
+                                <i class="bi bi-star-fill" style="color:var(--caramel)"></i> ${cafe.rating}
+                            </div>
+                            <div class="trending-tags">
+                                ${cafe.tags.map(t => `<span>${t}</span>`).join('')}
+                            </div>
+                        </div>
+                        <a href="/cafe/${encodeURIComponent(cafe.name)}"
+                           class="btn-primary-custom"
+                           style="font-size:0.8rem;padding:8px 14px;white-space:nowrap;">
+                            View Posts
+                        </a>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        })
+        .catch(() => {
+            // Fallback to just cafes if trending API fails
+            list.innerHTML = cafes.map(cafe => `
+                <div class="trending-card">
+                    <div>
+                        <h5>${cafe.name}</h5>
+                        <div style="font-size:0.85rem;color:var(--muted);">★ ${cafe.rating}</div>
+                    </div>
+                    <a href="/cafe/${encodeURIComponent(cafe.name)}" class="btn-primary-custom" style="font-size:0.8rem;padding:8px 14px;">
+                        View Posts
+                    </a>
                 </div>
-                <div class="trending-tags">
-                    ${cafe.tags.map(t => `<span>${t}</span>`).join('')}
-                </div>
-            </div>
-            <a href="/cafe/${encodeURIComponent(cafe.name)}" class="btn-primary-custom" style="font-size:0.8rem;padding:8px 14px;white-space:nowrap;">
-                View Posts
-            </a>
-        </div>
-    `).join('');
+            `).join('');
+        });
 }
 
 // Wire modal close
