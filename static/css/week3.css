@@ -1,0 +1,248 @@
+/* ── WEEK 3 STYLES ───────────────────────────────────────────── */
+
+/* Hashtag links in post text */
+.hashtag-link {
+    color: var(--caramel);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.hashtag-link:hover {
+    text-decoration: underline;
+}
+
+/* Mention links */
+.mention-link {
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.mention-link:hover {
+    text-decoration: underline;
+}
+
+/* Hashtag pills below post */
+.post-hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 14px 0;
+}
+
+.hashtag-pill {
+    background: rgba(196,122,43,0.1);
+    color: var(--caramel);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.hashtag-pill:hover {
+    background: rgba(196,122,43,0.2);
+    color: var(--caramel);
+}
+
+/* View count */
+.view-count {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+/* Post time */
+.post-time {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-left: auto;
+}
+
+/* Edit post form */
+.edit-post-form {
+    padding: 4px 0;
+}
+
+.edit-caption-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid rgba(196,122,43,0.3);
+    border-radius: 8px;
+    background: var(--surface, #fff);
+    color: var(--text, #1a0e00);
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: none;
+}
+
+.edit-caption-input:focus {
+    outline: none;
+    border-color: var(--caramel);
+}
+
+.edit-post-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.btn-save-edit {
+    background: var(--caramel);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancel-edit {
+    background: none;
+    border: 1px solid rgba(196,122,43,0.3);
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--text, #1a0e00);
+}
+
+/* Like button animation */
+.like-btn i {
+    display: inline-block;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.like-btn:active i {
+    transform: scale(1.5) !important;
+}
+
+/* Action buttons row */
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--muted, #8a7060);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.action-btn:hover {
+    background: rgba(196,122,43,0.08);
+    color: var(--caramel);
+}
+
+/* Post caption */
+.post-caption {
+    padding: 4px 14px 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text, #1a0e00);
+}
+
+.post-caption-full {
+    padding: 2px 14px 6px;
+    font-size: 0.9rem;
+    color: var(--text, #1a0e00);
+}
+
+.post-caption-full a {
+    color: var(--text, #1a0e00);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* Post username link */
+.post-username {
+    color: var(--text, #1a0e00);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.post-username:hover {
+    color: var(--caramel);
+}
+
+/* Cafe link on post */
+.cafe-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.82rem;
+    transition: color 0.2s;
+}
+
+.cafe-link:hover {
+    color: var(--caramel);
+}
+
+/* Trending posts section */
+.trending-section {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(196,122,43,0.15);
+    border-radius: 14px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.trending-section h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text, #1a0e00);
+}
+
+/* Hashtag page */
+.hashtag-hero {
+    background: linear-gradient(140deg, var(--espresso), var(--roast));
+    padding: 3rem 0 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.hashtag-hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--latte);
+    font-size: 2rem;
+}
+
+.hashtag-hero p {
+    color: rgba(232,201,154,0.7);
+}
+/* Back button — matches style used across other pages */
+.back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 1.2rem 0;
+    color: var(--espresso, #1a0e00);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 7px 16px;
+    border: 1.5px solid rgba(196,122,43,0.25);
+    border-radius: 10px;
+    transition: all 0.2s;
+    background: var(--surface, #fff);
+}
+
+.back-home-btn:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+    background: rgba(196,122,43,0.05);
+}

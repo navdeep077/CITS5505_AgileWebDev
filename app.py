@@ -82,6 +82,8 @@ def serialize_post(post):
         "image": post.image or "",
         "likes": post.likes or 0,
         "liked_by": post.liked_by.split(",") if post.liked_by else [],
+        "view_count": post.view_count or 0,
+        "hashtags": post.hashtags.split(",") if post.hashtags else [],
         "comments": [
             {
                 "id": c.id,
@@ -835,6 +837,106 @@ def edit_profile():
         "website": current.website,
         "location": current.location
     })
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>/edit", methods=["PUT"])
+def edit_post(post_id):
+    """Edit a post caption — only the author can edit"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    post = Post.query.get_or_404(post_id)
+
+    if post.author.username != current.username:
+        return jsonify({"error": "You can only edit your own posts"}), 403
+
+    data = request.get_json()
+    new_text = data.get("text", "").strip()
+
+    if not new_text:
+        return jsonify({"error": "Caption cannot be empty"}), 400
+
+    post.text = new_text
+
+    # Extract and save hashtags from the text
+    import re
+    tags = re.findall(r'#(\w+)', new_text)
+    post.hashtags = ",".join(tags)
+
+    db.session.commit()
+    return jsonify({"text": post.text, "hashtags": post.hashtags})
+
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>/view", methods=["POST"])
+def increment_view(post_id):
+    """Increment view count when a post is seen"""
+    post = Post.query.get_or_404(post_id)
+    post.view_count = (post.view_count or 0) + 1
+    db.session.commit()
+    return jsonify({"view_count": post.view_count})
+
+
+@app.route("/api/posts/trending", methods=["GET"])
+def trending_posts():
+    """Returns top 10 most liked posts this week"""
+    from datetime import timedelta
+    one_week_ago = datetime.utcnow() - timedelta(days=7)
+
+    posts = Post.query.filter(
+        Post.created_at >= one_week_ago
+    ).order_by(
+        Post.likes.desc()
+    ).limit(10).all()
+
+    return jsonify([serialize_post(p) for p in posts])
+
+
+@app.route("/api/hashtags/trending", methods=["GET"])
+def trending_hashtags():
+    """Returns top 10 most used hashtags"""
+    from collections import Counter
+    import re
+
+    posts = Post.query.filter(
+        Post.hashtags != "",
+        Post.hashtags != None
+    ).all()
+
+    all_tags = []
+    for post in posts:
+        if post.hashtags:
+            all_tags.extend(post.hashtags.split(","))
+
+    tag_counts = Counter(all_tags).most_common(10)
+
+    return jsonify([
+        {"tag": tag, "count": count}
+        for tag, count in tag_counts
+        if tag
+    ])
+
+
+@app.route("/api/posts/hashtag/<tag>", methods=["GET"])
+def posts_by_hashtag(tag):
+    """Returns all posts containing a specific hashtag"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    posts = Post.query.filter(
+        Post.hashtags.contains(tag)
+    ).order_by(Post.created_at.desc()).all()
+
+    return jsonify([serialize_post(p) for p in posts])
+
+
+@app.route("/hashtag/<tag>")
+@login_required
+def hashtag_page(tag):
+    """Renders the hashtag feed page"""
+    return render_template("hashtag.html", tag=tag)
 
 #  Application Entry Point
 if __name__ == "__main__":
