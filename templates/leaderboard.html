@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Leaderboard | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="leaderboard-hero">
+    <h1><i class="bi bi-trophy-fill" style="color:var(--caramel)"></i> Leaderboard</h1>
+    <p>Top coffee lovers ranked by Barista XP</p>
+</div>
+
+<div class="container" style="max-width:720px;margin-top:2rem;">
+    <div id="leaderboard-list">
+        <!-- Skeleton -->
+        <div class="skeleton-post">
+            <div class="skeleton skeleton-line" style="height:60px;border-radius:12px;"></div>
+        </div>
+        <div class="skeleton-post">
+            <div class="skeleton skeleton-line" style="height:60px;border-radius:12px;"></div>
+        </div>
+        <div class="skeleton-post">
+            <div class="skeleton skeleton-line" style="height:60px;border-radius:12px;"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
+{% endblock %}

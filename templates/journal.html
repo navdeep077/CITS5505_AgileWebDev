@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Coffee Journal | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="leaderboard-hero">
+    <h1><i class="bi bi-journal-text" style="color:var(--caramel)"></i> Coffee Journal</h1>
+    <p>Your private notes from every cafe visit</p>
+</div>
+
+<div class="container" style="max-width:720px;margin-top:2rem;">
+
+    <!-- Add entry form -->
+    <div class="journal-form-card">
+        <h5 style="margin-bottom:1rem;font-weight:700;">
+            <i class="bi bi-plus-circle" style="color:var(--caramel)"></i>
+            New Entry
+        </h5>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <label class="journal-label">Cafe</label>
+                <select id="journal-cafe" class="journal-input">
+                    <option value="">Select a cafe...</option>
+                    {% for cafe in cafes %}
+                    <option value="{{ cafe.name }}">{{ cafe.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="journal-label">Visit Date</label>
+                <input type="date" id="journal-date" class="journal-input">
+            </div>
+            <div>
+                <label class="journal-label">Brew Type</label>
+                <select id="journal-brew" class="journal-input">
+                    <option value="">Select brew...</option>
+                    <option>Espresso</option>
+                    <option>Flat White</option>
+                    <option>Latte</option>
+                    <option>Cappuccino</option>
+                    <option>Cold Brew</option>
+                    <option>Pour Over</option>
+                    <option>Batch Brew</option>
+                    <option>Matcha</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div>
+                <label class="journal-label">Mood</label>
+                <select id="journal-mood" class="journal-input">
+                    <option value="">Select mood...</option>
+                    <option>☀️ Great</option>
+                    <option>😊 Good</option>
+                    <option>😐 Okay</option>
+                    <option>☔ Bad</option>
+                    <option>🌙 Tired</option>
+                    <option>💪 Productive</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top:12px;">
+            <label class="journal-label">Rating</label>
+            <div class="star-rating" id="star-rating">
+                <span data-val="1">☆</span>
+                <span data-val="2">☆</span>
+                <span data-val="3">☆</span>
+                <span data-val="4">☆</span>
+                <span data-val="5">☆</span>
+            </div>
+            <input type="hidden" id="journal-rating" value="0">
+        </div>
+
+        <div style="margin-top:12px;">
+            <label class="journal-label">Notes</label>
+            <textarea id="journal-notes" class="journal-input"
+                rows="3" placeholder="How was the coffee? Any notes to remember?"></textarea>
+        </div>
+
+        <button onclick="saveJournalEntry()" class="journal-save-btn">
+            <i class="bi bi-journal-plus"></i> Save Entry
+        </button>
+    </div>
+
+    <!-- Entries list -->
+    <div id="journal-entries" style="margin-top:1.5rem;">
+        <div class="skeleton-post">
+            <div class="skeleton skeleton-line" style="height:80px;border-radius:12px;"></div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/journal.js') }}"></script>
+{% endblock %}
