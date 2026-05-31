@@ -1,120 +1,172 @@
 {% extends "base.html" %}
-{% block title %}My Profile | Coffee Social Hub{% endblock %}
+{% block title %}Profile | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
-<!-- Profile-specific layout and avatar styles -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-<!-- Shared social feed card styles (post cards, like button, comment threads) -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile-page.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
 
-    <!-- Back navigation to the main home feed -->
-    <div class="mb-3">
-        <a href="{{ url_for('home') }}" class="btn btn-outline-coffee btn-sm">
-            <i class="bi bi-arrow-left"></i> Back to Home
-        </a>
-    </div>
+<div class="profile-container">
 
-    <!-- ── Profile Header ──────────────────────────────────────────────── -->
-    <!-- Displays the user's avatar, name, and photo upload controls -->
-    <div class="profile-header d-flex align-items-center gap-4 mb-4">
-        <div class="profile-avatar-wrapper">
-            <!-- Actual photo: hidden by default; shown by profile.js once an image is stored -->
-            <img id="profile-avatar-image" class="profile-avatar-image" style="display:none;" alt="Profile photo">
-            <!-- Fallback initials placeholder shown when no photo is set -->
-            <div id="profile-avatar-placeholder" class="profile-avatar-placeholder">
-                {{ session.get('user', 'U')[0].upper() }}
-            </div>
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+
+        <!-- Avatar -->
+        {% if current_user.avatar %}
+        <img src="{{ current_user.avatar }}" alt="avatar" class="profile-avatar" id="profile-avatar-img">
+        {% else %}
+        <div class="fallback-avatar" id="profile-avatar-fallback">
+            {{ current_user.username[0].upper() }}
         </div>
+        {% endif %}
 
-        <div>
-            <h2 class="mb-1">{{ session.get('user', 'User') }}</h2>
-            <p class="text-muted mb-0">Coffee enthusiast · Perth WA</p>
-
-            <!-- Label acts as the clickable trigger for the hidden file input -->
-            <label for="profile-avatar-upload" class="btn btn-outline-coffee btn-sm mt-2">
-                <i class="bi bi-camera-fill"></i> Change photo
-            </label>
-
-            <!-- Remove button: only shown by profile.js when a custom photo exists -->
-            <button type="button" id="profile-avatar-remove"
-                    class="btn btn-outline-danger btn-sm mt-2 ms-2"
-                    style="display:none;">
-                <i class="bi bi-trash"></i> Remove photo
+        <!-- Avatar controls -->
+        <div class="avatar-controls">
+            <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
+            <button class="avatar-upload-btn" onclick="document.getElementById('avatar-file-input').click()">
+                📷 Change Photo
             </button>
-
-            <!-- Visually hidden file input; triggers profile.js avatar upload logic -->
-            <input type="file" id="profile-avatar-upload" class="visually-hidden" accept="image/*">
+            {% if current_user.avatar %}
+            <button class="avatar-remove-btn" onclick="removeAvatar()">Remove</button>
+            {% endif %}
         </div>
+
+        <!-- Username -->
+        <h2 class="profile-username">{{ current_user.username }}</h2>
+
+        <!-- Stats -->
+        <p class="profile-stats">
+            <strong id="posts-count">0</strong> posts
+            &nbsp;•&nbsp;
+            <strong>0</strong> likes
+        </p>
+
+        <!-- Bio display -->
+        <div id="bio-display">
+            <p class="bio-text" id="bio-text">
+                {{ current_user.bio or 'No bio yet' }}
+            </p>
+
+            <!-- Website and location -->
+            <div class="profile-meta">
+                {% if current_user.website %}
+                <span><i class="bi bi-link-45deg"></i>
+                    <a href="{{ current_user.website }}" target="_blank" id="website-display">
+                        {{ current_user.website }}
+                    </a>
+                </span>
+                {% else %}
+                <span id="website-display"></span>
+                {% endif %}
+
+                {% if current_user.location %}
+                <span><i class="bi bi-geo-alt"></i>
+                    <span id="location-display">{{ current_user.location }}</span>
+                </span>
+                {% else %}
+                <span id="location-display"></span>
+                {% endif %}
+            </div>
+
+            <button class="edit-bio-btn" onclick="showEditBio()">✏️ Edit Profile</button>
+        </div>
+
+        <!-- Bio edit form (hidden by default) -->
+        <div id="bio-edit" style="display:none;" class="bio-edit-form">
+            <textarea id="bio-input" rows="3"
+                placeholder="Write your bio...">{{ current_user.bio or '' }}</textarea>
+            <input type="text" id="website-input"
+                placeholder="Website URL"
+                value="{{ current_user.website or '' }}">
+            <input type="text" id="location-input"
+                placeholder="Location"
+                value="{{ current_user.location or '' }}">
+            <div class="bio-edit-actions">
+                <button class="btn-save" onclick="saveEditBio()">Save</button>
+                <button class="btn-cancel" onclick="cancelEditBio()">Cancel</button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ── Main Content Row ────────────────────────────────────────────── -->
-    <div class="row g-4">
+    <!-- TWO COLUMN LAYOUT -->
+    <div class="profile-body">
 
-        <!-- Left column: post composer and personal feed -->
-        <div class="col-lg-8">
-
-            <!-- ── Post Composer Card ──────────────────────────────────── -->
-            <div class="card mb-4 p-3">
-                <h6 class="mb-3">Share a coffee moment</h6>
-
-                <!-- Post body text -->
-                <textarea id="profile-post-text" class="form-control mb-2"
-                    placeholder="What are you brewing today?" rows="3"></textarea>
-
-                <!-- Cafe tag dropdown; options mirrored from home.html -->
-                <select id="profile-post-shop" class="form-select mb-2">
-                    <option value="">Tag a cafe...</option>
-                    {% for cafe in cafes %}
-                    <option>{{ cafe.name }}</option>
-                    {% endfor %}
-                </select>
-
-                <!-- Image aspect ratio selector; mirrors the modal on home.html -->
-                <select id="aspect-ratio" class="form-select mb-2">
-                    <option value="original">Original</option>
-                    <option value="square">Square (1:1)</option>
-                    <option value="portrait">Portrait (4:5)</option>
-                    <option value="landscape">Landscape (16:9)</option>
-                </select>
-
-                <!-- Image picker; triggers live preview via previewProfileImage() -->
-                <input type="file" id="profile-post-image" class="form-control mb-2"
-                    accept="image/*" onchange="previewProfileImage(event)">
-
-                <!-- Preview rendered here before submission; hidden until an image is chosen -->
-                <img id="profile-image-preview"
-                    style="width:100%; display:none; border-radius:10px; margin-top:8px; object-fit:cover;">
-
-                <!-- Calls submitProfilePost() which POSTs to the backend via AJAX -->
-                <button class="btn btn-primary-custom w-100 mt-2" onclick="submitProfilePost()">Post</button>
-            </div>
-
-            <!-- ── User's Post Feed ────────────────────────────────────── -->
-            <!-- profile.js fetches only the current user's posts and renders them here -->
-            <h5 class="mb-3">My Posts</h5>
-            <div id="profile-feed" class="feed"></div>
+        <!-- LEFT: Posts Grid -->
+        <div class="profile-posts-col">
+            <h4 class="profile-section-title">Posts</h4>
+            <div class="posts-grid" id="profile-posts"></div>
         </div>
 
-        <!-- Right column: reviews submitted by this user across all cafes -->
-        <div class="col-lg-4">
-            <h5 class="mb-3">My Reviews</h5>
-            <!-- profile.js populates this list; placeholder shown when no reviews exist -->
-            <div id="my-reviews-list">
-                <p class="text-muted small">No reviews yet. Visit a cafe and share your experience!</p>
+        <!-- RIGHT: Reviews -->
+        <div class="profile-reviews-col">
+            <h4 class="profile-section-title">Recent Reviews</h4>
+            <div id="profile-reviews">
+                <p style="color:var(--muted);font-size:0.9rem;">No reviews yet</p>
             </div>
         </div>
 
+    </div>
+
+</div>
+
+<!-- POST DETAIL MODAL -->
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
     </div>
 </div>
+
+<!-- Create post FAB -->
+<button class="fab" onclick="openModal()">
+    <i class="bi bi-plus-lg"></i>
+</button>
+
+<!-- Post creation modal -->
+<div id="create-post-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h4><i class="bi bi-pencil-square"></i> Create Post</h4>
+            <span class="close-btn" onclick="closeModal()">
+                <i class="bi bi-x-lg"></i>
+            </span>
+        </div>
+        <textarea id="modal-text" placeholder="Share your coffee moment..."></textarea>
+        <label><i class="bi bi-geo-alt-fill"></i> Cafe</label>
+        <select id="modal-shop">
+            {% for cafe in cafes %}
+            <option>{{ cafe.name }}</option>
+            {% endfor %}
+        </select>
+        <label><i class="bi bi-image-fill"></i> Image Style</label>
+        <select id="aspect-ratio">
+            <option value="original">Original</option>
+            <option value="square">Square (1:1)</option>
+            <option value="portrait">Portrait (4:5)</option>
+            <option value="landscape">Landscape (16:9)</option>
+        </select>
+        <input type="file" id="modal-image" accept="image/*" onchange="previewImage(event)">
+        <div class="preview-container">
+            <img id="image-preview">
+        </div>
+        <button class="post-btn" onclick="submitModalPost()">
+            Post <i class="bi bi-cup-hot"></i>
+        </button>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- social.js: shared feed rendering helpers (post cards, likes, comments) -->
+<script>
+    window.currentUser = "{{ current_user.username }}";
+</script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
-<!-- profile.js: avatar upload/removal, profile feed fetch, review list population -->
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile-reviews.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile-edit.js') }}"></script>
 {% endblock %}

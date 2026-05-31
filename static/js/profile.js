@@ -1,259 +1,220 @@
 /*
  * profile.js
- * Handles all functionality on the logged-in user's profile page including:
- * - Avatar upload, display and removal
- * - Post creation with image preview
- * - Loading and rendering the user's own posts
- * - Loading and displaying the user's cafe reviews
+ * Handles avatar upload, post grid loading and reviews
+ * for the logged-in user's own profile page (/profile)
+ * Works with the new profile.html layout
  */
 
 // ── Cafe Slug Helper ──────────────────────────────────────────────────────────
-// Maps a full cafe name to its URL-friendly slug used in shop page routes
 function cafeSlug(name) {
     const map = {
         'Blacklist Coffee Roasters': 'blacklist',
-        'La Veen Coffee': 'laveen',
-        'Venn Coffee': 'venn',
-        'Harvest Espresso': 'harvest',
-        'Telegram Cafe': 'telegram',
-        'Satchmo': 'satchmo',
-        'Mary Street Bakery': 'marystreet'
+        'La Veen Coffee':            'laveen',
+        'Venn Coffee':               'venn',
+        'Harvest Espresso':          'harvest',
+        'Telegram Cafe':             'telegram',
+        'Satchmo':                   'satchmo',
+        'Mary Street Bakery':        'marystreet'
     };
     return map[name] || '';
 }
 
-// ── Avatar State ──────────────────────────────────────────────────────────────
-// Tracks the current avatar URL in memory to avoid repeated API calls
-let currentAvatar = "";
-
-// Returns the currently stored avatar URL
-function getSavedAvatar() {
-    return currentAvatar;
-}
-
-// Fetches the current user's avatar URL from the backend API
-async function fetchAvatar() {
-    const response = await fetch('/api/avatar');
-    if (!response.ok) return '';
-    const data = await response.json();
-    return data.avatar || '';
-}
-
-// ── Avatar Rendering ──────────────────────────────────────────────────────────
-// Updates the profile page avatar UI based on whether a photo is set.
-// Shows the image and remove button when an avatar exists;
-// shows the initials placeholder when no avatar is set.
-function renderProfileAvatar() {
-    const avatar = currentAvatar;
-    const image = document.getElementById('profile-avatar-image');
-    const placeholder = document.getElementById('profile-avatar-placeholder');
-    const removeButton = document.getElementById('profile-avatar-remove');
-
-    if (avatar) {
-        image.src = avatar;
-        image.style.display = 'block';
-        placeholder.style.display = 'none';
-        removeButton.style.display = 'inline-block';
-    } else {
-        image.removeAttribute('src');
-        image.style.display = 'none';
-        placeholder.style.display = 'flex';
-        removeButton.style.display = 'none';
-    }
-
-    // Sync the navbar avatar with the profile page avatar
-    if (typeof window.updateNavbarAvatar === 'function') {
-        window.updateNavbarAvatar(avatar);
-    }
-}
-
 // ── Avatar Upload ─────────────────────────────────────────────────────────────
-// Handles the file input change event when the user selects a new profile photo.
-// Uploads the image to /api/avatar via POST and refreshes the avatar display.
-async function handleAvatarUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+// Listens for file selection on the hidden avatar file input
+// Uploads to /api/avatar and updates the avatar on screen
+document.addEventListener('DOMContentLoaded', () => {
 
-    const formData = new FormData();
-    formData.append('avatar', file);
+    const avatarInput = document.getElementById('avatar-file-input');
+    if (avatarInput) {
+        avatarInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    const response = await fetch('/api/avatar', {
-        method: 'POST',
-        body: formData
-    });
-    const data = await response.json();
+            const formData = new FormData();
+            formData.append('avatar', file);
 
-    if (!response.ok) {
-        alert(data.error || 'Could not upload profile picture.');
-        return;
+            try {
+                const response = await fetch('/api/avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showToast(data.error || 'Could not upload photo', 'error');
+                    return;
+                }
+
+                // Update avatar image on the profile page
+                const existingImg = document.getElementById('profile-avatar-img');
+                const fallback    = document.getElementById('profile-avatar-fallback');
+
+                if (existingImg) {
+                    // Already showing an image — just update src
+                    existingImg.src = data.avatar;
+                } else if (fallback) {
+                    // Replace the initials fallback with a real image
+                    fallback.outerHTML = `<img
+                        src="${data.avatar}"
+                        alt="avatar"
+                        class="profile-avatar"
+                        id="profile-avatar-img"
+                    >`;
+                }
+
+                // Also update the navbar avatar
+                const navAvatar = document.querySelector('[data-navbar-avatar]');
+                if (navAvatar) {
+                    navAvatar.innerHTML = `<img src="${data.avatar}"
+                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                }
+
+                showToast('Profile photo updated ✓', 'success');
+
+            } catch (err) {
+                console.error('Avatar upload error:', err);
+                showToast('Upload failed', 'error');
+            }
+
+            // Reset input so same file can be re-selected if needed
+            e.target.value = '';
+        });
     }
 
-    // Update the in-memory avatar and refresh the UI
-    currentAvatar = data.avatar || '';
-    renderProfileAvatar();
-    loadProfilePosts();   // Reload posts so new avatar appears on post cards
-    event.target.value = ''; // Reset the file input
-}
+    // ── Remove Avatar ─────────────────────────────────────────────────────────
+    // removeAvatar() is called from onclick in profile.html
+    window.removeAvatar = async function() {
+        if (!confirm('Remove your profile photo?')) return;
 
-// ── Avatar Removal ────────────────────────────────────────────────────────────
-// Sends a DELETE request to /api/avatar to remove the current profile photo.
-// Resets the avatar display to the initials placeholder.
-async function removeProfileAvatar() {
-    if (!confirm('Are you sure you want to remove your profile picture?')) return;
-    if (!currentAvatar) return;
+        try {
+            const response = await fetch('/api/avatar', { method: 'DELETE' });
+            const data     = await response.json();
 
-    const response = await fetch('/api/avatar', { method: 'DELETE' });
-    const data = await response.json();
+            if (!response.ok) {
+                showToast(data.error || 'Could not remove photo', 'error');
+                return;
+            }
 
-    if (!response.ok) {
-        alert(data.error || 'Could not remove profile picture.');
-        return;
-    }
+            // Replace image with initials fallback
+            const img = document.getElementById('profile-avatar-img');
+            if (img) {
+                img.outerHTML = `<div class="fallback-avatar" id="profile-avatar-fallback">
+                    ${window.currentUser.charAt(0).toUpperCase()}
+                </div>`;
+            }
 
-    currentAvatar = '';
-    renderProfileAvatar();
-    loadProfilePosts();
-}
+            // Reset navbar avatar to icon
+            const navAvatar = document.querySelector('[data-navbar-avatar]');
+            if (navAvatar) {
+                navAvatar.innerHTML = '<i class="bi bi-person-circle"></i>';
+            }
 
-// ── Image Preview ─────────────────────────────────────────────────────────────
-// Displays a live preview of the selected image before the post is submitted.
-// Applies the chosen aspect ratio to the preview element.
-function previewProfileImage(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        const img = document.getElementById("profile-image-preview");
-        const ratio = document.getElementById("aspect-ratio").value;
-        img.src = e.target.result;
-        img.style.display = "block";
-        // Apply the selected aspect ratio to the preview
-        if (ratio === "square")         img.style.aspectRatio = "1 / 1";
-        else if (ratio === "portrait")  img.style.aspectRatio = "4 / 5";
-        else if (ratio === "landscape") img.style.aspectRatio = "16 / 9";
-        else                            img.style.aspectRatio = "auto";
+            showToast('Profile photo removed', 'info');
+
+        } catch (err) {
+            console.error('Avatar remove error:', err);
+        }
     };
-    reader.readAsDataURL(file);
-}
 
-// ── Post Submission ───────────────────────────────────────────────────────────
-// Reads the post form fields, validates that text is present, and sends a
-// multipart POST request to /api/posts. Resets the form and reloads posts on success.
-async function submitProfilePost() {
-    const text = document.getElementById('profile-post-text').value.trim();
-    const shop = document.getElementById('profile-post-shop').value;
-    const imageInput = document.getElementById('profile-post-image');
+    // ── Load Profile Posts into Grid ──────────────────────────────────────────
+    // Fetches all posts, filters to current user, renders into posts-grid
+    loadProfilePosts();
 
-    if (!text) { alert('Please write something!'); return; }
+    // ── Load Reviews ──────────────────────────────────────────────────────────
+    loadMyReviews();
 
-    const formData = new FormData();
-    formData.append('text', text);
-    formData.append('shop', shop || '');
-    if (imageInput.files.length > 0) formData.append('image', imageInput.files[0]);
+    // ── Wire Post Modal Close ─────────────────────────────────────────────────
+    document.getElementById('close-modal')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
+    document.querySelector('#post-modal .modal-overlay')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
 
-    const response = await fetch('/api/posts', { method: 'POST', body: formData });
-    if (!response.ok) {
-        const data = await response.json();
-        alert(data.error || 'Could not create post');
-        return;
-    }
-
-    // Reset all form fields and hide the image preview
-    document.getElementById('profile-post-text').value = '';
-    document.getElementById('profile-post-shop').value = '';
-    imageInput.value = '';
-    document.getElementById('profile-image-preview').style.display = "none";
-    await loadProfilePosts();
-}
+});
 
 // ── Load Profile Posts ────────────────────────────────────────────────────────
-// Fetches all posts from the API and filters to only the current user's posts.
-// Renders each post into the profile feed container using renderPost() from social.js.
+// Fetches posts from API, filters to current user, renders as grid
 function loadProfilePosts() {
-    fetch("/api/posts")
+    fetch('/api/posts')
         .then(res => res.json())
         .then(posts => {
-            const feed = document.getElementById("profile-feed");
-            if (!feed) return;
-            feed.innerHTML = "";
+            const grid = document.getElementById('profile-posts');
+            if (!grid) return;
 
-            // Filter to only posts authored by the current logged-in user
+            // Filter to only this user's posts
             const myPosts = posts.filter(
                 p => p.username === window.currentUser || p.owner === window.currentUser
             );
 
+            // Update post count in stats
+            const countEl = document.getElementById('posts-count');
+            if (countEl) countEl.textContent = myPosts.length;
+
             if (myPosts.length === 0) {
-                feed.innerHTML = "<p class='text-muted'>No posts yet. Share your first coffee moment!</p>";
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted);">
+                        <i class="bi bi-camera" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                        No posts yet — create one with the + button
+                    </div>`;
                 return;
             }
 
-            myPosts.forEach(post => renderPost(post, "profile-feed"));
+            // Render each post using the profile grid mode from social.js
+            grid.innerHTML = '';
+            myPosts.forEach(post => renderPost(post, 'profile-posts', 'profile'));
         })
-        .catch(err => console.error("Profile load error:", err));
+        .catch(err => console.error('Profile posts error:', err));
 }
 
-// ── Event Listeners ───────────────────────────────────────────────────────────
-// Wire the file input and remove button to their respective handler functions
-document.getElementById('profile-avatar-upload').addEventListener('change', handleAvatarUpload);
-document.getElementById('profile-avatar-remove').addEventListener('click', removeProfileAvatar);
-
-// ── Page Initialisation ───────────────────────────────────────────────────────
-// On page load: fetch the avatar, render it, load posts and load reviews
-window.onload = async function () {
-    currentAvatar = await fetchAvatar();
-    renderProfileAvatar();
-    loadProfilePosts();
-    loadMyReviews();
-};
-
-// Reload reviews when the user returns to this tab (e.g. after deleting on shop page)
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') loadMyReviews();
-});
-
-// Reload reviews when navigating back via browser history (bfcache restore)
-window.addEventListener('pageshow', (e) => {
-    if (e.persisted) loadMyReviews();
-});
-
 // ── Load My Reviews ───────────────────────────────────────────────────────────
-// Fetches all reviews submitted by the current user from the database API.
-// Clears any legacy localStorage reviews on each load.
-// Renders each review as a card with a link to the cafe page for deletion.
+// Fetches reviews by current user and renders into profile-reviews container
 function loadMyReviews() {
-    // Remove old localStorage reviews from before the database migration
     localStorage.removeItem('shopReviews');
 
-    const container = document.getElementById('my-reviews-list');
+    const container = document.getElementById('profile-reviews');
     if (!container) return;
 
     fetch(`/api/reviews/${window.currentUser}`)
         .then(res => res.json())
         .then(reviews => {
             if (reviews.length === 0) {
-                container.innerHTML = "<p class='text-muted small'>No reviews yet. Visit a cafe and share your experience!</p>";
+                container.innerHTML = `
+                    <p style="color:var(--muted);font-size:0.85rem;">
+                        No reviews yet
+                    </p>`;
                 return;
             }
 
-            // Render each review as a Bootstrap card with star rating and cafe link
             container.innerHTML = reviews.map(r => `
-                <div class="card p-3 mb-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <strong>${r.shop}</strong>
-                        <span style="color:var(--caramel);">
-                            ${'<i class="bi bi-star-fill"></i>'.repeat(r.rating)}
-                            ${'<i class="bi bi-star"></i>'.repeat(5 - r.rating)}
+                <div style="
+                    background:var(--surface, #fff);
+                    border:1px solid rgba(196,122,43,0.15);
+                    border-radius:10px;
+                    padding:12px 14px;
+                    margin-bottom:10px;
+                ">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <strong style="font-size:0.9rem;">${r.shop}</strong>
+                        <span style="color:var(--caramel);font-size:0.8rem;">
+                            ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
                         </span>
                     </div>
-                    <p class="small text-muted mb-0">${r.text}</p>
-                    <!-- Link to the cafe shop page where the user can delete their review -->
+                    <p style="font-size:0.82rem;color:var(--muted);margin:0 0 6px;">${r.text}</p>
                     <a href="/shop/${cafeSlug(r.shop)}"
-                       class="small mt-1"
-                       style="color:var(--caramel);display:block;">
-                        Visit ${r.shop} to delete this review →
+                       style="font-size:0.78rem;color:var(--caramel);text-decoration:none;">
+                        Visit ${r.shop} to delete →
                     </a>
                 </div>
             `).join('');
         })
-        .catch(err => console.error('Error loading reviews:', err));
+        .catch(err => console.error('Reviews error:', err));
 }
+
+// ── Reload on tab focus / bfcache restore ─────────────────────────────────────
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') loadMyReviews();
+});
+window.addEventListener('pageshow', e => {
+    if (e.persisted) loadMyReviews();
+});

@@ -1,0 +1,329 @@
+/* ── PROFILE PAGE ────────────────────────────────────────────── */
+
+.profile-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--caramel);
+    margin-bottom: 1rem;
+}
+
+.fallback-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--caramel);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    border: 3px solid var(--caramel);
+}
+
+.profile-username {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+}
+
+.profile-stats {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.profile-stats strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* Bio section */
+.bio-text {
+    color: var(--muted);
+    font-size: 0.9rem;
+    max-width: 400px;
+    margin: 0 auto 8px;
+}
+
+.edit-bio-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    margin-top: 4px;
+    transition: all 0.2s;
+}
+
+.edit-bio-btn:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+}
+
+/* Bio edit form */
+.bio-edit-form {
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+}
+
+.bio-edit-form textarea,
+.bio-edit-form input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-top: 6px;
+    resize: none;
+}
+
+.bio-edit-form textarea:focus,
+.bio-edit-form input:focus {
+    outline: none;
+    border-color: var(--caramel);
+}
+
+.bio-edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.btn-save {
+    background: var(--caramel);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-save:hover { opacity: 0.85; }
+
+.btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 18px;
+    cursor: pointer;
+    color: var(--text);
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    border-color: var(--caramel);
+}
+
+/* Website and location */
+.profile-meta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 8px 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.profile-meta a {
+    color: var(--caramel);
+    text-decoration: none;
+}
+
+.profile-meta a:hover {
+    text-decoration: underline;
+}
+
+/* Back button */
+.back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 16px;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.back-home-btn:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+}
+
+/* Posts grid */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.grid-post {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.grid-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.grid-post:hover .grid-image {
+    transform: scale(1.05);
+}
+
+.grid-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--roast), var(--caramel));
+    color: white;
+    font-size: 0.8rem;
+    padding: 12px;
+    text-align: center;
+}
+
+/* Post modal */
+.post-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-modal.hidden {
+    display: none;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--surface);
+    border-radius: var(--radius);
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    z-index: 1;
+    padding: 1.5rem;
+}
+
+.close-modal {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--text);
+    z-index: 2;
+    line-height: 1;
+}
+
+/* Two column layout */
+.profile-body {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.profile-posts-col {
+    flex: 3;
+    min-width: 0;
+}
+
+.profile-reviews-col {
+    flex: 1;
+    min-width: 220px;
+    max-width: 260px;
+    position: sticky;
+    top: 90px;
+}
+
+.profile-section-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+/* Avatar upload controls */
+.avatar-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.avatar-upload-btn,
+.avatar-remove-btn {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    transition: all 0.2s;
+}
+
+.avatar-upload-btn:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+}
+
+.avatar-remove-btn:hover {
+    border-color: #e53935;
+    color: #e53935;
+}

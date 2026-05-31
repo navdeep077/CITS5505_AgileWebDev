@@ -20,7 +20,9 @@ body {
     padding: 0 20px;
     gap: 30px;
 }
-
+.post-modal.hidden {
+    display: none !important;
+}
 /* ── Left Sidebar ─────────────────────────────────────────────────────── */
 /* Sticky sidebar showing trending cafes — offset slightly left */
 .sidebar-left {
@@ -154,8 +156,9 @@ body {
 /* Fixed position + button in the bottom-right corner for creating new posts */
 .fab {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 500;
     width: 55px;
     height: 55px;
     border-radius: 50%;

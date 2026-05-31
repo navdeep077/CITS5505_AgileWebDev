@@ -1,0 +1,195 @@
+/* ── EXPLORE PAGE ────────────────────────────────────────────── */
+
+.explore-hero {
+    background: linear-gradient(140deg, var(--espresso) 0%, var(--roast) 100%);
+    padding: 3rem 0 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.explore-hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--latte);
+    font-size: 2rem;
+}
+
+.explore-hero p {
+    color: rgba(232,201,154,0.7);
+}
+
+.explore-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.explore-tab {
+    padding: 8px 20px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.explore-tab.active,
+.explore-tab:hover {
+    background: var(--caramel);
+    border-color: var(--caramel);
+    color: white;
+}
+
+.explore-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+@media (max-width: 600px) {
+    .explore-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.explore-item {
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: var(--surface);
+}
+
+.explore-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.explore-item:hover img {
+    transform: scale(1.05);
+}
+
+.explore-item-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.explore-item:hover .explore-item-overlay {
+    opacity: 1;
+}
+
+.explore-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--roast), var(--caramel));
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 12px;
+    text-align: center;
+}
+
+/* Suggested users */
+.suggested-section {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.suggested-user-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+}
+
+.suggested-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--caramel);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.suggested-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.follow-btn {
+    margin-left: auto;
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--caramel);
+    background: none;
+    color: var(--caramel);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.follow-btn:hover,
+.follow-btn.following {
+    background: var(--caramel);
+    color: white;
+}
+
+.explore-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+}
+
+.trending-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.trending-tags span {
+    background: rgba(196,122,43,0.12);
+    color: var(--caramel);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 4px;
+}

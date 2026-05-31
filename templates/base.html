@@ -1,104 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Dynamic page title injected by child templates -->
     <title>{% block title %}Coffee Social Hub{% endblock %}</title>
 
-    <!-- Google Fonts: Cormorant Garamond for headings, DM Sans for body text -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap 5 CSS for grid and utility classes -->
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 
-    <!-- Bootstrap Icons for consistent iconography across the app -->
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Global site-wide stylesheet containing CSS variables and shared components -->
+    <!-- Global CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
 
-    <!-- Slot for page-specific stylesheets injected by child templates -->
+    <!-- Page specific CSS -->
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    <!-- NAVBAR: shared navigation bar across all pages -->
-    <!-- Collapses into a hamburger menu on smaller screens via Bootstrap -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
+<!-- TOP NAVBAR — hidden on mobile (mobile uses bottom navbar) -->
+<nav class="navbar navbar-expand-lg d-none d-lg-flex">
+    <div class="container">
 
-            <!-- Brand link only shown when no user is logged in -->
-            {% if not session.get('user') %}
-            <a class="navbar-brand" href="{{ url_for('landing') }}">Coffee Social Hub</a>
-            {% endif %}
+        {% if not session.get('user') %}
+        <a class="navbar-brand" href="{{ url_for('landing') }}">
+            ☕ Coffee Social Hub
+        </a>
+        {% endif %}
 
-            <!-- Hamburger toggle button for mobile viewports -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-                <span class="navbar-toggler-icon"></span>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            {% if session.get("user") %}
+
+            <!-- Search bar in navbar -->
+            <div class="navbar-search">
+                <i class="bi bi-search"></i>
+                <input type="text" id="navbar-search-input" placeholder="Search users or cafes...">
+                <div id="navbar-search-results" class="search-dropdown"></div>
+            </div>
+
+            <!-- Navigation links -->
+            <a href="{{ url_for('home') }}" class="nav-icon-btn" title="Home">
+                <i class="bi bi-house"></i>
+            </a>
+            <a href="{{ url_for('explore') }}" class="nav-icon-btn" title="Explore">
+                <i class="bi bi-compass"></i>
+            </a>
+            <a href="{{ url_for('bookmarks') }}" class="nav-icon-btn" title="Bookmarks">
+                <i class="bi bi-bookmark"></i>
+            </a>
+
+            <!-- Notifications bell -->
+            <a href="{{ url_for('notifications') }}" class="nav-icon-btn position-relative" title="Notifications">
+                <i class="bi bi-bell"></i>
+                <span class="notif-badge" id="notif-count" style="display:none"></span>
+            </a>
+
+            <!-- Dark mode toggle -->
+            <button class="nav-icon-btn" id="dark-mode-toggle" title="Toggle dark mode">
+                <i class="bi bi-moon"></i>
             </button>
 
-            <div class="collapse navbar-collapse" id="navMenu">
-                <ul class="navbar-nav ms-auto align-items-center gap-2">
+            <!-- Profile -->
+            <a href="{{ url_for('profile') }}" class="nav-profile-link">
+    <span class="nav-profile-avatar" data-navbar-avatar>
+        <i class="bi bi-person-circle"></i>
+    </span>
+    <span>{{ session.get('user') }}</span>
+</a>
 
-                    {% if session.get("user") %}
-                    <!-- Authenticated state: show profile link and logout button -->
-                    <li class="nav-item">
-                        <a class="nav-link nav-profile-link" href="{{ url_for('profile') }}">
-                            <!-- Avatar slot populated dynamically by navbar.js -->
-                            <!-- Falls back to person icon if no avatar is set -->
-                            <span class="nav-profile-avatar" data-navbar-avatar>
-                                <i class="bi bi-person-circle"></i>
-                            </span>
-                            <span>{{ session.get('user') }}</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-nav" href="{{ url_for('logout') }}">Logout</a>
-                    </li>
+            <!-- Logout -->
+            <a class="btn btn-nav" href="{{ url_for('logout') }}">Logout</a>
 
-                    {% else %}
-                    <!-- Unauthenticated state: show single Login / Sign Up CTA -->
-                    <li class="nav-item">
-                        <a class="btn btn-nav" href="{{ url_for('login') }}">Login / Sign Up</a>
-                    </li>
-                    {% endif %}
-
-                </ul>
-            </div>
+            {% else %}
+            <a class="btn btn-nav" href="{{ url_for('login') }}">Login / Sign Up</a>
+            {% endif %}
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <!-- PAGE CONTENT: each child template fills this block with its own HTML -->
-    {% block content %}{% endblock %}
+<!-- MOBILE TOP BAR — only on mobile -->
+{% if session.get('user') %}
+<div class="mobile-top-bar d-flex d-lg-none">
+    <span class="mobile-brand">☕ Coffee Hub</span>
+    <div class="d-flex gap-3 align-items-center">
+        <button class="nav-icon-btn" id="dark-mode-toggle-mobile">
+            <i class="bi bi-moon"></i>
+        </button>
+        <a href="{{ url_for('notifications') }}" class="nav-icon-btn position-relative">
+            <i class="bi bi-bell"></i>
+            <span class="notif-badge" id="notif-count-mobile" style="display:none"></span>
+        </a>
+    </div>
+</div>
+{% endif %}
 
-    <!-- FOOTER: shown on every page -->
-    <footer>
-        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <span class="footer-brand">Coffee Social Hub</span>
-            <span class="footer-note">CITS5505 Group Project · UWA 2026</span>
-        </div>
-    </footer>
+<!-- CONTENT -->
+{% block content %}{% endblock %}
 
-    <!-- Bootstrap JS bundle includes Popper, required for modals and dropdowns -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- MOBILE BOTTOM NAVBAR — only shows when logged in -->
+{% if session.get('user') %}
+<nav class="mobile-bottom-nav d-flex d-lg-none">
+    <a href="{{ url_for('home') }}" class="mobile-nav-item">
+        <i class="bi bi-house-fill"></i>
+        <span>Home</span>
+    </a>
+    <a href="{{ url_for('explore') }}" class="mobile-nav-item">
+        <i class="bi bi-compass-fill"></i>
+        <span>Explore</span>
+    </a>
+    <a href="{{ url_for('brew') }}" class="mobile-nav-item">
+        <i class="bi bi-cup-hot-fill"></i>
+        <span>Brew</span>
+    </a>
+    <a href="{{ url_for('bookmarks') }}" class="mobile-nav-item">
+        <i class="bi bi-bookmark-fill"></i>
+        <span>Saved</span>
+    </a>
+    <a href="{{ url_for('profile') }}" class="mobile-nav-item">
+        <i class="bi bi-person-fill"></i>
+        <span>Profile</span>
+    </a>
+</nav>
+{% endif %}
 
-    <!-- Expose the logged-in username to all client-side JS as a global variable -->
-    <!-- Outputs null when no user is in session -->
-    <script>
-        window.currentUser = {{ session.get('user') | tojson }};
-    </script>
+<!-- TOAST NOTIFICATION -->
+<div id="toast-container"></div>
 
-    <!-- navbar.js: fetches and renders the user avatar in the navigation bar -->
-    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- delete.js: handles post and review deletion requests across all pages -->
-    <script src="{{ url_for('static', filename='js/delete.js') }}"></script>
+<script>
+    window.currentUser = {{ session.get('user') | tojson }};
+    window.routes = {
+        landing: "{{ url_for('landing') }}"
+    };
+</script>
 
-    <!-- Slot for page-specific scripts injected by child templates -->
-    {% block extra_js %}{% endblock %}
+<!-- Global JS files -->
+<script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/delete.js') }}"></script>
+<script src="{{ url_for('static', filename='js/darkmode.js') }}"></script>
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script src="{{ url_for('static', filename='js/notifications-count.js') }}"></script>
+
+{% block extra_js %}{% endblock %}
 
 </body>
 </html>

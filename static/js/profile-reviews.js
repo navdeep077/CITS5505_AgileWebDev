@@ -1,46 +1,45 @@
 /*
  * profile-reviews.js
- * Loads and renders cafe reviews for a public user profile page.
- * Used on /user/<username> to show reviews submitted by that user.
- * Fetches from the database API so reviews are visible to all users
- * regardless of which browser or device they are using.
+ * Loads and renders reviews on the PUBLIC user profile page (/user/<username>)
+ * Uses window.profileUsername set by user-profile.html
+ * Also used on own profile page — uses window.currentUser as fallback
  */
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Remove any legacy localStorage reviews from before the DB migration
     localStorage.removeItem('shopReviews');
 
-    const reviewContainer = document.getElementById('profile-reviews');
-    if (!reviewContainer) return;
+    const container = document.getElementById('profile-reviews');
+    if (!container) return;
 
-    // Username of the profile being viewed — set in user-profile.html as a global
-    const username = window.profileUsername;
+    // Use profileUsername for public profiles, currentUser for own profile
+    const username = window.profileUsername || window.currentUser;
+    if (!username) return;
 
-    // Fetch all reviews submitted by this user from the backend API
     fetch(`/api/reviews/${username}`)
         .then(res => res.json())
         .then(reviews => {
             if (reviews.length === 0) {
-                reviewContainer.innerHTML = "<p>No reviews yet</p>";
+                container.innerHTML = '<p style="color:var(--muted);font-size:0.9rem;">No reviews yet</p>';
                 return;
             }
 
-            reviewContainer.innerHTML = '';
-
-            // Render each review as a card showing cafe name, star rating and text
-            reviews.forEach(r => {
-                const div = document.createElement('div');
-                div.className = 'review-card';
-                div.innerHTML = `
-                    <strong>${r.shop}</strong>
-                    <!-- Star rating using filled and empty star characters -->
-                    <div style="color:var(--caramel)">
-                        ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+            container.innerHTML = reviews.map(r => `
+                <div style="
+                    background:rgba(196,122,43,0.04);
+                    border:1px solid rgba(196,122,43,0.15);
+                    border-radius:10px;
+                    padding:12px 14px;
+                    margin-bottom:10px;
+                ">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <strong style="font-size:0.9rem;color:var(--text, #1a0e00);">${r.shop}</strong>
+                        <span style="color:var(--caramel);font-size:0.85rem;">
+                            ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+                        </span>
                     </div>
-                    <p style="font-size:0.85rem;color:var(--muted)">${r.text}</p>
-                `;
-                reviewContainer.appendChild(div);
-            });
+                    <p style="font-size:0.82rem;color:var(--muted);margin:0;">${r.text}</p>
+                </div>
+            `).join('');
         })
-        .catch(err => console.error('Error loading reviews:', err));
+        .catch(err => console.error('Profile reviews error:', err));
 });

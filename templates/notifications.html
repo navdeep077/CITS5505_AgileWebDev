@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Notifications | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="notif-hero">
+    <h1><i class="bi bi-bell-fill"></i> Notifications</h1>
+    <p>What has been happening</p>
+</div>
+
+<div class="container" style="max-width:640px;">
+
+    <div id="notif-list">
+        <!-- Skeleton loading -->
+        <div class="notif-card">
+            <div class="skeleton skeleton-avatar"></div>
+            <div style="flex:1;">
+                <div class="skeleton skeleton-line" style="width:70%;"></div>
+                <div class="skeleton skeleton-line" style="width:30%;"></div>
+            </div>
+        </div>
+        <div class="notif-card">
+            <div class="skeleton skeleton-avatar"></div>
+            <div style="flex:1;">
+                <div class="skeleton skeleton-line" style="width:60%;"></div>
+                <div class="skeleton skeleton-line" style="width:25%;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+{% endblock %}
