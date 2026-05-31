@@ -3,6 +3,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/user-profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -23,44 +24,45 @@
 
         <p class="profile-stats">
             <strong>{{ posts|length }}</strong> posts
-            •
+            &nbsp;•&nbsp;
             <strong>{{ total_likes }}</strong> likes
         </p>
 
-        <!-- Back to Home button under the stats -->
-        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary btn-sm mt-2">
-            ← Back to Home
+        <!-- Back button -->
+        <a href="javascript:history.back()" class="back-home-btn" style="margin-top:0.75rem;">
+            <i class="bi bi-arrow-left"></i> Back
         </a>
-        <!-- Block user button -->
-<button
-    id="block-btn"
-    onclick="toggleBlock('{{ profile_user.username }}')"
-    style="
-        background:none;
-        border:1px solid #e53935;
-        color:#e53935;
-        border-radius:8px;
-        padding:6px 16px;
-        font-size:0.82rem;
-        cursor:pointer;
-        margin-top:8px;
-        transition:all 0.2s;
-    ">
-    🚫 Block User
-</button>
+
+        <!-- Block button -->
+        <button
+            id="block-btn"
+            onclick="toggleBlock('{{ profile_user.username }}')"
+            style="
+                background:none;
+                border:1px solid #e53935;
+                color:#e53935;
+                border-radius:8px;
+                padding:6px 16px;
+                font-size:0.82rem;
+                cursor:pointer;
+                margin-top:8px;
+                transition:all 0.2s;
+            ">
+            🚫 Block User
+        </button>
     </div>
 
-    <!-- TWO COLUMN LAYOUT: Posts left, Reviews right -->
-    <div style="display:flex; gap:0; align-items:flex-start; margin-top:2rem; padding:0 2rem;">
+    <!-- TWO COLUMN LAYOUT -->
+    <div style="display:flex;gap:0;align-items:flex-start;margin-top:2rem;padding:0 2rem;">
 
-        <!-- LEFT: Posts Grid (wider) -->
-        <div style="flex:4; min-width:0;">
+        <!-- LEFT: Posts Grid -->
+        <div style="flex:4;min-width:0;">
             <h4 style="margin-bottom:1rem;">Posts</h4>
             <div class="posts-grid" id="profile-posts"></div>
         </div>
 
-        <!-- RIGHT: Reviews (narrower, pushed to the right) -->
-        <div style="flex:1; min-width:200px; max-width:240px; position:sticky; top:90px; padding-left:1rem;">
+        <!-- RIGHT: Reviews -->
+        <div style="flex:1;min-width:200px;max-width:240px;position:sticky;top:90px;padding-left:1rem;">
             <h4 style="margin-bottom:1rem;">Recent Reviews</h4>
             <div id="profile-reviews">
                 <p class="text-muted small">No reviews yet</p>
@@ -70,36 +72,43 @@
     </div>
 </div>
 
+<!-- POST MODAL -->
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 
 <script>
+    window.profileUsername = "{{ profile_user.username }}";
     window.profilePosts = [
         {% for post in posts %}
         {
-            id: "{{ post.id }}",
+            id: {{ post.id }},
             username: "{{ profile_user.username }}",
+            avatar: "{{ profile_user.avatar or '' }}",
             image: "{{ post.image or '' }}",
-            text: `{{ post.text or '' }}`,
+            text: `{{ post.text | replace('`', '\\`') or '' }}`,
             likes: {{ post.likes or 0 }},
-            liked_by: [
-                {% for user in post.liked_by %}
-                "{{ user }}"
-                {% if not loop.last %},{% endif %}
-                {% endfor %}
-            ],
+            view_count: {{ post.view_count or 0 }},
+            hashtags: {{ post.hashtags.split(',') | tojson if post.hashtags else '[]' }},
+            liked_by: {{ post.liked_by.split(',') | tojson if post.liked_by else '[]' }},
             comments: [
                 {% for c in post.comments %}
                 {
-                    id: "{{ c.id }}",
+                    id: {{ c.id }},
                     username: "{{ c.username }}",
-                    text: `{{ c.text }}`,
-                    time: "{{ c.time }}"
-                }
-                {% if not loop.last %},{% endif %}
+                    text: `{{ c.text | replace('`', '\\`') }}`,
+                    time: "{{ c.created_at.isoformat() }}"
+                }{% if not loop.last %},{% endif %}
                 {% endfor %}
-            ]
-        }
-        {% if not loop.last %},{% endif %}
+            ],
+            created_at: "{{ post.created_at.isoformat() }}"
+        }{% if not loop.last %},{% endif %}
         {% endfor %}
     ];
 
@@ -111,43 +120,34 @@
         document.getElementById("close-modal")?.addEventListener("click", () => {
             document.getElementById("post-modal").classList.add("hidden");
         });
-        document.querySelector(".modal-overlay")?.addEventListener("click", () => {
+        document.querySelector("#post-modal .modal-overlay")?.addEventListener("click", () => {
             document.getElementById("post-modal").classList.add("hidden");
         });
     });
-</script>
 
-<div id="post-modal" class="post-modal hidden">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-        <button id="close-modal" class="close-modal">×</button>
-        <div id="modal-post-container"></div>
-    </div>
-</div>
-
-<script>
-    window.profileUsername = "{{ profile_user.username }}";
     function toggleBlock(username) {
-    if (!confirm(`Block ${username}? Their posts will be hidden from your feed.`)) return;
-
-    fetch(`/api/block/${username}`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            const btn = document.getElementById('block-btn');
-            if (data.blocked) {
-                btn.textContent = '✅ Blocked';
-                btn.style.borderColor = 'var(--muted)';
-                btn.style.color = 'var(--muted)';
-                showToast(`${username} has been blocked`, 'info');
-            } else {
-                btn.textContent = '🚫 Block User';
-                btn.style.borderColor = '#e53935';
-                btn.style.color = '#e53935';
-                showToast(`${username} has been unblocked`, 'info');
-            }
-        })
-        .catch(err => console.error('Block error:', err));
-}
+        if (!confirm(`Block ${username}? Their posts will be hidden from your feed.`)) return;
+        fetch(`/api/block/${username}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                const btn = document.getElementById('block-btn');
+                if (data.blocked) {
+                    btn.textContent = '✅ Blocked';
+                    btn.style.borderColor = 'var(--muted)';
+                    btn.style.color = 'var(--muted)';
+                    showToast(`${username} has been blocked`, 'info');
+                    setTimeout(() => {
+                        window.location.href = '/home';
+                    }, 1500);
+                } else {
+                    btn.textContent = '🚫 Block User';
+                    btn.style.borderColor = '#e53935';
+                    btn.style.color = '#e53935';
+                    showToast(`${username} has been unblocked`, 'info');
+                }
+            })
+            .catch(err => console.error('Block error:', err));
+    }
 </script>
 
 <script src="{{ url_for('static', filename='js/profile-reviews.js') }}"></script>

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Blocked | Coffee Social Hub{% endblock %}
+
+{% block content %}
+<div style="
+    max-width:480px;
+    margin:4rem auto;
+    text-align:center;
+    padding:2rem;
+    background:var(--surface,#fff);
+    border-radius:16px;
+    border:1px solid rgba(196,122,43,0.15);
+    box-shadow:0 4px 20px rgba(26,14,0,0.08);
+">
+    <div style="font-size:3rem;margin-bottom:1rem;">🚫</div>
+    <h2 style="color:var(--espresso,#1a0e00);">User Blocked</h2>
+    <p style="color:var(--muted);margin:1rem 0;">
+        You have blocked <strong>{{ username }}</strong>.
+        You cannot view their profile.
+    </p>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
+        <a href="{{ url_for('home') }}" style="
+            background:var(--caramel,#c47a2b);
+            color:white;
+            padding:10px 24px;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:600;
+            font-size:0.9rem;
+        ">
+            Go Home
+        </a>
+        <button
+            onclick="unblockAndVisit('{{ username }}')"
+            style="
+                background:none;
+                border:1px solid rgba(196,122,43,0.3);
+                border-radius:8px;
+                padding:10px 20px;
+                cursor:pointer;
+                color:var(--caramel,#c47a2b);
+                font-weight:600;
+                font-size:0.9rem;
+            ">
+            Unblock {{ username }}
+        </button>
+    </div>
+</div>
+
+<script>
+function unblockAndVisit(username) {
+    fetch(`/api/block/${username}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(() => {
+            window.location.href = `/user/${username}`;
+        });
+}
+</script>
+{% endblock %}
