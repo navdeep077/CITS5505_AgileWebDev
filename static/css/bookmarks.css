@@ -34,3 +34,6 @@
     margin-bottom: 0.5rem;
     color: var(--text);
 }
+.post-modal.hidden {
+    display: none !important;
+}
