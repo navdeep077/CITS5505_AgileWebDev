@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline | Coffee Social Hub</title>
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #1a0e00;
+            color: #e8c99a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 2rem;
+        }
+        h1 { font-size: 2rem; margin-bottom: 1rem; }
+        p  { color: rgba(232,201,154,0.7); margin-bottom: 2rem; }
+        button {
+            background: #c47a2b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div style="font-size:4rem;margin-bottom:1rem;">☕</div>
+        <h1>You are offline</h1>
+        <p>No internet connection detected.<br>Check your connection and try again.</p>
+        <button onclick="window.location.reload()">Try Again</button>
+    </div>
+</body>
+</html>

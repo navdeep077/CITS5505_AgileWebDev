@@ -130,6 +130,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#post-modal .modal-overlay')?.addEventListener('click', () => {
         document.getElementById('post-modal').classList.add('hidden');
     });
+    // Load XP and badges
+fetch('/api/profile/xp')
+    .then(res => res.json())
+    .then(data => {
+        const section = document.getElementById('xp-section');
+        if (!section) return;
+        section.style.display = 'block';
+        document.getElementById('xp-level-title').textContent =
+            `Level ${data.level} — ${data.title}`;
+        document.getElementById('xp-amount').textContent = data.xp;
+
+        const badgeContainer = document.getElementById('profile-badges');
+        if (data.badges.length > 0) {
+            badgeContainer.innerHTML = data.badges.map(b =>
+                `<span class="badge-pill">${b}</span>`
+            ).join('');
+        }
+    })
+    .catch(err => console.error('XP load error:', err));
 
 });
 

@@ -17,6 +17,7 @@ import cloudinary.uploader
 from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timedelta
 import re
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, JournalEntry
 
 # ── Application Factory ───────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -141,6 +142,25 @@ def serialize_post(post):
         "time": f"post-{post.id}"
     }
 
+# ── XP SYSTEM ─────────────────────────────────────────────────────────────────
+
+XP_VALUES = {
+    'post':        10,   # creating a post
+    'review':      15,   # submitting a review
+    'like_given':   2,   # giving a like
+    'like_received': 5,  # receiving a like on your post
+    'comment':      3,   # commenting on a post
+    'follower':     8,   # someone follows you
+}
+
+def award_xp(user, action):
+    """Award XP to a user for an action and check badges"""
+    points = XP_VALUES.get(action, 0)
+    if points == 0:
+        return
+    user.xp = (user.xp or 0) + points
+    user.check_and_award_badges()
+    db.session.commit()
 
 # ── Email Helpers ─────────────────────────────────────────────────────────────
 
@@ -538,6 +558,8 @@ def api_posts():
     )
     db.session.add(post)
     db.session.commit()
+    # Award XP for creating a post
+    award_xp(user, 'post')
     return jsonify(serialize_post(post)), 201
 
 
@@ -594,6 +616,14 @@ def like_post(post_id):
             db.session.add(notif)
     post.liked_by = ",".join(filter(None, liked_users))
     db.session.commit()
+    # Award XP to liker and post author
+    if liked:
+        liker = get_current_user()
+        if liker:
+            award_xp(liker, 'like_given')
+        post_author = User.query.get(post.user_id)
+        if post_author:
+            award_xp(post_author, 'like_received')
     return jsonify({"likes": post.likes, "liked": liked})
 
 
@@ -676,6 +706,10 @@ def submit_review():
     review = Review(username=current_user, shop=shop, rating=rating, text=text)
     db.session.add(review)
     db.session.commit()
+    # Award XP for submitting a review
+    current_user_obj = get_current_user()
+    if current_user_obj:
+        award_xp(current_user_obj, 'review')
     return jsonify({"message": "Review submitted"}), 201
 
 
@@ -756,7 +790,10 @@ def follow_user(username):
         notif = Notification(user_id=target.id, actor_id=current.id, type='follow')
         db.session.add(notif)
         db.session.commit()
+        # Award XP to the person being followed
+        award_xp(target, 'follower')
         return jsonify({"following": True, "followers": target.follower_count()})
+
 
 
 @app.route("/api/followers/<username>", methods=["GET"])
@@ -1101,6 +1138,211 @@ def get_blocked_users():
             blocked_users.append({"username": blocked.username})
     return jsonify(blocked_users)
 
+# ── XP AND PROFILE API ────────────────────────────────────────────────────────
+
+@app.route("/api/profile/xp", methods=["GET"])
+def get_profile_xp():
+    """Returns XP, level and badges for current user"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    level_info = current.get_level()
+    return jsonify({
+        "xp":     current.xp or 0,
+        "level":  level_info["level"],
+        "title":  level_info["title"],
+        "next":   level_info["next"],
+        "badges": current.get_badges()
+    })
+
+
+@app.route("/api/leaderboard", methods=["GET"])
+def leaderboard():
+    """Returns top 20 users by XP"""
+    users = User.query.order_by(
+        (User.xp or 0).desc()
+    ).limit(20).all()
+    result = []
+    for i, u in enumerate(users):
+        level_info = u.get_level()
+        result.append({
+            "rank":       i + 1,
+            "username":   u.username,
+            "avatar":     u.avatar or "",
+            "xp":         u.xp or 0,
+            "level":      level_info["level"],
+            "title":      level_info["title"],
+            "badges":     u.get_badges(),
+            "post_count": len(u.posts),
+        })
+    return jsonify(result)
+
+
+# ── COFFEE JOURNAL API ────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/journal", methods=["GET", "POST"])
+def journal():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if request.method == "GET":
+        entries = JournalEntry.query.filter_by(
+            user_id=current.id
+        ).order_by(JournalEntry.created_at.desc()).all()
+        return jsonify([{
+            "id":         e.id,
+            "cafe":       e.cafe,
+            "visit_date": e.visit_date,
+            "brew_type":  e.brew_type,
+            "mood":       e.mood,
+            "rating":     e.rating,
+            "notes":      e.notes,
+            "created_at": e.created_at.isoformat()
+        } for e in entries])
+
+    data  = request.get_json()
+    entry = JournalEntry(
+        user_id    = current.id,
+        cafe       = data.get("cafe", ""),
+        visit_date = data.get("visit_date", ""),
+        brew_type  = data.get("brew_type", ""),
+        mood       = data.get("mood", ""),
+        rating     = data.get("rating"),
+        notes      = data.get("notes", "")
+    )
+    db.session.add(entry)
+    db.session.commit()
+    return jsonify({"message": "Entry saved", "id": entry.id}), 201
+
+
+@csrf.exempt
+@app.route("/api/journal/<int:entry_id>", methods=["DELETE"])
+def delete_journal_entry(entry_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    entry = JournalEntry.query.get_or_404(entry_id)
+    if entry.user_id != current.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({"deleted": True})
+
+
+# ── ADMIN ROUTES ──────────────────────────────────────────────────────────────
+
+@app.route("/admin")
+@login_required
+def admin_dashboard():
+    current = get_current_user()
+    if not current or not current.is_admin:
+        return redirect(url_for("home"))
+    reports = Report.query.order_by(Report.created_at.desc()).all()
+    report_data = []
+    for r in reports:
+        post = Post.query.get(r.post_id)
+        report_data.append({
+            "report":   r,
+            "post":     post,
+            "reporter": r.reporter
+        })
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template("admin.html",
+        reports=report_data,
+        users=users,
+        total_posts=Post.query.count(),
+        total_users=User.query.count(),
+        total_reports=Report.query.count()
+    )
+
+
+@csrf.exempt
+@app.route("/api/admin/delete-post/<int:post_id>", methods=["DELETE"])
+def admin_delete_post(post_id):
+    current = get_current_user()
+    if not current or not current.is_admin:
+        return jsonify({"error": "Unauthorized"}), 403
+    post = Post.query.get_or_404(post_id)
+    # Delete all reports for this post
+    Report.query.filter_by(post_id=post_id).delete()
+    image_path = post.image
+    db.session.delete(post)
+    db.session.commit()
+    delete_uploaded_image(image_path)
+    return jsonify({"deleted": True})
+
+
+@csrf.exempt
+@app.route("/api/admin/dismiss-report/<int:report_id>", methods=["DELETE"])
+def dismiss_report(report_id):
+    current = get_current_user()
+    if not current or not current.is_admin:
+        return jsonify({"error": "Unauthorized"}), 403
+    report = Report.query.get_or_404(report_id)
+    db.session.delete(report)
+    db.session.commit()
+    return jsonify({"dismissed": True})
+
+
+@csrf.exempt
+@app.route("/api/admin/make-admin/<username>", methods=["POST"])
+def make_admin(username):
+    current = get_current_user()
+    if not current or not current.is_admin:
+        return jsonify({"error": "Unauthorized"}), 403
+    user = User.query.filter_by(username=username).first_or_404()
+    user.is_admin = True
+    db.session.commit()
+    return jsonify({"message": f"{username} is now admin"})
+
+
+# ── PWA ROUTES ────────────────────────────────────────────────────────────────
+
+@app.route("/manifest.json")
+def manifest():
+    return jsonify({
+        "name": "Coffee Social Hub",
+        "short_name": "CoffeeHub",
+        "description": "Perth's coffee community",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#1a0e00",
+        "theme_color": "#c47a2b",
+        "orientation": "portrait",
+        "icons": [
+            {
+                "src": "/static/images/icon-192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "/static/images/icon-512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    })
+
+
+@app.route("/offline")
+def offline():
+    return render_template("offline.html")
+
+
+# ── PAGE ROUTES ───────────────────────────────────────────────────────────────
+
+@app.route("/leaderboard")
+@login_required
+def leaderboard_page():
+    return render_template("leaderboard.html")
+
+
+@app.route("/journal")
+@login_required
+def journal_page():
+    return render_template("journal.html")
 
 # ── Application Entry Point ───────────────────────────────────────────────────
 if __name__ == "__main__":
