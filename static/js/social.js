@@ -253,6 +253,10 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
             <button onclick="toggleBookmark(${postData.id}, this)" class="action-btn bookmark-btn">
                 <i class="bi bi-bookmark"></i>
             </button>
+            ${!canDelete ? `
+<button onclick="reportPost(${postData.id})" class="action-btn report-btn" title="Report post">
+    <i class="bi bi-flag"></i>
+</button>` : ""}
             <span class="view-count">
                 <i class="bi bi-eye"></i> ${postData.view_count || 0}
             </span>
@@ -568,6 +572,31 @@ function refreshUI() {
     } else if (document.getElementById("feed")) {
         loadPosts();
     }
+}
+
+// ── REPORT POST ───────────────────────────────────────────────────────────────
+function reportPost(postId) {
+    const reason = prompt(
+        'Why are you reporting this post?\n\n' +
+        '1. Spam\n2. Inappropriate content\n3. Harassment\n4. Other\n\n' +
+        'Type your reason:'
+    );
+    if (!reason) return;
+
+    fetch(`/api/posts/${postId}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            showToast(data.error, 'error');
+        } else {
+            showToast('Post reported. Thank you.', 'success');
+        }
+    })
+    .catch(err => console.error('Report error:', err));
 }
 
 // ── LOGOUT ────────────────────────────────────────────────────────────────────

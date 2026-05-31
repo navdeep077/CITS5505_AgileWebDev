@@ -5,6 +5,11 @@ Flask-Migrate
 Flask-WTF
 Flask-Login
 python-dotenv
+flask-mail
+flask-limiter
+cloudinary
+psycopg2-binary
+gunicorn
 pytest
 selenium
 webdriver-manager

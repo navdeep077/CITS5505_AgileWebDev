@@ -2,45 +2,41 @@
 {% block title %}Signup | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
-<!-- Shared login/signup card layout styles -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 {% endblock %}
 
 {% block content %}
-
-<!-- Two-column signup card: form on left, hero image on right -->
 <div class="login-container">
-
-    <!-- LEFT SIDE: Registration form panel -->
     <div class="left">
-        <!-- Brand name -->
         <h2 class="logo">Coffee Hub</h2>
         <h3>Create Account</h3>
         <p class="subtitle">Join Perth's coffee community</p>
 
-        <!-- Tab switcher: Login and Signup (active) -->
         <div class="tabs">
             <a href="{{ url_for('login') }}">Login</a>
             <a class="active" href="{{ url_for('signup') }}">Signup</a>
         </div>
 
-        <!-- Error message shown on validation failure (e.g. username taken) -->
         {% if error %}
         <p class="error">{{ error }}</p>
         {% endif %}
 
-        <!-- Signup form: POST to /signup with CSRF token -->
         <form method="POST" action="{{ url_for('signup') }}">
-            <!-- CSRF token prevents cross-site request forgery attacks -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <label>Username</label>
             <input type="text" name="username" placeholder="Choose username" required>
 
+            <label>Email
+                <span style="color:var(--muted);font-size:0.8rem;">
+                    (optional — for password reset)
+                </span>
+            </label>
+            <input type="email" name="email" placeholder="your@email.com">
+
             <label>Password</label>
             <input type="password" name="password" placeholder="Choose password" required>
 
-            <!-- Confirm password field — validated server-side for mismatch -->
             <label>Confirm Password</label>
             <input type="password" name="confirm_password" placeholder="Confirm password" required>
 
@@ -48,21 +44,16 @@
         </form>
     </div>
 
-    <!-- RIGHT SIDE: Decorative hero coffee image -->
     <div class="right">
         <img src="{{ url_for('static', filename='images/login-image.jpeg') }}" alt="coffee">
     </div>
-
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    /* Remove the ?error= query parameter from the URL after displaying the error.
-       Prevents the error message from reappearing if the user refreshes. */
     if (window.location.search.includes("error")) {
-        window.history.replaceState({}, document.title, "/login");
+        window.history.replaceState({}, document.title, "/signup");
     }
 </script>
 {% endblock %}
