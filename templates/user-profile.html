@@ -10,26 +10,32 @@
 /* ── Public Profile Page Styles ─────────────────────────────── */
 
 .pub-profile-wrap {
+    width: 100%;
     max-width: 960px;
     margin: 0 auto;
     padding: 1.5rem 2rem 4rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
-/* Hero banner */
 .pub-profile-banner {
-    height: 180px;
+    height: 200px;
     border-radius: 16px;
     background: linear-gradient(135deg, #1a0e00 0%, #3d1f00 50%, #c47a2b 100%);
     position: relative;
     margin-bottom: 60px;
     width: 100%;
+    min-width: 0;
+    display: block;
+    box-sizing: border-box;
 }
 
 /* Avatar on banner */
 .pub-profile-avatar-wrap {
     position: absolute;
-    bottom: -48px;
+    bottom: -52px;
     left: 2rem;
+    z-index: 10;
 }
 
 .pub-profile-avatar-wrap img,
@@ -340,7 +346,6 @@
 
 <div class="pub-profile-wrap">
 
-    <!-- BANNER -->
     <div class="pub-profile-banner">
         <div class="pub-profile-avatar-wrap">
             {% if profile_user.avatar %}
