@@ -150,6 +150,23 @@ fetch('/api/profile/xp')
     })
     .catch(err => console.error('XP load error:', err));
 
+    // Load profile completion
+fetch('/api/profile/completion')
+    .then(res => res.json())
+    .then(data => {
+        const section = document.getElementById('completion-section');
+        if (!section) return;
+        section.style.display = 'block';
+        document.getElementById('completion-percent').textContent = data.percent;
+        document.getElementById('completion-bar').style.width = data.percent + '%';
+
+        if (data.missing.length > 0) {
+            document.getElementById('completion-missing').textContent =
+                'Missing: ' + data.missing.join(', ');
+        }
+    })
+    .catch(err => console.error('Completion error:', err));
+
 });
 
 // ── Load Profile Posts ────────────────────────────────────────────────────────

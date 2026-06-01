@@ -52,6 +52,44 @@ window.onload = function() {
     }
 };
 
+// ── DRAG TO SCROLL FILTER BAR ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const bar = document.getElementById('filter-bar');
+    if (!bar) return;
+
+    let isDown   = false;
+    let startX;
+    let scrollLeft;
+
+    bar.addEventListener('mousedown', e => {
+        isDown = true;
+        bar.style.cursor = 'grabbing';
+        startX     = e.pageX - bar.offsetLeft;
+        scrollLeft = bar.scrollLeft;
+    });
+
+    bar.addEventListener('mouseleave', () => {
+        isDown = false;
+        bar.style.cursor = 'grab';
+    });
+
+    bar.addEventListener('mouseup', () => {
+        isDown = false;
+        bar.style.cursor = 'grab';
+    });
+
+    bar.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x    = e.pageX - bar.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        bar.scrollLeft = scrollLeft - walk;
+    });
+
+    // Set initial cursor
+    bar.style.cursor = 'grab';
+});
+
 // ── INFINITE SCROLL ───────────────────────────────────────────────────────────
 let currentPage   = 1;
 const postsPerPage = 10;
@@ -217,23 +255,23 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     post.dataset.postId = postData.id;
 
     post.innerHTML = `
-        <div class="post-header">
-            ${avatarMarkup(username, postData.avatar || "")}
-            <div class="user-info">
+    <div class="post-header">
+        ${avatarMarkup(username, postData.avatar || "")}
+        <div class="user-info">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
                 <a href="/user/${username}" class="post-username">
                     <strong>${username}</strong>
                 </a>
-                <span class="location">
-                    ${postData.shop
-                        ? `<a href="/cafe/${encodeURIComponent(postData.shop)}"
-                              class="cafe-link">
-                              <i class="bi bi-geo-alt-fill"></i> ${postData.shop}
-                           </a>`
-                        : ""}
-                </span>
+                <span class="post-time">${timeAgo(postData.created_at)}</span>
             </div>
-            <span class="post-time">${timeAgo(postData.created_at)}</span>
+            ${postData.shop
+                ? `<a href="/cafe/${encodeURIComponent(postData.shop)}"
+                      class="cafe-link">
+                      <i class="bi bi-geo-alt-fill"></i> ${postData.shop}
+                   </a>`
+                : ""}
         </div>
+    </div>
 
         ${postImage}
 
@@ -253,6 +291,9 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
             <button onclick="toggleBookmark(${postData.id}, this)" class="action-btn bookmark-btn">
                 <i class="bi bi-bookmark"></i>
             </button>
+            <button onclick="sharePost(${postData.id})" class="action-btn share-btn" title="Share post">
+    <i class="bi bi-share"></i>
+</button>
             ${!canDelete ? `
 <button onclick="reportPost(${postData.id})" class="action-btn report-btn" title="Report post">
     <i class="bi bi-flag"></i>
@@ -451,6 +492,8 @@ function toggleBookmark(postId, btn) {
         .catch(err => console.error('Bookmark error:', err));
 }
 
+
+
 // ── COMMENTS ──────────────────────────────────────────────────────────────────
 function addComment(e, postId, input) {
     if (e.key !== "Enter" || input.value.trim() === "") return;
@@ -597,6 +640,75 @@ function reportPost(postId) {
         }
     })
     .catch(err => console.error('Report error:', err));
+}
+
+// ── SHARE POST ────────────────────────────────────────────────────────────────
+function sharePost(postId) {
+    const url = `${window.location.origin}/post/${postId}`;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copied to clipboard ✓', 'success');
+        });
+    } else {
+        // Fallback for older browsers
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Link copied ✓', 'success');
+    }
+}
+
+// ── FILTER FEED BY CAFE ───────────────────────────────────────────────────────
+function filterFeed(cafeName, btn) {
+    // Update active chip
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const feed = document.getElementById('feed');
+    if (!feed) return;
+
+    if (!cafeName) {
+        // Show all posts
+        loadPosts();
+        return;
+    }
+
+    // Show skeleton
+    feed.innerHTML = `
+        <div class="skeleton-post">
+            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1;">
+                    <div class="skeleton skeleton-line" style="width:40%;"></div>
+                    <div class="skeleton skeleton-line" style="width:25%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-image"></div>
+        </div>
+    `;
+
+    fetch(`/api/posts/cafe/${encodeURIComponent(cafeName)}`)
+        .then(res => res.json())
+        .then(posts => {
+            feed.innerHTML = '';
+
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div style="text-align:center;padding:3rem;color:var(--muted);">
+                        <i class="bi bi-cup-hot" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                        <h5>No posts for ${cafeName} yet</h5>
+                        <p>Be the first to post from this cafe!</p>
+                    </div>`;
+                return;
+            }
+
+            posts.forEach(post => renderPost(post));
+        })
+        .catch(err => console.error('Filter error:', err));
 }
 
 // ── LOGOUT ────────────────────────────────────────────────────────────────────
