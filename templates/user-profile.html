@@ -1,75 +1,474 @@
 {% extends "base.html" %}
+{% block title %}{{ profile_user.username }} | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/user-profile.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week6.css') }}">
+<style>
+/* ── Public Profile Page Styles ─────────────────────────────── */
+
+.pub-profile-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+}
+
+/* Hero banner */
+.pub-profile-banner {
+    height: 180px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #1a0e00 0%, #3d1f00 50%, #c47a2b 100%);
+    position: relative;
+    margin-bottom: 60px;
+}
+
+/* Avatar on banner */
+.pub-profile-avatar-wrap {
+    position: absolute;
+    bottom: -48px;
+    left: 2rem;
+}
+
+.pub-profile-avatar-wrap img,
+.pub-profile-avatar-wrap .pub-avatar-fallback {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.pub-avatar-fallback {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 4px solid white;
+    background: var(--caramel);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+/* Profile info row */
+.pub-profile-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.pub-profile-left h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--text, #1a0e00);
+}
+
+.pub-profile-level {
+    font-size: 0.82rem;
+    color: var(--caramel);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.pub-profile-bio {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 0;
+    max-width: 400px;
+}
+
+.pub-profile-meta {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.pub-profile-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Stats row */
+.pub-stats-row {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(196,122,43,0.1);
+    border-bottom: 1px solid rgba(196,122,43,0.1);
+}
+
+.pub-stat {
+    text-align: center;
+}
+
+.pub-stat-number {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text, #1a0e00);
+    display: block;
+}
+
+.pub-stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Action buttons */
+.pub-action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-follow {
+    background: var(--caramel);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 24px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-follow:hover { opacity: 0.88; }
+
+.btn-follow.following {
+    background: rgba(196,122,43,0.1);
+    color: var(--caramel);
+    border: 1.5px solid var(--caramel);
+}
+
+.btn-message {
+    background: none;
+    border: 1.5px solid rgba(196,122,43,0.3);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text, #1a0e00);
+    transition: all 0.2s;
+}
+
+.btn-message:hover {
+    border-color: var(--caramel);
+    color: var(--caramel);
+}
+
+.btn-block-sm {
+    background: none;
+    border: 1.5px solid rgba(229,57,53,0.3);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #e53935;
+    transition: all 0.2s;
+}
+
+.btn-block-sm:hover {
+    background: rgba(229,57,53,0.08);
+}
+
+/* Badges row */
+.pub-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+}
+
+/* XP bar */
+.pub-xp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    font-size: 0.82rem;
+}
+
+.pub-xp-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: rgba(196,122,43,0.15);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.pub-xp-bar {
+    height: 100%;
+    background: var(--caramel);
+    border-radius: 6px;
+    transition: width 0.8s ease;
+}
+
+/* Two column body */
+.pub-profile-body {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+@media (max-width: 700px) {
+    .pub-profile-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Posts grid */
+.pub-posts-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text, #1a0e00);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+}
+
+@media (max-width: 500px) {
+    .posts-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.grid-post {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: rgba(196,122,43,0.08);
+}
+
+.grid-post img.grid-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.grid-post:hover img { transform: scale(1.05); }
+
+.grid-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: linear-gradient(135deg, rgba(196,122,43,0.08), rgba(196,122,43,0.15));
+}
+
+.grid-no-image p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin: 0;
+}
+
+/* Reviews column */
+.pub-reviews-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: var(--text, #1a0e00);
+}
+
+.pub-review-card {
+    background: rgba(196,122,43,0.04);
+    border: 1px solid rgba(196,122,43,0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.pub-review-cafe {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--text, #1a0e00);
+    margin-bottom: 2px;
+}
+
+.pub-review-stars {
+    color: var(--caramel);
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.pub-review-text {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 
-<div class="profile-container">
+<div class="pub-profile-wrap">
 
-    <!-- PROFILE HEADER -->
-    <div class="profile-header">
-        {% if profile_user.avatar %}
-        <img src="{{ profile_user.avatar }}" alt="avatar" class="profile-avatar">
-        {% else %}
-        <div class="profile-avatar fallback-avatar">
-            {{ profile_user.username[0].upper() }}
+    <!-- BANNER -->
+    <div class="pub-profile-banner">
+        <div class="pub-profile-avatar-wrap">
+            {% if profile_user.avatar %}
+                <img src="{{ profile_user.avatar }}" alt="{{ profile_user.username }}">
+            {% else %}
+                <div class="pub-avatar-fallback">
+                    {{ profile_user.username[0].upper() }}
+                </div>
+            {% endif %}
         </div>
-        {% endif %}
-
-        <h2 class="profile-username">{{ profile_user.username }}</h2>
-
-        <p class="profile-stats">
-            <strong>{{ posts|length }}</strong> posts
-            &nbsp;•&nbsp;
-            <strong>{{ total_likes }}</strong> likes
-        </p>
-
-        <!-- Back button -->
-        <a href="javascript:history.back()" class="back-home-btn" style="margin-top:0.75rem;">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-
-        <!-- Block button -->
-        <button
-            id="block-btn"
-            onclick="toggleBlock('{{ profile_user.username }}')"
-            style="
-                background:none;
-                border:1px solid #e53935;
-                color:#e53935;
-                border-radius:8px;
-                padding:6px 16px;
-                font-size:0.82rem;
-                cursor:pointer;
-                margin-top:8px;
-                transition:all 0.2s;
-            ">
-            🚫 Block User
-        </button>
     </div>
 
-    <!-- TWO COLUMN LAYOUT -->
-    <div style="display:flex;gap:0;align-items:flex-start;margin-top:2rem;padding:0 2rem;">
+    <!-- PROFILE INFO ROW -->
+    <div class="pub-profile-info">
+        <div class="pub-profile-left">
+            <h2>{{ profile_user.username }}</h2>
+            <div class="pub-profile-level" id="pub-level">
+                <i class="bi bi-cup-hot-fill"></i>
+                <span id="pub-level-title">Loading...</span>
+            </div>
+            {% if profile_user.bio %}
+            <p class="pub-profile-bio">{{ profile_user.bio }}</p>
+            {% endif %}
+            <div class="pub-profile-meta">
+                {% if profile_user.location %}
+                <span>
+                    <i class="bi bi-geo-alt"></i> {{ profile_user.location }}
+                </span>
+                {% endif %}
+                {% if profile_user.website %}
+                <span>
+                    <i class="bi bi-link-45deg"></i>
+                    <a href="{{ profile_user.website }}" target="_blank"
+                       style="color:var(--caramel);text-decoration:none;">
+                        {{ profile_user.website }}
+                    </a>
+                </span>
+                {% endif %}
+            </div>
+        </div>
 
-        <!-- LEFT: Posts Grid -->
-        <div style="flex:4;min-width:0;">
-            <h4 style="margin-bottom:1rem;">Posts</h4>
-            <div class="posts-grid" id="profile-posts"></div>
+        <!-- ACTION BUTTONS -->
+        <div class="pub-action-row">
+            <a href="javascript:history.back()" class="back-home-btn">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <button
+                id="follow-btn"
+                onclick="toggleFollowProfile('{{ profile_user.username }}')"
+                class="btn-follow">
+                Follow
+            </button>
+            <button
+                id="block-btn"
+                onclick="toggleBlock('{{ profile_user.username }}')"
+                class="btn-block-sm">
+                🚫 Block
+            </button>
+        </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="pub-stats-row">
+        <div class="pub-stat">
+            <span class="pub-stat-number">{{ posts|length }}</span>
+            <span class="pub-stat-label">Posts</span>
+        </div>
+        <div class="pub-stat">
+            <span class="pub-stat-number">{{ total_likes }}</span>
+            <span class="pub-stat-label">Likes</span>
+        </div>
+        <div class="pub-stat">
+            <span class="pub-stat-number" id="pub-followers">—</span>
+            <span class="pub-stat-label">Followers</span>
+        </div>
+        <div class="pub-stat">
+            <span class="pub-stat-number" id="pub-following">—</span>
+            <span class="pub-stat-label">Following</span>
+        </div>
+        <div class="pub-stat">
+            <span class="pub-stat-number" id="pub-xp">—</span>
+            <span class="pub-stat-label">XP</span>
+        </div>
+    </div>
+
+    <!-- XP BAR -->
+    <div class="pub-xp-row">
+        <span style="color:var(--caramel);font-weight:700;" id="pub-xp-label">Level —</span>
+        <div class="pub-xp-bar-wrap">
+            <div class="pub-xp-bar" id="pub-xp-bar" style="width:0%"></div>
+        </div>
+        <span style="color:var(--muted);" id="pub-xp-next"></span>
+    </div>
+
+    <!-- BADGES -->
+    <div class="pub-badges-row" id="pub-badges"></div>
+
+    <!-- TWO COLUMN BODY -->
+    <div class="pub-profile-body">
+
+        <!-- LEFT: Posts grid -->
+        <div>
+            <div class="pub-posts-title">
+                <i class="bi bi-grid-3x3" style="color:var(--caramel)"></i>
+                Posts
+            </div>
+            {% if posts %}
+                <div class="posts-grid" id="profile-posts"></div>
+            {% else %}
+                <div style="text-align:center;padding:2rem;color:var(--muted);">
+                    <i class="bi bi-camera" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                    No posts yet
+                </div>
+            {% endif %}
         </div>
 
         <!-- RIGHT: Reviews -->
-        <div style="flex:1;min-width:200px;max-width:240px;position:sticky;top:90px;padding-left:1rem;">
-            <h4 style="margin-bottom:1rem;">Recent Reviews</h4>
+        <div>
+            <div class="pub-reviews-title">
+                <i class="bi bi-star-fill" style="color:var(--caramel)"></i>
+                Reviews
+            </div>
             <div id="profile-reviews">
-                <p class="text-muted small">No reviews yet</p>
+                <p style="color:var(--muted);font-size:0.82rem;">Loading...</p>
             </div>
         </div>
 
     </div>
+
 </div>
 
 <!-- POST MODAL -->
@@ -84,70 +483,155 @@
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 
 <script>
-    window.profileUsername = "{{ profile_user.username }}";
-    window.profilePosts = [
-        {% for post in posts %}
-        {
-            id: {{ post.id }},
-            username: "{{ profile_user.username }}",
-            avatar: "{{ profile_user.avatar or '' }}",
-            image: "{{ post.image or '' }}",
-            text: `{{ post.text | replace('`', '\\`') or '' }}`,
-            likes: {{ post.likes or 0 }},
-            view_count: {{ post.view_count or 0 }},
-            hashtags: {{ post.hashtags.split(',') | tojson if post.hashtags else '[]' }},
-            liked_by: {{ post.liked_by.split(',') | tojson if post.liked_by else '[]' }},
-            comments: [
-                {% for c in post.comments %}
-                {
-                    id: {{ c.id }},
-                    username: "{{ c.username }}",
-                    text: `{{ c.text | replace('`', '\\`') }}`,
-                    time: "{{ c.created_at.isoformat() }}"
-                }{% if not loop.last %},{% endif %}
-                {% endfor %}
-            ],
-            created_at: "{{ post.created_at.isoformat() }}"
-        }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
+window.profileUsername = "{{ profile_user.username }}";
 
-    window.profilePosts.forEach(post => {
-        renderPost(post, "profile-posts", "profile");
+// ── Load posts into grid ──────────────────────────────────────
+window.profilePosts = [
+    {% for post in posts %}
+    {
+        id: {{ post.id }},
+        username: "{{ profile_user.username }}",
+        avatar: "{{ profile_user.avatar or '' }}",
+        image: "{{ post.image or '' }}",
+        text: `{{ post.text | replace('`', '\\`') or '' }}`,
+        likes: {{ post.likes or 0 }},
+        view_count: {{ post.view_count or 0 }},
+        hashtags: {{ post.hashtags.split(',') | tojson if post.hashtags else '[]' }},
+        liked_by: {{ post.liked_by.split(',') | tojson if post.liked_by else '[]' }},
+        comments: [
+            {% for c in post.comments %}
+            {
+                id: {{ c.id }},
+                username: "{{ c.username }}",
+                text: `{{ c.text | replace('`', '\\`') }}`,
+                time: "{{ c.created_at.isoformat() }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        created_at: "{{ post.created_at.isoformat() }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+window.profilePosts.forEach(post => renderPost(post, "profile-posts", "profile"));
+
+// ── Wire modal ────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("close-modal")?.addEventListener("click", () => {
+        document.getElementById("post-modal").classList.add("hidden");
+    });
+    document.querySelector("#post-modal .modal-overlay")?.addEventListener("click", () => {
+        document.getElementById("post-modal").classList.add("hidden");
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("close-modal")?.addEventListener("click", () => {
-            document.getElementById("post-modal").classList.add("hidden");
-        });
-        document.querySelector("#post-modal .modal-overlay")?.addEventListener("click", () => {
-            document.getElementById("post-modal").classList.add("hidden");
-        });
-    });
+    loadProfileStats();
+    loadFollowStatus();
+});
 
-    function toggleBlock(username) {
-        if (!confirm(`Block ${username}? Their posts will be hidden from your feed.`)) return;
-        fetch(`/api/block/${username}`, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-                const btn = document.getElementById('block-btn');
-                if (data.blocked) {
-                    btn.textContent = '✅ Blocked';
-                    btn.style.borderColor = 'var(--muted)';
-                    btn.style.color = 'var(--muted)';
-                    showToast(`${username} has been blocked`, 'info');
-                    setTimeout(() => {
-                        window.location.href = '/home';
-                    }, 1500);
-                } else {
-                    btn.textContent = '🚫 Block User';
-                    btn.style.borderColor = '#e53935';
-                    btn.style.color = '#e53935';
-                    showToast(`${username} has been unblocked`, 'info');
-                }
-            })
-            .catch(err => console.error('Block error:', err));
-    }
+// ── Load XP, level and badges ─────────────────────────────────
+function loadProfileStats() {
+    const username = window.profileUsername;
+
+    // Followers and following counts
+    fetch(`/api/followers/${username}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('pub-followers').textContent = data.length;
+        });
+
+    fetch(`/api/following/${username}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('pub-following').textContent = data.length;
+        });
+
+    // XP and badges — fetch user profile from leaderboard
+    fetch('/api/leaderboard')
+        .then(r => r.json())
+        .then(users => {
+            const u = users.find(u => u.username === username);
+            if (!u) {
+                document.getElementById('pub-xp').textContent = '0';
+                document.getElementById('pub-level-title').textContent = 'Newcomer';
+                document.getElementById('pub-xp-label').textContent = 'Level 1';
+                return;
+            }
+
+            document.getElementById('pub-xp').textContent       = u.xp;
+            document.getElementById('pub-level-title').textContent = u.title;
+            document.getElementById('pub-xp-label').textContent  = `Level ${u.level}`;
+
+            // XP bar
+            const next = [50,150,300,500,750,1000,1500,2000,3000];
+            const nextXp = next.find(n => n > u.xp) || u.xp;
+            const prev   = next.filter(n => n <= u.xp).pop() || 0;
+            const pct    = nextXp > prev ? ((u.xp - prev) / (nextXp - prev)) * 100 : 100;
+            document.getElementById('pub-xp-bar').style.width = Math.min(pct, 100) + '%';
+            document.getElementById('pub-xp-next').textContent =
+                nextXp > u.xp ? `${nextXp - u.xp} XP to next level` : 'Max Level';
+
+            // Badges
+            const badgeContainer = document.getElementById('pub-badges');
+            if (u.badges && u.badges.length > 0) {
+                badgeContainer.innerHTML = u.badges.map(b =>
+                    `<span class="badge-pill">${b}</span>`
+                ).join('');
+            }
+        });
+}
+
+// ── Follow / Unfollow ─────────────────────────────────────────
+function loadFollowStatus() {
+    fetch(`/api/followers/{{ profile_user.username }}`)
+        .then(r => r.json())
+        .then(followers => {
+            const isFollowing = followers.some(f => f.username === window.currentUser);
+            const btn = document.getElementById('follow-btn');
+            if (isFollowing) {
+                btn.textContent = 'Following';
+                btn.classList.add('following');
+            }
+        });
+}
+
+function toggleFollowProfile(username) {
+    fetch(`/api/follow/${username}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            const btn        = document.getElementById('follow-btn');
+            const followersEl = document.getElementById('pub-followers');
+            if (data.following) {
+                btn.textContent = 'Following';
+                btn.classList.add('following');
+                showToast(`Following ${username} ✓`, 'success');
+            } else {
+                btn.textContent = 'Follow';
+                btn.classList.remove('following');
+                showToast(`Unfollowed ${username}`, 'info');
+            }
+            followersEl.textContent = data.followers;
+        });
+}
+
+// ── Block / Unblock ───────────────────────────────────────────
+function toggleBlock(username) {
+    if (!confirm(`Block ${username}?`)) return;
+    fetch(`/api/block/${username}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            const btn = document.getElementById('block-btn');
+            if (data.blocked) {
+                btn.textContent = '✅ Blocked';
+                btn.style.borderColor = 'var(--muted)';
+                btn.style.color = 'var(--muted)';
+                showToast(`${username} blocked`, 'info');
+                setTimeout(() => { window.location.href = '/home'; }, 1500);
+            } else {
+                btn.textContent = '🚫 Block';
+                showToast(`${username} unblocked`, 'info');
+            }
+        });
+}
 </script>
 
 <script src="{{ url_for('static', filename='js/profile-reviews.js') }}"></script>

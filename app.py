@@ -1236,7 +1236,8 @@ def delete_journal_entry(entry_id):
 @app.route("/admin")
 @login_required
 def admin_dashboard():
-    current = get_current_user()
+    # Reload fresh from DB to get latest is_admin value
+    current = User.query.filter_by(username=session.get("user")).first()
     if not current or not current.is_admin:
         return redirect(url_for("home"))
     reports = Report.query.order_by(Report.created_at.desc()).all()
@@ -1343,6 +1344,126 @@ def leaderboard_page():
 @login_required
 def journal_page():
     return render_template("journal.html")
+
+# ── WEEK 6 API ROUTES ─────────────────────────────────────────────────────────
+
+@app.route("/api/suggested-users/sidebar", methods=["GET"])
+def suggested_users_sidebar():
+    """Returns 5 suggested users with follow status for sidebar"""
+    current = get_current_user()
+    if not current:
+        return jsonify([])
+
+    following_ids = [
+        f.followed_id for f in
+        Follow.query.filter_by(follower_id=current.id).all()
+    ]
+    following_ids.append(current.id)
+
+    # Also exclude blocked users
+    blocked_ids = [
+        b.blocked_id for b in
+        Block.query.filter_by(blocker_id=current.id).all()
+    ]
+
+    suggested = User.query.filter(
+        ~User.id.in_(following_ids + blocked_ids)
+    ).order_by(db.func.random()).limit(5).all()
+
+    return jsonify([{
+        "username":   u.username,
+        "avatar":     u.avatar or "",
+        "bio":        u.bio or "",
+        "followers":  u.follower_count(),
+        "level":      u.get_level()["title"]
+    } for u in suggested])
+
+
+@app.route("/api/cafe-ratings", methods=["GET"])
+def cafe_ratings():
+    """Returns average rating per cafe from all reviews"""
+    result = {}
+    for cafe in CAFES:
+        reviews = Review.query.filter_by(shop=cafe["name"]).all()
+        if reviews:
+            avg = sum(r.rating for r in reviews) / len(reviews)
+            result[cafe["name"]] = {
+                "average": round(avg, 1),
+                "count":   len(reviews)
+            }
+        else:
+            result[cafe["name"]] = {"average": 0, "count": 0}
+    return jsonify(result)
+
+
+@app.route("/search")
+@login_required
+def search_page():
+    """Full search results page"""
+    query = request.args.get("q", "").strip()
+    return render_template("search.html", query=query)
+
+
+@app.route("/api/profile/completion", methods=["GET"])
+def profile_completion():
+    """Returns profile completion percentage"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    fields = {
+        "Avatar":   bool(current.avatar),
+        "Bio":      bool(current.bio),
+        "Website":  bool(current.website),
+        "Location": bool(current.location),
+        "Email":    bool(current.email),
+        "Post":     len(current.posts) > 0,
+        "Review":   Review.query.filter_by(username=current.username).count() > 0,
+        "Follow":   current.following_count() > 0,
+    }
+
+    completed = sum(1 for v in fields.values() if v)
+    total     = len(fields)
+    percent   = round((completed / total) * 100)
+
+    missing = [k for k, v in fields.items() if not v]
+
+    return jsonify({
+        "percent":   percent,
+        "completed": completed,
+        "total":     total,
+        "missing":   missing
+    })
+
+
+@app.route("/api/profile/activity", methods=["GET"])
+def profile_activity():
+    """Returns post count per day for last 52 weeks"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    from datetime import date, timedelta
+    today     = date.today()
+    start     = today - timedelta(weeks=52)
+    posts     = Post.query.filter(
+        Post.user_id    == current.id,
+        Post.created_at >= start
+    ).all()
+
+    activity = {}
+    for post in posts:
+        day = post.created_at.strftime('%Y-%m-%d')
+        activity[day] = activity.get(day, 0) + 1
+
+    return jsonify(activity)
+
+
+@app.route("/quiz")
+@login_required
+def quiz_page():
+    """Coffee personality quiz page"""
+    return render_template("quiz.html")
 
 # ── Application Entry Point ───────────────────────────────────────────────────
 if __name__ == "__main__":

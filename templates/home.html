@@ -2,35 +2,42 @@
 {% block title %}Home | Coffee Social Hub{% endblock %}
 
 {% block extra_css %}
-<!-- Page-specific stylesheets: social feed, brew map grid, and home layout -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/brew.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-<!-- CSRF token exposed as a meta tag so JS can read it for AJAX POST requests -->
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week6.css') }}">
 {% endblock %}
 
 {% block content %}
-<!-- Two-column split layout: Social Grounds (left) and Brew Map (right) -->
-<div class="home-split-layout">
 
-    <!-- ── LEFT SIDE — Social Grounds (post feed) ─────────────────────── -->
-    <div class="home-left">
-        <div class="home-section-header">
-            <h5><i class="bi bi-people-fill"></i> Social Grounds</h5>
+<div class="home-layout">
+
+    <!-- ── MAIN FEED ──────────────────────────────────────────── -->
+    <div class="home-feed-col">
+
+        <!-- Cafe filter chips -->
+        <div class="filter-bar" id="filter-bar">
+            <button class="filter-chip active" onclick="filterFeed(null, this)">
+                All
+            </button>
+            {% for cafe in cafes %}
+            <button class="filter-chip" onclick="filterFeed('{{ cafe.name }}', this)">
+                {{ cafe.name }}
+            </button>
+            {% endfor %}
         </div>
 
-        <!-- Feed container: posts are dynamically injected here by social.js -->
-        <div id="feed" class="feed"></div>
+        <!-- Post feed -->
+        <div id="feed"></div>
 
-        <!-- Floating action button — opens the post creation modal -->
+        <!-- Create post FAB -->
         <button class="fab" onclick="openModal()">
             <i class="bi bi-plus-lg"></i>
         </button>
 
-        <!-- ── Post Creation Modal ──────────────────────────────────────── -->
-        <!-- Clicking the overlay (outside the box) also closes the modal -->
-        <div id="post-modal" class="modal-overlay" onclick="closeModal(event)">
+        <!-- Post creation modal -->
+        <div id="create-post-modal" class="modal-overlay" onclick="closeModal(event)">
             <div class="modal-box" onclick="event.stopPropagation()">
                 <div class="modal-header">
                     <h4><i class="bi bi-pencil-square"></i> Create Post</h4>
@@ -38,216 +45,109 @@
                         <i class="bi bi-x-lg"></i>
                     </span>
                 </div>
-
-                <!-- Post body text -->
-                <textarea id="modal-text" placeholder="Share your coffee moment..."></textarea>
-
-                <!-- Cafe tag: populated from the server-side cafes list -->
-                <label><i class="bi bi-geo-alt-fill"></i> Cafe</label>
+                <textarea id="modal-text"
+                    placeholder="Share your coffee moment..."></textarea>
+                <label>
+                    <i class="bi bi-geo-alt-fill"></i> Cafe
+                </label>
                 <select id="modal-shop">
                     {% for cafe in cafes %}
                     <option>{{ cafe.name }}</option>
                     {% endfor %}
                 </select>
-
-                <!-- Aspect ratio selector for the uploaded image preview -->
-                <label><i class="bi bi-image-fill"></i> Image Style</label>
+                <label>
+                    <i class="bi bi-image-fill"></i> Image Style
+                </label>
                 <select id="aspect-ratio">
                     <option value="original">Original</option>
                     <option value="square">Square (1:1)</option>
                     <option value="portrait">Portrait (4:5)</option>
                     <option value="landscape">Landscape (16:9)</option>
                 </select>
-
-                <!-- Image file picker; triggers live preview via previewImage() -->
-                <input type="file" id="modal-image" accept="image/*" onchange="previewImage(event)">
+                <input type="file" id="modal-image" accept="image/*"
+                    onchange="previewImage(event)">
                 <div class="preview-container">
                     <img id="image-preview">
                 </div>
-
-                <!-- Submit button calls submitModalPost() which POSTs via AJAX -->
                 <button class="post-btn" onclick="submitModalPost()">
                     Post <i class="bi bi-cup-hot"></i>
                 </button>
-
-                <!-- Hidden CSRF token field read by submitModalPost() -->
-                <input type="hidden" id="csrf-token-field" value="{{ csrf_token() }}">
             </div>
         </div>
+
     </div>
 
-    <!-- ── RIGHT SIDE — Brew Map (cafe discovery grid) ────────────────── -->
-    <div class="home-right">
-        <div class="home-section-header">
-            <h5><i class="bi bi-map-fill"></i> Brew Map</h5>
+    <!-- ── RIGHT SIDEBAR ──────────────────────────────────────── -->
+    <div class="home-sidebar-col">
+
+        <!-- Suggested users -->
+        <div class="sidebar-card">
+            <h6 class="sidebar-title">
+                <i class="bi bi-person-plus" style="color:var(--caramel)"></i>
+                Suggested For You
+            </h6>
+            <div id="suggestions-list">
+                <div class="skeleton skeleton-line"
+                    style="height:48px;border-radius:10px;margin-bottom:8px;"></div>
+                <div class="skeleton skeleton-line"
+                    style="height:48px;border-radius:10px;margin-bottom:8px;"></div>
+                <div class="skeleton skeleton-line"
+                    style="height:48px;border-radius:10px;"></div>
+            </div>
         </div>
 
-        <!-- Filter chips: brew.js listens for clicks and filters #shop-grid items -->
-        <div class="filters">
-            <button class="filter-chip active-filter" data-filter="all">All</button>
-            <button class="filter-chip" data-filter="open">Open Now</button>
-            <button class="filter-chip" data-filter="pet">Pet Friendly</button>
-            <button class="filter-chip" data-filter="cold-brew">Cold Brew</button>
-            <button class="filter-chip" data-filter="pour-over">Pour Over</button>
+        <!-- Trending hashtags -->
+        <div class="sidebar-card">
+            <h6 class="sidebar-title">
+                <i class="bi bi-hash" style="color:var(--caramel)"></i>
+                Trending
+            </h6>
+            <div id="trending-tags-list">
+                <div class="skeleton skeleton-line"
+                    style="height:24px;border-radius:6px;margin-bottom:6px;"></div>
+                <div class="skeleton skeleton-line"
+                    style="height:24px;border-radius:6px;margin-bottom:6px;"></div>
+                <div class="skeleton skeleton-line"
+                    style="height:24px;border-radius:6px;"></div>
+            </div>
         </div>
 
-        <!-- Shown by brew.js when the active filter matches no cafes -->
-        <div id="no-results" style="display:none; text-align:center; padding:2rem 0; color:var(--muted);">
-            <i class="bi bi-search"></i>
-            <p class="mt-2">No cafes match this filter.</p>
-        </div>
-
-        <!-- Cafe cards grid: data-* attributes drive client-side filter logic -->
-        <div class="brew-grid" id="shop-grid">
+        <!-- Perth Cafes directory -->
+        <div class="sidebar-card">
+            <h6 class="sidebar-title">
+                <i class="bi bi-cup-hot-fill" style="color:var(--caramel)"></i>
+                Perth Cafes
+            </h6>
             {% for cafe in cafes %}
-            <!-- Each card exposes its properties as data attributes for JS filtering -->
-            <div class="shop-item"
-                 data-open="{{ cafe.open|lower }}"
-                 data-pet="{{ cafe.pet|lower }}"
-                 data-cold-brew="{{ cafe.cold_brew|lower }}"
-                 data-pour-over="{{ cafe.pour_over|lower }}">
-                <div class="feature-card shop-card h-100">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0">{{ cafe.name }}</h6>
-                        <!-- Open status badge — colour-coded green -->
-                        <span class="badge" style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">Open</span>
-                    </div>
-                    <p class="mb-1"><i class="bi bi-geo-alt" style="color:var(--caramel)"></i> {{ cafe.location }}</p>
-                    <p class="mb-1"><i class="bi bi-star-fill" style="color:var(--caramel)"></i> {{ cafe.rating }}</p>
-                    <div class="mt-1 mb-2">
-                        {% for tag in cafe.tags %}
-                        <span class="shop-tag">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    <!-- Link to the cafe's detail page if a route is defined; disabled otherwise -->
-                    {% if cafe.route %}
-                    <a href="{{ url_for(cafe.route) }}" class="btn btn-outline-nav mt-auto d-block text-center">View Details</a>
-                    {% else %}
-                    <span class="btn btn-outline-nav mt-auto d-block text-center disabled">Details coming soon</span>
-                    {% endif %}
-                </div>
-            </div>
+            <a href="/shop/{{ cafe.route.replace('shop_', '') }}"
+               class="sidebar-cafe-link">
+                <span>{{ cafe.name }}</span>
+                <span class="sidebar-cafe-rating">
+                    <i class="bi bi-star-fill"></i> {{ cafe.rating }}
+                </span>
+            </a>
             {% endfor %}
+            <a href="{{ url_for('brew') }}" class="sidebar-brew-link">
+                View Brew Map →
+            </a>
         </div>
+
     </div>
 
 </div>
 
-<!-- ── Onboarding Tour Modal ────────────────────────────────────────────── -->
-<!-- Static backdrop + keyboard=false prevents accidental dismissal.
-     Only shown once per user; completion is stored in localStorage. -->
-<div class="modal fade" id="onboardingModal"
-     data-bs-backdrop="static" data-bs-keyboard="false"
-     tabindex="-1" aria-labelledby="onboardingModalLabel" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content onboarding-modal-content">
-
-            <!-- Step 1: Brew Map introduction -->
-            <div class="onboarding-step" id="onboarding-step-1">
-                <div class="onboarding-icon">
-                    <i class="bi bi-geo-alt-fill"></i>
-                </div>
-                <h4 class="onboarding-title" id="onboardingModalLabel">Discover Perth Cafes</h4>
-                <p class="onboarding-desc">Welcome! Explore the Brew Map to find the best coffee spots around Perth — filtered by your vibe.</p>
-            </div>
-
-            <!-- Step 2: Posting flow explanation -->
-            <div class="onboarding-step d-none" id="onboarding-step-2">
-                <div class="onboarding-icon">
-                    <i class="bi bi-camera-fill"></i>
-                </div>
-                <h4 class="onboarding-title">Post Your Coffee Moments</h4>
-                <p class="onboarding-desc">Tap the <strong>+</strong> button to share a photo or thought from your latest cafe visit. Tag the shop to earn kudos.</p>
-            </div>
-
-            <!-- Step 3: Social engagement (likes/comments) -->
-            <div class="onboarding-step d-none" id="onboarding-step-3">
-                <div class="onboarding-icon">
-                    <i class="bi bi-heart-fill"></i>
-                </div>
-                <h4 class="onboarding-title">Like &amp; Comment on Posts</h4>
-                <p class="onboarding-desc">Connect with fellow Perth coffee lovers — like their moments and join the conversation.</p>
-            </div>
-
-            <!-- Step progress indicator dots (aria-hidden since they're purely decorative) -->
-            <div class="onboarding-dots" aria-hidden="true">
-                <span class="onboarding-dot active" id="onboarding-dot-1"></span>
-                <span class="onboarding-dot" id="onboarding-dot-2"></span>
-                <span class="onboarding-dot" id="onboarding-dot-3"></span>
-            </div>
-
-            <!-- Navigation: Skip exits immediately; Next advances steps or finishes -->
-            <div class="onboarding-actions">
-                <button class="btn-onboarding-skip" id="onboarding-skip" type="button">Skip</button>
-                <button class="btn-onboarding-next" id="onboarding-next" type="button">
-                    Next <i class="bi bi-arrow-right"></i>
-                </button>
-            </div>
-
-        </div>
+<!-- POST DETAIL MODAL -->
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Expose the landing route to JS so social.js can redirect unauthenticated users -->
-<script>
-    window.routes = { landing: "{{ url_for('landing') }}" };
-</script>
-
-<!-- social.js: feed rendering, post submission, like/comment interactions -->
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
-
-<!-- brew.js: filter chip logic and cafe card visibility toggling -->
-<script src="{{ url_for('static', filename='js/brew.js') }}"></script>
-
-<script>
-(function () {
-    const user = window.currentUser;
-    if (!user) return;  // Don't show onboarding to unauthenticated visitors
-
-    // Use a per-user key so the tour is tracked independently for each account
-    const STORAGE_KEY = 'coffee_onboarding_seen_' + user;
-    if (localStorage.getItem(STORAGE_KEY)) return;  // Already completed — skip
-
-    const TOTAL_STEPS = 3;
-    let currentStep = 1;
-
-    // Initialise and show the Bootstrap modal
-    const bsModal = new bootstrap.Modal(document.getElementById('onboardingModal'));
-    bsModal.show();
-
-    // Transition from one step to the next: toggle visibility and update dots
-    function goToStep(next) {
-        document.getElementById('onboarding-step-' + currentStep).classList.add('d-none');
-        document.getElementById('onboarding-dot-' + currentStep).classList.remove('active');
-        currentStep = next;
-        document.getElementById('onboarding-step-' + currentStep).classList.remove('d-none');
-        document.getElementById('onboarding-dot-' + currentStep).classList.add('active');
-
-        // Relabel the button on the final step
-        const nextBtn = document.getElementById('onboarding-next');
-        if (currentStep === TOTAL_STEPS) {
-            nextBtn.innerHTML = 'Got it! <i class="bi bi-check-lg"></i>';
-        } else {
-            nextBtn.innerHTML = 'Next <i class="bi bi-arrow-right"></i>';
-        }
-    }
-
-    // Mark tour as complete and close the modal
-    function finishTour() {
-        localStorage.setItem(STORAGE_KEY, '1');
-        bsModal.hide();
-    }
-
-    document.getElementById('onboarding-skip').addEventListener('click', finishTour);
-    document.getElementById('onboarding-next').addEventListener('click', function () {
-        if (currentStep < TOTAL_STEPS) {
-            goToStep(currentStep + 1);
-        } else {
-            finishTour();
-        }
-    });
-})();
-</script>
+<script src="{{ url_for('static', filename='js/home-sidebar.js') }}"></script>
 {% endblock %}

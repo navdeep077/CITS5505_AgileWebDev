@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/week6.css') }}">
 
     <!-- Page specific CSS -->
     {% block extra_css %}{% endblock %}
@@ -63,7 +64,8 @@
             <!-- Search bar -->
             <div class="navbar-search">
                 <i class="bi bi-search"></i>
-                <input type="text" id="navbar-search-input" placeholder="Search users or cafes...">
+                <input type="text" id="navbar-search-input"
+                    placeholder="Search users or cafes...">
                 <div id="navbar-search-results" class="search-dropdown"></div>
             </div>
 
@@ -77,25 +79,35 @@
                 <i class="bi bi-compass"></i>
             </a>
 
+
             <!-- Bookmarks -->
             <a href="{{ url_for('bookmarks') }}" class="nav-icon-btn" title="Bookmarks">
                 <i class="bi bi-bookmark"></i>
             </a>
 
             <!-- Notifications -->
-            <a href="{{ url_for('notifications') }}" class="nav-icon-btn position-relative" title="Notifications">
+            <a href="{{ url_for('notifications') }}" class="nav-icon-btn position-relative"
+               title="Notifications">
                 <i class="bi bi-bell"></i>
                 <span class="notif-badge" id="notif-count" style="display:none"></span>
             </a>
 
             <!-- Leaderboard -->
-            <a href="{{ url_for('leaderboard_page') }}" class="nav-icon-btn" title="Leaderboard">
+            <a href="{{ url_for('leaderboard_page') }}" class="nav-icon-btn"
+               title="Leaderboard">
                 <i class="bi bi-trophy"></i>
             </a>
 
             <!-- Coffee Journal -->
-            <a href="{{ url_for('journal_page') }}" class="nav-icon-btn" title="Coffee Journal">
+            <a href="{{ url_for('journal_page') }}" class="nav-icon-btn"
+               title="Coffee Journal">
                 <i class="bi bi-journal-text"></i>
+            </a>
+
+            <!-- Quiz -->
+            <a href="{{ url_for('quiz_page') }}" class="nav-icon-btn"
+               title="Coffee Personality Quiz">
+                <i class="bi bi-question-circle"></i>
             </a>
 
             <!-- Dark mode toggle -->
@@ -140,6 +152,28 @@
 <!-- CONTENT -->
 {% block content %}{% endblock %}
 
+<!-- FOOTER -->
+<footer style="
+    background: var(--espresso, #1a0e00);
+    color: rgba(232,201,154,0.6);
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.8rem;
+    margin-top: 3rem;
+">
+    <p style="margin:0;">
+        ☕ Coffee Social Hub — Perth's Coffee Community
+        &nbsp;•&nbsp;
+        Built with Flask &amp; ❤️
+        &nbsp;•&nbsp;
+        <a href="{{ url_for('leaderboard_page') }}"
+           style="color:var(--caramel);text-decoration:none;">Leaderboard</a>
+        &nbsp;•&nbsp;
+        <a href="{{ url_for('quiz_page') }}"
+           style="color:var(--caramel);text-decoration:none;">Quiz</a>
+    </p>
+</footer>
+
 <!-- MOBILE BOTTOM NAVBAR -->
 {% if session.get('user') %}
 <nav class="mobile-bottom-nav d-flex d-lg-none">
@@ -147,17 +181,17 @@
         <i class="bi bi-house-fill"></i>
         <span>Home</span>
     </a>
-    <a href="{{ url_for('explore') }}" class="mobile-nav-item">
-        <i class="bi bi-compass-fill"></i>
-        <span>Explore</span>
-    </a>
+    <a href="{{ url_for('brew') }}" class="mobile-nav-item">
+    <i class="bi bi-cup-hot-fill"></i>
+    <span>Brew</span>
+</a>
     <a href="{{ url_for('leaderboard_page') }}" class="mobile-nav-item">
         <i class="bi bi-trophy-fill"></i>
         <span>Ranks</span>
     </a>
-    <a href="{{ url_for('journal_page') }}" class="mobile-nav-item">
-        <i class="bi bi-journal-fill"></i>
-        <span>Journal</span>
+    <a href="{{ url_for('quiz_page') }}" class="mobile-nav-item">
+        <i class="bi bi-question-circle-fill"></i>
+        <span>Quiz</span>
     </a>
     <a href="{{ url_for('profile') }}" class="mobile-nav-item">
         <i class="bi bi-person-fill"></i>
