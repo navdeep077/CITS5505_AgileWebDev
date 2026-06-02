@@ -1,73 +1,168 @@
-// notifications.js
-// Loads and renders notifications for the current user
+/*
+ * notifications.js
+ * Loads and renders notifications
+ * Week 7: follow back button toggles like Instagram
+ */
 
-function timeAgo(timestamp) {
-    if (!timestamp) return '';
-    const now = new Date();
-    const past = new Date(timestamp);
-    const seconds = Math.floor((now - past) / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    loadNotifications();
+});
 
 function loadNotifications() {
+    const container = document.getElementById('notifications-list');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="skeleton-post">
+            <div style="display:flex;gap:12px;">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1;">
+                    <div class="skeleton skeleton-line" style="width:60%;"></div>
+                    <div class="skeleton skeleton-line" style="width:40%;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+
     fetch('/api/notifications')
         .then(res => res.json())
         .then(notifs => {
-            const list = document.getElementById('notif-list');
-
             if (notifs.length === 0) {
-                list.innerHTML = `
-                    <div class="notif-empty">
-                        <i class="bi bi-bell-slash"></i>
-                        <h4>No notifications yet</h4>
+                container.innerHTML = `
+                    <div style="text-align:center;padding:3rem;color:var(--muted);">
+                        <i class="bi bi-bell-slash"
+                           style="font-size:2.5rem;display:block;margin-bottom:1rem;"></i>
+                        <h5>No notifications yet</h5>
                         <p>When someone likes or comments on your posts you will see it here</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
-            list.innerHTML = notifs.map(n => {
-                const initial = n.actor.charAt(0).toUpperCase();
-                const avatarHtml = n.actor_avatar
-                    ? `<img src="${n.actor_avatar}">`
-                    : initial;
+            container.innerHTML = notifs.map(n => {
+                const icon = {
+                    'like':    '❤️',
+                    'comment': '💬',
+                    'follow':  '👤'
+                }[n.type] || '🔔';
 
-                let iconClass = '';
-                let iconHtml = '';
-                let message = '';
+                const message = {
+                    'like':    'liked your post',
+                    'comment': 'commented on your post',
+                    'follow':  'started following you'
+                }[n.type] || 'interacted with you';
 
-                if (n.type === 'like') {
-                    iconClass = 'like';
-                    iconHtml = '<i class="bi bi-heart-fill"></i>';
-                    message = `<strong>${n.actor}</strong> liked your post`;
-                } else if (n.type === 'comment') {
-                    iconClass = 'comment';
-                    iconHtml = '<i class="bi bi-chat-fill"></i>';
-                    message = `<strong>${n.actor}</strong> commented on your post`;
-                } else if (n.type === 'follow') {
-                    iconClass = 'follow';
-                    iconHtml = '<i class="bi bi-person-plus-fill"></i>';
-                    message = `<strong>${n.actor}</strong> started following you`;
-                }
-
-                const linkHref = n.post_id ? `/home` : `/user/${n.actor}`;
+                const timeAgo = getTimeAgo(n.created_at);
 
                 return `
-                    <a href="${linkHref}" class="notif-card ${n.is_read ? '' : 'unread'}">
-                        <div class="notif-avatar">${avatarHtml}</div>
-                        <div class="notif-icon ${iconClass}">${iconHtml}</div>
-                        <div class="notif-text">${message}</div>
-                        <div class="notif-time">${timeAgo(n.created_at)}</div>
-                    </a>
+                    <div class="notif-row ${n.is_read ? '' : 'notif-unread'}">
+                        <div class="notif-icon-wrap">
+                            <a href="/user/${n.actor}">
+                                ${n.actor_avatar
+                                    ? `<img src="${n.actor_avatar}"
+                                           class="notif-avatar"
+                                           alt="${n.actor}">`
+                                    : `<div class="notif-avatar-fallback">
+                                           ${n.actor.charAt(0).toUpperCase()}
+                                       </div>`
+                                }
+                            </a>
+                            <span class="notif-type-icon">${icon}</span>
+                        </div>
+                        <div class="notif-body">
+                            <div class="notif-text">
+                                <a href="/user/${n.actor}"
+                                   style="font-weight:700;color:var(--text,#1a0e00);
+                                          text-decoration:none;">
+                                    ${n.actor}
+                                </a>
+                                ${message}
+                            </div>
+                            <div class="notif-time">${timeAgo}</div>
+                        </div>
+                        <div class="notif-action">
+                            ${n.type === 'follow'
+                                ? `<button
+                                       id="follow-back-${n.actor}"
+                                       onclick="followBack('${n.actor}', this)"
+                                       class="notif-follow-btn">
+                                       Follow Back
+                                   </button>`
+                                : n.post_id
+                                    ? `<a href="/home" class="notif-post-link">
+                                           View Post →
+                                       </a>`
+                                    : ''
+                            }
+                        </div>
+                    </div>
                 `;
             }).join('');
+
+            // ── Check follow status for each follow notification ──────
+            const followNotifs = notifs.filter(n => n.type === 'follow');
+            if (followNotifs.length > 0) {
+                fetch(`/api/following/${window.currentUser}`)
+                    .then(r => r.json())
+                    .then(following => {
+                        const followingNames = following.map(f => f.username);
+                        followNotifs.forEach(n => {
+                            const btn = document.getElementById(`follow-back-${n.actor}`);
+                            if (!btn) return;
+                            if (followingNames.includes(n.actor)) {
+                                setFollowingState(btn);
+                            }
+                        });
+                    })
+                    .catch(() => {});
+            }
         })
         .catch(err => console.error('Notifications error:', err));
 }
 
-document.addEventListener('DOMContentLoaded', loadNotifications);
+// ── Follow Back toggle ────────────────────────────────────────────────────────
+function followBack(username, btn) {
+    fetch(`/api/follow/${username}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.following) {
+                setFollowingState(btn);
+                if (typeof showToast === 'function') {
+                    showToast(`Following ${username} ✓`, 'success');
+                }
+            } else {
+                setFollowBackState(btn);
+                if (typeof showToast === 'function') {
+                    showToast(`Unfollowed ${username}`, 'info');
+                }
+            }
+        })
+        .catch(err => console.error('Follow error:', err));
+}
+
+function setFollowingState(btn) {
+    btn.textContent      = 'Following';
+    btn.style.background = 'rgba(196,122,43,0.1)';
+    btn.style.color      = 'var(--caramel)';
+    btn.style.border     = '1.5px solid var(--caramel)';
+}
+
+function setFollowBackState(btn) {
+    btn.textContent      = 'Follow Back';
+    btn.style.background = 'var(--caramel)';
+    btn.style.color      = 'white';
+    btn.style.border     = 'none';
+}
+
+// ── Time ago helper ───────────────────────────────────────────────────────────
+function getTimeAgo(timestamp) {
+    if (!timestamp) return '';
+    const now     = new Date();
+    const past    = new Date(timestamp);
+    const seconds = Math.floor((now - past) / 1000);
+    if (seconds < 60)  return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60)  return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24)    return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+}

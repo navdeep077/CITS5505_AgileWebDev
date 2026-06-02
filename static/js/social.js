@@ -365,7 +365,12 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
         >` : ""}
     `;
 
-    feed.appendChild(post);
+     feed.appendChild(post);
+
+    // Init lightbox on new images
+    if (typeof window.initLightbox === 'function') {
+        setTimeout(window.initLightbox, 100);
+    }
 }
 
 // ── LIKE WITH ANIMATION ───────────────────────────────────────────────────────

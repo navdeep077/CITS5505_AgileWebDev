@@ -160,6 +160,7 @@ input {
         flex-direction: column;
         height: auto;
         margin: 24px auto;
+        min-height: calc(100vh - 120px);
     }
 
     .left,

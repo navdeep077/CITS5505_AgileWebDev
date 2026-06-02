@@ -3,159 +3,483 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile-page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week7.css') }}">
+<style>
+/* ── OWN PROFILE STYLES ──────────────────────────────────────── */
+
+.own-profile-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    box-sizing: border-box;
+}
+
+/* Banner */
+.own-profile-banner {
+    height: 200px;
+    background: linear-gradient(135deg, #1a0e00 0%, #3d1f00 50%, #c47a2b 100%);
+    border-radius: 0 0 20px 20px;
+    position: relative;
+    margin-bottom: 70px;
+}
+
+/* Avatar */
+.own-avatar-wrap {
+    position: absolute;
+    bottom: -52px;
+    left: 2rem;
+    z-index: 10;
+}
+
+.own-avatar-wrap img,
+.own-avatar-fallback {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.own-avatar-fallback {
+    background: var(--caramel);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    font-weight: 700;
+}
+
+.own-avatar-edit {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: var(--caramel);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: opacity 0.2s;
+}
+
+.own-avatar-edit:hover { opacity: 0.85; }
+
+/* Profile header row */
+.own-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.own-profile-left h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--text, #1a0e00);
+}
+
+.own-level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(196,122,43,0.1);
+    color: var(--caramel);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.own-bio-text {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 0 0 6px;
+    max-width: 400px;
+}
+
+.own-profile-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+}
+
+.own-profile-meta a {
+    color: var(--caramel);
+    text-decoration: none;
+}
+
+/* Stats row */
+.own-stats-row {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(196,122,43,0.1);
+    border-bottom: 1px solid rgba(196,122,43,0.1);
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.own-stat {
+    text-align: center;
+}
+
+.own-stat-number {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text, #1a0e00);
+    display: block;
+}
+
+.own-stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* XP section */
+.own-xp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.own-xp-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: rgba(196,122,43,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.own-xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #c47a2b, #e89a4a);
+    border-radius: 8px;
+    transition: width 0.8s ease;
+}
+
+/* Badges */
+.own-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1.2rem;
+}
+
+/* Quick links row */
+.own-quick-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.own-quick-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border: 1.5px solid rgba(196,122,43,0.2);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--caramel);
+    text-decoration: none;
+    transition: all 0.2s;
+    background: rgba(196,122,43,0.04);
+}
+
+.own-quick-link:hover {
+    background: rgba(196,122,43,0.1);
+    border-color: var(--caramel);
+}
+
+/* Two column body */
+.own-profile-body {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+@media (max-width: 700px) {
+    .own-profile-body { grid-template-columns: 1fr; }
+    .own-profile-wrap { padding: 0 1rem 3rem; }
+}
+
+/* Section titles */
+.own-section-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text, #1a0e00);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Edit bio form */
+.bio-edit-form input,
+.bio-edit-form textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid rgba(196,122,43,0.2);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+    background: var(--surface, #fff);
+    color: var(--text, #1a0e00);
+    box-sizing: border-box;
+}
+
+.bio-edit-form textarea { resize: none; }
+
+.bio-edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-save {
+    background: var(--caramel);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.btn-cancel {
+    background: none;
+    border: 1.5px solid rgba(196,122,43,0.3);
+    border-radius: 8px;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text, #1a0e00);
+}
+</style>
 {% endblock %}
 
 {% block content %}
 
-<div class="profile-container">
+<div class="own-profile-wrap">
+
+    <!-- BANNER -->
+    <div class="own-profile-banner">
+        <div class="own-avatar-wrap">
+            <!-- Hidden file input -->
+            <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
+
+            {% if current_user.avatar %}
+                <img src="{{ current_user.avatar }}" alt="avatar"
+                     id="profile-avatar-img">
+            {% else %}
+                <div class="own-avatar-fallback" id="profile-avatar-fallback">
+                    {{ current_user.username[0].upper() }}
+                </div>
+            {% endif %}
+
+            <!-- Edit button overlaid on avatar -->
+            <div class="own-avatar-edit"
+                 onclick="document.getElementById('avatar-file-input').click()"
+                 title="Change photo">
+                <i class="bi bi-camera-fill"></i>
+            </div>
+        </div>
+    </div>
 
     <!-- PROFILE HEADER -->
-    <div class="profile-header">
+    <div class="own-profile-header">
+        <div class="own-profile-left">
+            <h2>{{ current_user.username }}</h2>
+            <div class="own-level-badge" id="own-level-badge">
+                <i class="bi bi-cup-hot-fill"></i>
+                <span id="own-level-title">Loading...</span>
+            </div>
 
-        <!-- Avatar -->
-        {% if current_user.avatar %}
-        <img src="{{ current_user.avatar }}" alt="avatar"
-             class="profile-avatar" id="profile-avatar-img">
-        {% else %}
-        <div class="fallback-avatar" id="profile-avatar-fallback">
-            {{ current_user.username[0].upper() }}
+            <!-- Bio display -->
+            <div id="bio-display">
+                <p class="own-bio-text" id="bio-text">
+                    {{ current_user.bio or 'No bio yet — click Edit Profile to add one' }}
+                </p>
+                <div class="own-profile-meta">
+                    {% if current_user.location %}
+                    <span>
+                        <i class="bi bi-geo-alt"></i>
+                        <span id="location-display">{{ current_user.location }}</span>
+                    </span>
+                    {% else %}
+                    <span id="location-display"></span>
+                    {% endif %}
+                    {% if current_user.website %}
+                    <span>
+                        <i class="bi bi-link-45deg"></i>
+                        <a href="{{ current_user.website }}" target="_blank"
+                           id="website-display">
+                            {{ current_user.website }}
+                        </a>
+                    </span>
+                    {% else %}
+                    <span id="website-display"></span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Bio edit form -->
+            <div id="bio-edit" style="display:none;" class="bio-edit-form">
+                <textarea id="bio-input" rows="2"
+                    placeholder="Write your bio...">{{ current_user.bio or '' }}</textarea>
+                <input type="text" id="website-input"
+                    placeholder="Website URL"
+                    value="{{ current_user.website or '' }}">
+                <input type="text" id="location-input"
+                    placeholder="Location"
+                    value="{{ current_user.location or '' }}">
+                <div class="bio-edit-actions">
+                    <button class="btn-save" onclick="saveEditBio()">Save</button>
+                    <button class="btn-cancel" onclick="cancelEditBio()">Cancel</button>
+                </div>
+            </div>
         </div>
-        {% endif %}
 
-        <!-- Avatar controls -->
-        <div class="avatar-controls">
-            <input type="file" id="avatar-file-input"
-                   accept="image/*" style="display:none;">
-            <button class="avatar-upload-btn"
-                onclick="document.getElementById('avatar-file-input').click()">
-                📷 Change Photo
+        <!-- Right actions -->
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+            <button onclick="showEditBio()" style="
+                background:none;
+                border:1.5px solid rgba(196,122,43,0.3);
+                border-radius:10px;
+                padding:8px 18px;
+                font-size:0.85rem;
+                font-weight:600;
+                cursor:pointer;
+                color:var(--text,#1a0e00);
+                transition:all 0.2s;
+                font-family:inherit;
+            ">
+                ✏️ Edit Profile
             </button>
             {% if current_user.avatar %}
-            <button class="avatar-remove-btn" onclick="removeAvatar()">
-                Remove
+            <button onclick="removeAvatar()" style="
+                background:none;
+                border:none;
+                font-size:0.78rem;
+                color:var(--muted);
+                cursor:pointer;
+            ">
+                Remove photo
             </button>
             {% endif %}
         </div>
-
-        <!-- Username -->
-        <h2 class="profile-username">{{ current_user.username }}</h2>
-
-        <!-- Stats -->
-        <p class="profile-stats">
-            <strong id="posts-count">0</strong> posts
-            &nbsp;•&nbsp;
-            <strong>0</strong> likes
-        </p>
-
-        <!-- Bio display -->
-        <div id="bio-display">
-            <p class="bio-text" id="bio-text">
-                {{ current_user.bio or 'No bio yet' }}
-            </p>
-
-            <div class="profile-meta">
-                {% if current_user.website %}
-                <span>
-                    <i class="bi bi-link-45deg"></i>
-                    <a href="{{ current_user.website }}" target="_blank"
-                       id="website-display">
-                        {{ current_user.website }}
-                    </a>
-                </span>
-                {% else %}
-                <span id="website-display"></span>
-                {% endif %}
-
-                {% if current_user.location %}
-                <span>
-                    <i class="bi bi-geo-alt"></i>
-                    <span id="location-display">{{ current_user.location }}</span>
-                </span>
-                {% else %}
-                <span id="location-display"></span>
-                {% endif %}
-            </div>
-
-            <button class="edit-bio-btn" onclick="showEditBio()">
-                ✏️ Edit Profile
-            </button>
-        </div>
-
-        <!-- Bio edit form -->
-        <div id="bio-edit" style="display:none;" class="bio-edit-form">
-            <textarea id="bio-input" rows="3"
-                placeholder="Write your bio...">{{ current_user.bio or '' }}</textarea>
-            <input type="text" id="website-input"
-                placeholder="Website URL"
-                value="{{ current_user.website or '' }}">
-            <input type="text" id="location-input"
-                placeholder="Location"
-                value="{{ current_user.location or '' }}">
-            <div class="bio-edit-actions">
-                <button class="btn-save" onclick="saveEditBio()">Save</button>
-                <button class="btn-cancel" onclick="cancelEditBio()">Cancel</button>
-            </div>
-        </div>
-
-        <!-- XP and Badges section -->
-        <div class="xp-section" id="xp-section" style="display:none;">
-            <div class="xp-level-title" id="xp-level-title">Level 1 — Newcomer</div>
-            <div class="xp-amount">
-                <span id="xp-amount"
-                    style="font-size:1.5rem;font-weight:700;color:var(--caramel);">
-                    0
-                </span>
-                <span style="font-size:1.5rem;font-weight:700;color:var(--text,#1a0e00);">
-                    XP
-                </span>
-            </div>
-            <div class="profile-badges" id="profile-badges"></div>
-        </div>
-
-        <!-- Profile completion meter -->
-        <div class="completion-section" id="completion-section" style="display:none;">
-            <div class="completion-label">
-                Profile <span id="completion-percent">0</span>% complete
-            </div>
-            <div class="completion-bar-wrap">
-                <div class="completion-bar" id="completion-bar" style="width:0%"></div>
-            </div>
-            <div id="completion-missing"
-                style="font-size:0.75rem;color:var(--muted);margin-top:4px;"></div>
-        </div>
-
-        <!-- Quiz link -->
-        <a href="{{ url_for('quiz_page') }}" style="
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            font-size:0.82rem;
-            color:var(--caramel);
-            text-decoration:none;
-            font-weight:600;
-            margin-top:10px;
-        ">
-            <i class="bi bi-question-circle"></i>
-            Take the Coffee Personality Quiz
-        </a>
-
     </div>
 
-    <!-- TWO COLUMN LAYOUT -->
-    <div class="profile-body">
+    <!-- STATS ROW -->
+    <div class="own-stats-row">
+        <div class="own-stat">
+            <span class="own-stat-number" id="posts-count">0</span>
+            <span class="own-stat-label">Posts</span>
+        </div>
+        <div class="own-stat">
+            <span class="own-stat-number" id="stat-likes">0</span>
+            <span class="own-stat-label">Likes</span>
+        </div>
+        <div class="own-stat">
+            <span class="own-stat-number" id="stat-views">0</span>
+            <span class="own-stat-label">Views</span>
+        </div>
+        <div class="own-stat">
+            <span class="own-stat-number" id="stat-comments">0</span>
+            <span class="own-stat-label">Comments</span>
+        </div>
+        <div class="own-stat">
+            <span class="own-stat-number" id="own-xp">0</span>
+            <span class="own-stat-label">XP</span>
+        </div>
+    </div>
+
+    <!-- XP BAR -->
+    <div class="own-xp-row">
+        <span style="font-size:0.8rem;font-weight:700;color:var(--caramel);"
+              id="own-xp-label">Level 1</span>
+        <div class="own-xp-bar-wrap">
+            <div class="own-xp-bar" id="own-xp-bar" style="width:0%"></div>
+        </div>
+        <span style="font-size:0.75rem;color:var(--muted);"
+              id="own-xp-next">50 XP to next level</span>
+    </div>
+
+    <!-- BADGES -->
+    <div class="own-badges-row" id="profile-badges"></div>
+
+    <!-- PROFILE COMPLETION -->
+    <div class="completion-section" id="completion-section" style="display:none;">
+        <div class="completion-label">
+            Profile <span id="completion-percent">0</span>% complete
+        </div>
+        <div class="completion-bar-wrap">
+            <div class="completion-bar" id="completion-bar" style="width:0%"></div>
+        </div>
+        <div id="completion-missing"
+             style="font-size:0.72rem;color:var(--muted);margin-top:4px;"></div>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="own-quick-links">
+        <a href="{{ url_for('journal_page') }}" class="own-quick-link">
+            <i class="bi bi-journal-text"></i> Coffee Journal
+        </a>
+        <a href="{{ url_for('leaderboard_page') }}" class="own-quick-link">
+            <i class="bi bi-trophy"></i> Leaderboard
+        </a>
+        <a href="{{ url_for('quiz_page') }}" class="own-quick-link">
+            <i class="bi bi-question-circle"></i> Coffee Quiz
+        </a>
+        <a href="{{ url_for('brew') }}" class="own-quick-link">
+            <i class="bi bi-cup-hot"></i> Brew Map
+        </a>
+    </div>
+
+    <!-- TWO COLUMN BODY -->
+    <div class="own-profile-body">
 
         <!-- LEFT: Posts Grid -->
-        <div class="profile-posts-col">
-            <h4 class="profile-section-title">Posts</h4>
-            <div class="posts-grid" id="profile-posts"></div>
+        <div>
+            <div class="own-section-title">
+                <i class="bi bi-grid-3x3" style="color:var(--caramel)"></i>
+                Posts
+            </div>
+            <div class="posts-grid" id="profile-posts">
+                <!-- Filled by profile.js -->
+            </div>
         </div>
 
-        <!-- RIGHT: Reviews -->
-        <div class="profile-reviews-col">
-            <h4 class="profile-section-title">Recent Reviews</h4>
+        <!-- RIGHT: Reviews + Info -->
+        <div>
+            <div class="own-section-title">
+                <i class="bi bi-star-fill" style="color:var(--caramel)"></i>
+                Reviews
+            </div>
             <div id="profile-reviews">
-                <p style="color:var(--muted);font-size:0.9rem;">No reviews yet</p>
+                <p style="color:var(--muted);font-size:0.82rem;">
+                    No reviews yet
+                </p>
             </div>
         </div>
 
@@ -222,4 +546,65 @@
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profile-reviews.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profile-edit.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ── XP and badges ────────────────────────────────────────
+    fetch('/api/profile/xp')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('own-level-title').textContent = data.title;
+            document.getElementById('own-xp').textContent          = data.xp;
+            document.getElementById('own-xp-label').textContent    = `Level ${data.level}`;
+
+            const next = [50,150,300,500,750,1000,1500,2000,3000];
+            const nextXp = next.find(n => n > data.xp) || data.xp;
+            const prev   = next.filter(n => n <= data.xp).pop() || 0;
+            const pct    = nextXp > prev
+                ? ((data.xp - prev) / (nextXp - prev)) * 100 : 100;
+            document.getElementById('own-xp-bar').style.width = Math.min(pct,100) + '%';
+            document.getElementById('own-xp-next').textContent =
+                nextXp > data.xp ? `${nextXp - data.xp} XP to next` : 'Max Level';
+
+            const badgeEl = document.getElementById('profile-badges');
+            if (data.badges.length > 0) {
+                badgeEl.innerHTML = data.badges.map(b =>
+                    `<span class="badge-pill">${b}</span>`
+                ).join('');
+            }
+        });
+
+    // ── Analytics ─────────────────────────────────────────────
+    fetch('/api/profile/analytics')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('stat-likes').textContent    = data.total_likes;
+            document.getElementById('stat-views').textContent    = data.total_views;
+            document.getElementById('stat-comments').textContent = data.total_comments;
+        });
+
+    // ── Profile completion ─────────────────────────────────────
+    fetch('/api/profile/completion')
+        .then(r => r.json())
+        .then(data => {
+            const section = document.getElementById('completion-section');
+            if (!section) return;
+            section.style.display = 'block';
+            document.getElementById('completion-percent').textContent = data.percent;
+            document.getElementById('completion-bar').style.width     = data.percent + '%';
+            if (data.missing.length > 0) {
+                document.getElementById('completion-missing').textContent =
+                    'Missing: ' + data.missing.join(', ');
+            }
+        });
+
+    // ── Modal close ────────────────────────────────────────────
+    document.getElementById('close-modal')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
+    document.querySelector('#post-modal .modal-overlay')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
+});
+</script>
 {% endblock %}

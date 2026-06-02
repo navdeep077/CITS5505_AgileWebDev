@@ -3,59 +3,57 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/explore.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week6.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week7.css') }}">
 {% endblock %}
 
 {% block content %}
 
-<div class="explore-hero">
-    <h1><i class="bi bi-compass"></i> Explore</h1>
+<div class="leaderboard-hero">
+    <i class="bi bi-compass-fill" style="font-size:2rem;color:var(--caramel);"></i>
+    <h1 style="margin-top:0.5rem;">Explore</h1>
     <p>Discover posts and people</p>
 </div>
 
-<div class="container" style="max-width:700px;">
+<div class="container" style="max-width:900px;">
 
+    <!-- Tabs -->
     <div class="explore-tabs">
-        <button class="explore-tab active" onclick="showTab('posts', this)">Posts</button>
-        <button class="explore-tab" onclick="showTab('people', this)">People</button>
-        <button class="explore-tab" onclick="showTab('trending', this)">Trending</button>
+        <button class="explore-tab active" data-tab="posts"
+            onclick="showTab('posts')">
+            <i class="bi bi-grid-3x3"></i> Posts
+        </button>
+        <button class="explore-tab" data-tab="people"
+            onclick="showTab('people')">
+            <i class="bi bi-people"></i> People
+        </button>
+        <button class="explore-tab" data-tab="trending"
+            onclick="showTab('trending')">
+            <i class="bi bi-fire"></i> Trending
+        </button>
     </div>
 
-    <!-- POSTS GRID -->
+    <!-- Posts Tab -->
     <div id="tab-posts">
-        <div class="explore-grid" id="explore-grid">
-            <div class="explore-item skeleton"></div>
-            <div class="explore-item skeleton"></div>
-            <div class="explore-item skeleton"></div>
-            <div class="explore-item skeleton"></div>
-            <div class="explore-item skeleton"></div>
-            <div class="explore-item skeleton"></div>
-        </div>
+        <div id="explore-grid" class="explore-grid"></div>
     </div>
 
-    <!-- PEOPLE -->
+    <!-- People Tab -->
     <div id="tab-people" style="display:none;">
-        <div class="suggested-section" id="people-list">
-            <div class="skeleton-post">
-                <div style="display:flex;gap:12px;align-items:center;">
-                    <div class="skeleton skeleton-avatar"></div>
-                    <div style="flex:1;">
-                        <div class="skeleton skeleton-line" style="width:40%;"></div>
-                        <div class="skeleton skeleton-line" style="width:25%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="people-list" style="margin-top:1.5rem;"></div>
     </div>
 
-    <!-- TRENDING -->
+    <!-- Trending Tab -->
     <div id="tab-trending" style="display:none;">
-        <div id="trending-list" style="max-width:600px;margin:0 auto;"></div>
+        <div id="trending-list"
+             style="max-width:680px;margin:1.5rem auto 0;"></div>
     </div>
 
 </div>
 
-<!-- POST MODAL -->
+<!-- Post detail modal — centered popup -->
 <div id="post-modal" class="post-modal hidden">
     <div class="modal-overlay"></div>
     <div class="modal-content">

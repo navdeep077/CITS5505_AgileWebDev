@@ -1,11 +1,13 @@
 /*
  * home-sidebar.js
- * Loads suggested users and trending hashtags into home page sidebar
+ * Loads suggested users, trending hashtags
+ * and rated cafes into home page sidebar
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     loadSuggestions();
     loadTrendingTags();
+    loadRatedCafes();
 });
 
 // ── Suggested Users ───────────────────────────────────────────────────────────
@@ -18,7 +20,8 @@ function loadSuggestions() {
 
             if (users.length === 0) {
                 list.innerHTML = `
-                    <p style="color:var(--muted);font-size:0.82rem;text-align:center;padding:1rem 0;">
+                    <p style="color:var(--muted);font-size:0.82rem;
+                        text-align:center;padding:1rem 0;">
                         No suggestions right now
                     </p>`;
                 return;
@@ -29,7 +32,9 @@ function loadSuggestions() {
                     <a href="/user/${u.username}" class="suggestion-avatar">
                         ${u.avatar
                             ? `<img src="${u.avatar}" alt="${u.username}">`
-                            : `<div class="sug-fallback">${u.username.charAt(0).toUpperCase()}</div>`
+                            : `<div class="sug-fallback">
+                                   ${u.username.charAt(0).toUpperCase()}
+                               </div>`
                         }
                     </a>
                     <div class="suggestion-info">
@@ -54,12 +59,10 @@ function followFromSidebar(username, btn) {
         .then(res => res.json())
         .then(data => {
             if (data.following) {
-                btn.textContent = 'Following';
-                btn.style.background = 'rgba(196,122,43,0.1)';
-                btn.style.color = 'var(--caramel)';
+                btn.textContent          = 'Following';
+                btn.style.background     = 'rgba(196,122,43,0.1)';
+                btn.style.color          = 'var(--caramel)';
                 showToast(`Following ${username} ✓`, 'success');
-
-                // Remove from suggestions after 1.5s
                 setTimeout(() => {
                     const row = document.getElementById(`sug-${username}`);
                     if (row) row.remove();
@@ -79,7 +82,8 @@ function loadTrendingTags() {
 
             if (tags.length === 0) {
                 list.innerHTML = `
-                    <p style="color:var(--muted);font-size:0.82rem;text-align:center;padding:0.5rem 0;">
+                    <p style="color:var(--muted);font-size:0.82rem;
+                        text-align:center;padding:0.5rem 0;">
                         No hashtags yet — add #tags to your posts
                     </p>`;
                 return;
@@ -88,9 +92,53 @@ function loadTrendingTags() {
             list.innerHTML = tags.map(t => `
                 <a href="/hashtag/${t.tag}" class="trending-tag-row">
                     <span class="trending-tag-name">#${t.tag}</span>
-                    <span class="trending-tag-count">${t.count} post${t.count > 1 ? 's' : ''}</span>
+                    <span class="trending-tag-count">
+                        ${t.count} post${t.count > 1 ? 's' : ''}
+                    </span>
                 </a>
             `).join('');
         })
         .catch(err => console.error('Trending tags error:', err));
+}
+
+// ── Rated Cafes Sidebar ───────────────────────────────────────────────────────
+// Only shows cafes that have at least one real user review
+// Sorted by average rating descending
+function loadRatedCafes() {
+    fetch('/api/cafes/rated')
+        .then(res => res.json())
+        .then(cafes => {
+            const list = document.getElementById('rated-cafes-list');
+            if (!list) return;
+
+            if (cafes.length === 0) {
+                list.innerHTML = `
+                    <p style="font-size:0.8rem;color:var(--muted);
+                        text-align:center;padding:0.5rem 0;">
+                        No reviews yet — visit a cafe and be first!
+                    </p>`;
+                return;
+            }
+
+            list.innerHTML = cafes.map(c => `
+                <a href="/shop/${c.route.replace('shop_', '')}"
+                   class="sidebar-cafe-link">
+                    <span style="
+                        white-space:nowrap;
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                        max-width:140px;">
+                        ${c.name}
+                    </span>
+                    <span class="sidebar-cafe-rating">
+                        <i class="bi bi-star-fill"></i>
+                        ${c.rating}
+                        <span style="font-size:0.68rem;color:var(--muted);">
+                            (${c.count})
+                        </span>
+                    </span>
+                </a>
+            `).join('');
+        })
+        .catch(() => {});
 }

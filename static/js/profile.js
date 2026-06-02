@@ -130,6 +130,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#post-modal .modal-overlay')?.addEventListener('click', () => {
         document.getElementById('post-modal').classList.add('hidden');
     });
+
+    // Load analytics
+fetch('/api/profile/analytics')
+    .then(res => res.json())
+    .then(data => {
+        const section = document.getElementById('analytics-section');
+        if (!section) return;
+        section.style.display = 'block';
+        document.getElementById('stat-likes').textContent    = data.total_likes;
+        document.getElementById('stat-views').textContent    = data.total_views;
+        document.getElementById('stat-comments').textContent = data.total_comments;
+        document.getElementById('stat-avg-likes').textContent = data.avg_likes;
+    })
+    .catch(err => console.error('Analytics error:', err));
     // Load XP and badges
 fetch('/api/profile/xp')
     .then(res => res.json())
