@@ -461,3 +461,48 @@
     .info-strip { grid-template-columns: 1fr 1fr; }
     .discount-block { flex-direction: column; gap: 0.85rem; }
 }
+
+/* ── REVIEW CARD CLEANUP ─────────────────────────────────────── */
+.shop-review-card {
+    background: var(--surface, #fff) !important;
+    border: 1px solid rgba(196,122,43,0.16) !important;
+    border-radius: 14px !important;
+    padding: 1rem 1.1rem !important;
+    box-shadow: 0 4px 14px rgba(26,14,0,0.05) !important;
+}
+
+.review-header {
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+}
+
+.review-stars {
+    margin-left: auto;
+    white-space: nowrap;
+    color: var(--caramel) !important;
+}
+
+.review-text {
+    background: rgba(196,122,43,0.04);
+    border-radius: 10px;
+    padding: 0.75rem 0.85rem;
+    color: var(--text, #1a0e00) !important;
+    margin: 0.8rem 0 0 !important;
+    word-break: break-word;
+}
+
+.review-delete-btn {
+    border: 1px solid rgba(220,53,69,0.18);
+    background: rgba(220,53,69,0.04);
+    color: #d6333f;
+    font-size: 0.78rem;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-top: 0.7rem;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.review-delete-btn:hover {
+    background: rgba(220,53,69,0.1);
+}

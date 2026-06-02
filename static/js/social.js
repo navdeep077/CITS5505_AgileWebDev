@@ -12,11 +12,19 @@
 const currentUser = window.currentUser || "guest";
 
 // ── TIME AGO ──────────────────────────────────────────────────────────────────
+function parseUtcTimestamp(timestamp) {
+    if (!timestamp) return null;
+    const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(timestamp);
+    return new Date(hasTimezone ? timestamp : `${timestamp}Z`);
+}
+
 function timeAgo(timestamp) {
     if (!timestamp) return "";
     const now  = new Date();
-    const past = new Date(timestamp);
-    const seconds = Math.floor((now - past) / 1000);
+    const past = parseUtcTimestamp(timestamp);
+    let seconds = Math.floor((now - past) / 1000);
+    if (Number.isNaN(seconds)) return "";
+    seconds = Math.max(seconds, 0);
     if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
@@ -179,14 +187,33 @@ function loadPosts() {
     fetch("/api/posts")
         .then(res => res.json())
         .then(posts => {
+            if (!Array.isArray(posts)) posts = [];
             allPosts = posts;
             feed.innerHTML = "";
             currentPage = 1;
 
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-feed-card">
+                        <i class="bi bi-camera"></i>
+                        <h5>No posts yet</h5>
+                        <p>Be the first to share a coffee moment. Use the + button to upload a post.</p>
+                    </div>`;
+                return;
+            }
+
             const firstBatch = posts.slice(0, postsPerPage);
             firstBatch.forEach(post => renderPost(post));
         })
-        .catch(err => console.error("Error loading posts:", err));
+        .catch(err => {
+            console.error("Error loading posts:", err);
+            feed.innerHTML = `
+                <div class="empty-feed-card">
+                    <i class="bi bi-wifi-off"></i>
+                    <h5>Could not load posts</h5>
+                    <p>Please refresh the page and try again.</p>
+                </div>`;
+        });
 }
 
 // ── RENDER POST ───────────────────────────────────────────────────────────────
@@ -226,9 +253,18 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     const canDelete = postData.username === currentUser;
     const canEdit   = postData.username === currentUser;
 
-    // Increment view count when post is rendered
-    if (!isModal && postData.id) {
-        fetch(`/api/posts/${postData.id}/view`, { method: "POST" }).catch(() => {});
+    // Increment view count once per logged-in user
+    if (!isModal && postData.id && currentUser !== "guest") {
+        fetch(`/api/posts/${postData.id}/view`, { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (typeof data.view_count !== "undefined") {
+                    postData.view_count = data.view_count;
+                    const viewEls = document.querySelectorAll(`[data-view-count="${postData.id}"]`);
+                    viewEls.forEach(el => el.textContent = data.view_count);
+                }
+            })
+            .catch(() => {});
     }
 
     const postImage = postData.image
@@ -299,7 +335,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     <i class="bi bi-flag"></i>
 </button>` : ""}
             <span class="view-count">
-                <i class="bi bi-eye"></i> ${postData.view_count || 0}
+                <i class="bi bi-eye"></i> <span data-view-count="${postData.id}">${postData.view_count || 0}</span>
             </span>
             ${canEdit
                 ? `<button onclick="editPost(${postData.id})" class="action-btn edit-btn">
@@ -315,7 +351,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
         ` : `
         <div class="post-actions">
             <span>${postData.likes || 0} likes</span>
-            <span><i class="bi bi-eye"></i> ${postData.view_count || 0} views</span>
+            <span><i class="bi bi-eye"></i> <span data-view-count="${postData.id}">${postData.view_count || 0}</span> views</span>
         </div>
         `}
 
@@ -535,16 +571,21 @@ function deleteComment(commentId) {
 
 // ── MODAL ─────────────────────────────────────────────────────────────────────
 function openModal() {
-    const modal = document.getElementById('create-post-modal')
-               || document.getElementById('post-modal');
-    if (modal) modal.classList.add('active');
+    const modal = document.getElementById('create-post-modal');
+    if (!modal) return;
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
 function closeModal(e) {
     if (e && e.target !== e.currentTarget) return;
-    const modal = document.getElementById('create-post-modal')
-               || document.getElementById('post-modal');
-    if (modal) modal.classList.remove('active');
+    const modal = document.getElementById('create-post-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = '';
+    }
+    document.body.style.overflow = '';
     resetModal();
 }
 
@@ -592,14 +633,21 @@ function submitModalPost() {
     }
 
     fetch("/api/posts", { method: "POST", body: formData })
-        .then(res => res.json())
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Could not create post');
+            return data;
+        })
         .then(() => {
             resetModal();
             closeModal();
             loadPosts();
             showToast('Post created ✓', 'success');
         })
-        .catch(err => console.error("Error creating post:", err));
+        .catch(err => {
+            console.error("Error creating post:", err);
+            showToast(err.message || 'Could not create post', 'error');
+        });
 }
 
 // ── DELETE POST ───────────────────────────────────────────────────────────────

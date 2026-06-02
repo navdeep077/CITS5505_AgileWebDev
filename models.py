@@ -78,7 +78,7 @@ class User(UserMixin, db.Model):
     bio         = db.Column(db.String(200), nullable=True)
     website     = db.Column(db.String(200), nullable=True)
     location    = db.Column(db.String(100), nullable=True)
-    email       = db.Column(db.String(200), nullable=True)
+    email       = db.Column(db.String(200), unique=True, nullable=True)
     is_verified = db.Column(db.Boolean, default=False)
     is_admin    = db.Column(db.Boolean, default=False)
     xp          = db.Column(db.Integer, default=0)
@@ -179,6 +179,17 @@ class Post(db.Model):
     user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     comments   = db.relationship('Comment', backref='post', cascade='all, delete-orphan')
     bookmarks  = db.relationship('Bookmark', backref='post', cascade='all, delete-orphan')
+
+
+# ── POST VIEW MODEL ────────────────────────────────────────────────────────────
+class PostView(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    post_id    = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (
+        db.UniqueConstraint('post_id', 'user_id', name='unique_post_view'),
+    )
 
 # ── COMMENT MODEL ─────────────────────────────────────────────────────────────
 class Comment(db.Model):

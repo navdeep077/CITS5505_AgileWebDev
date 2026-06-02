@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Replace image with initials fallback
             const img = document.getElementById('profile-avatar-img');
             if (img) {
-                img.outerHTML = `<div class="fallback-avatar" id="profile-avatar-fallback">
+                img.outerHTML = `<div class="own-avatar-fallback" id="profile-avatar-fallback">
                     ${window.currentUser.charAt(0).toUpperCase()}
                 </div>`;
             }

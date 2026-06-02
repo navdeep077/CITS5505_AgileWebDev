@@ -435,3 +435,68 @@
     background: linear-gradient(to right, transparent, var(--cream, #fdf6ee));
     pointer-events: none;
 }
+/* ── HOME FEED QUICK FIXES ───────────────────────────────────── */
+.filter-bar {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    user-select: none;
+}
+
+.filter-chip {
+    flex: 0 0 auto !important;
+    scroll-snap-align: start;
+}
+
+.fab {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+}
+
+.fab i {
+    display: block;
+    line-height: 1;
+    font-size: 1.35rem;
+}
+
+.empty-feed-card {
+    background: var(--surface, #fff);
+    border: 1px dashed rgba(196,122,43,0.28);
+    border-radius: 16px;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    margin-top: 1.5rem;
+}
+
+.empty-feed-card i {
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(196,122,43,0.08);
+    color: var(--caramel);
+    font-size: 1.7rem;
+    margin-bottom: 0.8rem;
+}
+
+.empty-feed-card h5 {
+    color: var(--text, #1a0e00);
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.empty-feed-card p {
+    margin: 0;
+    font-size: 0.9rem;
+}
