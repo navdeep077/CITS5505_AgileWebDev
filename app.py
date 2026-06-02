@@ -1465,6 +1465,76 @@ def quiz_page():
     """Coffee personality quiz page"""
     return render_template("quiz.html")
 
+# ── WEEK 7 ROUTES ─────────────────────────────────────────────────────────────
+
+@app.route("/api/cafe-stats/<cafe_name>", methods=["GET"])
+def cafe_stats(cafe_name):
+    """Returns average rating and review count for a cafe"""
+    reviews = Review.query.filter_by(shop=cafe_name).all()
+    if not reviews:
+        return jsonify({"average": 0, "count": 0, "breakdown": {}})
+
+    avg = sum(r.rating for r in reviews) / len(reviews)
+    breakdown = {str(i): sum(1 for r in reviews if r.rating == i) for i in range(1, 6)}
+
+    return jsonify({
+        "average":   round(avg, 1),
+        "count":     len(reviews),
+        "breakdown": breakdown
+    })
+
+
+@app.route("/api/profile/analytics", methods=["GET"])
+def profile_analytics():
+    """Returns post engagement stats for current user"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    posts       = current.posts
+    total_likes = sum(p.likes for p in posts)
+    total_views = sum(p.view_count or 0 for p in posts)
+    total_comments = sum(len(p.comments) for p in posts)
+
+    # Best performing post
+    best_post = max(posts, key=lambda p: p.likes, default=None)
+
+    # Posts per cafe
+    cafe_counts = {}
+    for post in posts:
+        if post.shop:
+            cafe_counts[post.shop] = cafe_counts.get(post.shop, 0) + 1
+
+    return jsonify({
+        "total_posts":    len(posts),
+        "total_likes":    total_likes,
+        "total_views":    total_views,
+        "total_comments": total_comments,
+        "avg_likes":      round(total_likes / len(posts), 1) if posts else 0,
+        "avg_views":      round(total_views / len(posts), 1) if posts else 0,
+        "best_post":      serialize_post(best_post) if best_post else None,
+        "cafe_breakdown": cafe_counts
+    })
+
+@app.route("/api/cafes/rated", methods=["GET"])
+def rated_cafes():
+    """Returns only cafes that have at least one review, sorted by avg rating"""
+    result = []
+    for cafe in CAFES:
+        reviews = Review.query.filter_by(shop=cafe["name"]).all()
+        if reviews:
+            avg = round(sum(r.rating for r in reviews) / len(reviews), 1)
+            result.append({
+                "name":     cafe["name"],
+                "location": cafe["location"],
+                "rating":   avg,
+                "count":    len(reviews),
+                "route":    cafe["route"]
+            })
+    # Sort by average rating descending
+    result.sort(key=lambda x: x["rating"], reverse=True)
+    return jsonify(result)
+
 # ── Application Entry Point ───────────────────────────────────────────────────
 if __name__ == "__main__":
     with app.app_context():

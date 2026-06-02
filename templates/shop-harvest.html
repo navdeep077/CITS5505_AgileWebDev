@@ -3,17 +3,15 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week7.css') }}">
 {% endblock %}
 
 {% block content %}
 
-<!-- HERO: Dark gradient banner with cafe identity and rating -->
 <section class="hero-shop">
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
-        <a href="{{ url_for('home') }}" class="shop-back-link">
-            <span class="shop-back-arrow">←</span> Back to Home
-        </a>
+
         <div class="shop-hero-body">
             <div class="shop-identity">
                 <div class="shop-logo-badge">H</div>
@@ -25,26 +23,26 @@
                     </div>
                     <h1 class="shop-hero-title">Harvest Espresso</h1>
                     <p class="shop-hero-location">
-                        <i class="bi bi-geo-alt"></i> Leederville, Perth WA
+                        <i class="bi bi-geo-alt"></i> Leederville, WA
                     </p>
                 </div>
             </div>
-            <div class="shop-rating-pill">
-                <span class="rating-num">4.7</span>
+            <div class="shop-rating-pill" id="hero-rating-pill" style="display:none;">
+                <span class="rating-num" id="hero-avg">—</span>
                 <div>
-                    <div class="rating-stars">★★★★★</div>
-                    <div class="rating-count">180 reviews</div>
+                    <div class="rating-stars" id="hero-stars"></div>
+                    <div class="rating-count" id="hero-count"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+
 <main class="container py-5">
     <div class="row g-5">
         <div class="col-lg-8">
 
-            <!-- Info strip: hours, wifi, parking -->
             <div class="info-strip mb-5">
                 <div class="info-strip-item">
                     <i class="bi bi-clock" style="font-size:1.3rem;color:var(--caramel)"></i>
@@ -61,58 +59,54 @@
                     </div>
                 </div>
                 <div class="info-strip-item">
-                    <i class="bi bi-p-square" style="font-size:1.3rem;color:var(--caramel)"></i>
+                    <i class="bi bi-cup" style="font-size:1.3rem;color:var(--caramel)"></i>
                     <div>
-                        <div class="info-strip-label">Parking</div>
-                        <div class="info-strip-value">Street parking</div>
+                        <div class="info-strip-label">Specialty</div>
+                        <div class="info-strip-value">Cold Brew &amp; Pour Over</div>
                     </div>
                 </div>
             </div>
 
             <span class="section-eyebrow">What's On Offer</span>
-            <h2 class="section-title mb-4">Menu & Pricing</h2>
+            <h2 class="section-title mb-4">Menu &amp; Pricing</h2>
 
-            <!-- Cold Brew menu category -->
             <div class="menu-category mb-4">
                 <div class="menu-category-label">Cold Brew</div>
                 <div class="menu-grid">
                     <div class="menu-item">
                         <div class="menu-item-name">Cold Brew Black</div>
-                        <div class="menu-item-desc">Smooth 12-hour steep</div>
-                        <div class="menu-item-price">$5.50</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="menu-item-name">Cold Brew Oat Latte</div>
-                        <div class="menu-item-desc">Cold brew with oat milk</div>
-                        <div class="menu-item-price">$6.50</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pour Over menu category -->
-            <div class="menu-category mb-5">
-                <div class="menu-category-label">Pour Over</div>
-                <div class="menu-grid">
-                    <div class="menu-item">
-                        <div class="menu-item-name">V60 Pour Over</div>
-                        <div class="menu-item-desc">Single origin, bright notes</div>
+                        <div class="menu-item-desc">24-hour steep, bold and smooth</div>
                         <div class="menu-item-price">$6.00</div>
                     </div>
                     <div class="menu-item">
-                        <div class="menu-item-name">Chemex</div>
-                        <div class="menu-item-desc">Clean, balanced cup</div>
+                        <div class="menu-item-name">Cold Brew Tonic</div>
+                        <div class="menu-item-desc">Cold brew with tonic water</div>
                         <div class="menu-item-price">$7.00</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Community reviews — populated by shop.js -->
+            <div class="menu-category mb-5">
+                <div class="menu-category-label">Pour Over</div>
+                <div class="menu-grid">
+                    <div class="menu-item">
+                        <div class="menu-item-name">Single Origin V60</div>
+                        <div class="menu-item-desc">Rotating seasonal single origin</div>
+                        <div class="menu-item-price">$8.00</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-name">Chemex Brew</div>
+                        <div class="menu-item-desc">Clean and bright, serves two</div>
+                        <div class="menu-item-price">$14.00</div>
+                    </div>
+                </div>
+            </div>
+
             <span class="section-eyebrow">Community Takes</span>
-            <h2 class="section-title mb-4">Ratings & Reviews</h2>
+            <h2 class="section-title mb-4">Ratings &amp; Reviews</h2>
             <div class="review-list"></div>
         </div>
 
-        <!-- RIGHT COLUMN: Review form and quick facts -->
         <div class="col-lg-4">
             <div class="sidebar-card mb-4">
                 <span class="section-eyebrow">Your Take</span>
@@ -124,26 +118,69 @@
                     <span class="star-pick" data-val="4">★</span>
                     <span class="star-pick" data-val="5">★</span>
                 </div>
-                <textarea class="review-textarea" placeholder="Share your experience…" rows="4"></textarea>
+                <textarea class="review-textarea"
+                    placeholder="Share your experience…" rows="4"></textarea>
                 <button class="btn-primary-custom w-100 mt-3">Submit Review</button>
             </div>
+
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
-                    <li><i class="bi bi-cup-hot"></i> Cold brew & pour over specialist</li>
+                    <li><i class="bi bi-cup-hot"></i> Cold brew and pour over</li>
                     <li><i class="bi bi-shop"></i> Dine-in available</li>
                     <li><i class="bi bi-bag"></i> Takeaway</li>
+                    <li><i class="bi bi-wifi"></i> Free Wi-Fi</li>
                     <li><i class="bi bi-credit-card"></i> Card and cash accepted</li>
                 </ul>
             </div>
-            <a href="{{ url_for('home') }}" class="btn-primary-custom w-100 text-center d-block">
-                Back to Home
+
+            <a href="javascript:history.back()"
+               class="btn-primary-custom w-100 text-center d-block">
+                ← Back
             </a>
         </div>
     </div>
 </main>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
+<script>
+fetch('/api/cafe-stats/Harvest Espresso')
+    .then(r => r.json())
+    .then(data => {
+        if (data.count === 0) return;
+        const pill = document.getElementById('hero-rating-pill');
+        pill.style.display = 'flex';
+        document.getElementById('hero-avg').textContent   = data.average;
+        document.getElementById('hero-stars').textContent =
+            '★'.repeat(Math.round(data.average)) +
+            '☆'.repeat(5 - Math.round(data.average));
+        document.getElementById('hero-count').textContent =
+            `${data.count} review${data.count > 1 ? 's' : ''}`;
+        const section = document.getElementById('cafe-rating-summary');
+        section.style.display = 'flex';
+        document.getElementById('cafe-avg-score').textContent = data.average;
+        document.getElementById('cafe-avg-stars').textContent =
+            '★'.repeat(Math.round(data.average)) +
+            '☆'.repeat(5 - Math.round(data.average));
+        document.getElementById('cafe-review-count').textContent =
+            `${data.count} review${data.count > 1 ? 's' : ''}`;
+        const bars = document.getElementById('cafe-rating-bars');
+        bars.innerHTML = [5,4,3,2,1].map(star => {
+            const count = data.breakdown[star] || 0;
+            const pct   = Math.round((count / data.count) * 100);
+            return `
+                <div class="cafe-rating-bar-row">
+                    <span style="color:var(--caramel);min-width:12px;">${star}</span>
+                    <i class="bi bi-star-fill" style="color:var(--caramel);font-size:0.7rem;"></i>
+                    <div class="cafe-rating-bar-fill">
+                        <div class="cafe-rating-bar-inner" style="width:${pct}%"></div>
+                    </div>
+                    <span style="color:var(--muted);min-width:24px;text-align:right;">${count}</span>
+                </div>`;
+        }).join('');
+    }).catch(() => {});
+</script>
 {% endblock %}

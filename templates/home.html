@@ -112,25 +112,22 @@
             </div>
         </div>
 
-        <!-- Perth Cafes directory -->
-        <div class="sidebar-card">
-            <h6 class="sidebar-title">
-                <i class="bi bi-cup-hot-fill" style="color:var(--caramel)"></i>
-                Perth Cafes
-            </h6>
-            {% for cafe in cafes %}
-            <a href="/shop/{{ cafe.route.replace('shop_', '') }}"
-               class="sidebar-cafe-link">
-                <span>{{ cafe.name }}</span>
-                <span class="sidebar-cafe-rating">
-                    <i class="bi bi-star-fill"></i> {{ cafe.rating }}
-                </span>
-            </a>
-            {% endfor %}
-            <a href="{{ url_for('brew') }}" class="sidebar-brew-link">
-                View Brew Map →
-            </a>
-        </div>
+        <!-- Perth Cafes directory — only shows reviewed cafes -->
+<div class="sidebar-card">
+    <h6 class="sidebar-title">
+        <i class="bi bi-cup-hot-fill" style="color:var(--caramel)"></i>
+        Top Rated Cafes
+    </h6>
+    <div id="rated-cafes-list">
+        <div class="skeleton skeleton-line"
+             style="height:24px;border-radius:6px;margin-bottom:6px;"></div>
+        <div class="skeleton skeleton-line"
+             style="height:24px;border-radius:6px;margin-bottom:6px;"></div>
+    </div>
+    <a href="{{ url_for('brew') }}" class="sidebar-brew-link">
+        View Brew Map →
+    </a>
+</div>
 
     </div>
 
