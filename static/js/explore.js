@@ -30,6 +30,12 @@ function wireModalClose() {
 }
 
 function openExplorePost(post) {
+    if (post.image && typeof openLightbox === 'function') {
+        const allImages = exploreAllPosts.filter(p => p.image).map(p => p.image);
+        openLightbox(post.image, post.text || '', allImages);
+        return;
+    }
+
     const modal     = document.getElementById('post-modal');
     const container = document.getElementById('modal-post-container');
     if (!modal || !container) return;
@@ -353,8 +359,7 @@ function followFromExplore(username, btn) {
 
 // ── Trending tab ──────────────────────────────────────────────
 function loadTrending() {
-    const list  = document.getElementById('trending-list');
-    const cafes = window.trendingCafes || [];
+    const list = document.getElementById('trending-list');
     if (!list) return;
 
     list.innerHTML = `
@@ -362,9 +367,13 @@ function loadTrending() {
             Loading...
         </div>`;
 
-    fetch('/api/posts/trending')
-        .then(res => res.json())
-        .then(posts => {
+    Promise.all([
+        fetch('/api/posts/trending').then(res => res.json()),
+        fetch('/api/cafes/rated').then(res => res.json()).catch(() => [])
+    ])
+        .then(([posts, cafes]) => {
+            posts = Array.isArray(posts) ? posts : [];
+            cafes = Array.isArray(cafes) ? cafes : [];
             let html = '';
 
             html += `
@@ -433,6 +442,10 @@ function loadTrending() {
                     Top Cafes
                 </h5>`;
 
+            if (cafes.length === 0) {
+                html += `<p style="color:var(--muted);font-size:0.9rem;">No cafe reviews yet</p>`;
+            }
+
             cafes.forEach(cafe => {
                 html += `
                     <div style="
@@ -457,7 +470,7 @@ function loadTrending() {
                                 ${cafe.rating}
                             </div>
                             <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
-                                ${cafe.tags.map(t =>
+                                ${(cafe.tags || []).map(t =>
                                     `<span style="
                                         background:rgba(196,122,43,0.1);
                                         color:var(--caramel);

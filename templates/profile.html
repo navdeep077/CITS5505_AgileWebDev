@@ -353,6 +353,9 @@
                 <input type="text" id="location-input"
                     placeholder="Location"
                     value="{{ current_user.location or '' }}">
+                <input type="email" id="email-input"
+                    placeholder="Email for password reset"
+                    value="{{ current_user.email or '' }}">
                 <div class="bio-edit-actions">
                     <button class="btn-save" onclick="saveEditBio()">Save</button>
                     <button class="btn-cancel" onclick="cancelEditBio()">Cancel</button>

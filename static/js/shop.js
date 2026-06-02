@@ -5,6 +5,27 @@
  * Seed/demo reviews removed — all reviews are real user submissions.
  */
 
+// ── Time Ago Helper ──────────────────────────────────────────────────────────
+function parseUtcTimestamp(timestamp) {
+    if (!timestamp) return null;
+    const hasTimezone = /Z$|[+-]\d{2}:?\d{2}$/.test(timestamp);
+    return new Date(hasTimezone ? timestamp : `${timestamp}Z`);
+}
+
+function timeAgo(timestamp) {
+    if (!timestamp) return "Just now";
+    const past = parseUtcTimestamp(timestamp);
+    let seconds = Math.floor((new Date() - past) / 1000);
+    if (Number.isNaN(seconds)) return "Just now";
+    seconds = Math.max(seconds, 0);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+}
+
 // ── Star Rating ───────────────────────────────────────────────────────────────
 const starPicker = document.getElementById('starPicker');
 let selectedRating = 0;
@@ -93,15 +114,7 @@ function renderReview(r, currentUser) {
     div.className = 'shop-review-card';
     div.setAttribute('data-review-id', r.id);
 
-    // Time ago
-    let timeDisplay = 'Just now';
-    if (r.created_at) {
-        const seconds = Math.floor((new Date() - new Date(r.created_at)) / 1000);
-        if (seconds < 60)        timeDisplay = `${seconds}s ago`;
-        else if (seconds < 3600) timeDisplay = `${Math.floor(seconds/60)}m ago`;
-        else if (seconds < 86400)timeDisplay = `${Math.floor(seconds/3600)}h ago`;
-        else                     timeDisplay = `${Math.floor(seconds/86400)}d ago`;
-    }
+    const timeDisplay = timeAgo(r.created_at);
 
     div.innerHTML = `
         <div class="review-header">
@@ -116,10 +129,8 @@ function renderReview(r, currentUser) {
         </div>
         <p class="review-text">${r.text}</p>
         ${canDelete ? `
-            <button onclick="deleteReview('${r.id}')"
-                style="border:none;background:none;color:var(--muted);
-                    font-size:0.8rem;cursor:pointer;padding:0;margin-top:4px;">
-                <i class="bi bi-trash"></i> Delete
+            <button onclick="deleteReview('${r.id}')" class="review-delete-btn">
+                <i class="bi bi-trash"></i> Delete review
             </button>` : ''}
     `;
     return div;
@@ -250,4 +261,5 @@ window.deleteReview = function(id) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     loadShopReviews();
+    setInterval(loadShopReviews, 60000);
 });

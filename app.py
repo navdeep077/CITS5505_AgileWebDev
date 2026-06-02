@@ -10,14 +10,14 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView
 from config import Config
 import cloudinary
 import cloudinary.uploader
 from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timedelta
 import re
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, JournalEntry
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry
 
 # ── Application Factory ───────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -310,18 +310,25 @@ def index():
 @limiter.limit("10 per minute", methods=["POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
+        username = request.form.get("username", "").strip()
         password = request.form.get("password")
+
         if not username or not password:
             return redirect(url_for("login", error="Please fill all fields"))
+
         user = User.query.filter_by(username=username).first()
+
         if user and bcrypt.check_password_hash(user.password, password):
+            if not user.is_verified:
+                return redirect(url_for("login", error="Please verify your email before signing in"))
+
             login_user(user)
             session["user"] = username
             return redirect(url_for("home"))
         else:
             return redirect(url_for("login", error="Invalid username or password"))
-    error   = request.args.get("error")
+
+    error = request.args.get("error")
     message = request.args.get("message")
     return render_template("login.html", error=error, message=message)
 
@@ -329,22 +336,22 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        username         = request.form.get("username")
-        email            = request.form.get("email", "").strip()
+        username         = request.form.get("username", "").strip()
+        email            = request.form.get("email", "").strip().lower()
         password         = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
 
-        if not username or not password or not confirm_password:
+        if not username or not email or not password or not confirm_password:
             return redirect(url_for("signup", error="Please fill all fields"))
         if password != confirm_password:
             return redirect(url_for("signup", error="Passwords do not match"))
-        if User.query.filter_by(username=username).first():
+        if User.query.filter(db.func.lower(User.username) == username.lower()).first():
             return redirect(url_for("signup", error="Username already exists"))
-        if email and User.query.filter_by(email=email).first():
+        if User.query.filter(db.func.lower(User.email) == email).first():
             return redirect(url_for("signup", error="Email already registered"))
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        new_user = User(username=username, password=hashed_password, email=email or None)
+        new_user = User(username=username, password=hashed_password, email=email)
         db.session.add(new_user)
         db.session.commit()
 
@@ -958,11 +965,45 @@ def edit_profile():
     if not current:
         return jsonify({"error": "Unauthorized"}), 401
     data             = request.get_json()
+    email            = (data.get("email") or "").strip().lower()
+
+    if not email:
+        return jsonify({"error": "Email is required for password reset"}), 400
+
+    existing_email = User.query.filter(
+        db.func.lower(User.email) == email,
+        User.id != current.id
+    ).first()
+    if existing_email:
+        return jsonify({"error": "Email already registered"}), 400
+
+    email_changed = email != (current.email or "").lower()
+
     current.bio      = data.get("bio", current.bio)
     current.website  = data.get("website", current.website)
     current.location = data.get("location", current.location)
+    current.email    = email
+
+    message = "Profile updated ✓"
+    if email_changed:
+        current.is_verified = False
+        try:
+            send_verification_email(current)
+            message = "Profile updated. Please verify the new email from your inbox."
+        except Exception as e:
+            print(f"Email verification error: {e}")
+            message = "Profile updated, but verification email could not be sent."
+
     db.session.commit()
-    return jsonify({"bio": current.bio, "website": current.website, "location": current.location})
+    return jsonify({
+        "bio": current.bio,
+        "website": current.website,
+        "location": current.location,
+        "email": current.email,
+        "email_changed": email_changed,
+        "is_verified": current.is_verified,
+        "message": message
+    })
 
 
 # ── Week 3 Routes ─────────────────────────────────────────────────────────────
@@ -990,10 +1031,22 @@ def edit_post(post_id):
 @csrf.exempt
 @app.route("/api/posts/<int:post_id>/view", methods=["POST"])
 def increment_view(post_id):
-    post            = Post.query.get_or_404(post_id)
-    post.view_count = (post.view_count or 0) + 1
-    db.session.commit()
-    return jsonify({"view_count": post.view_count})
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    post = Post.query.get_or_404(post_id)
+    existing_view = PostView.query.filter_by(
+        post_id=post.id,
+        user_id=user.id
+    ).first()
+
+    if not existing_view:
+        db.session.add(PostView(post_id=post.id, user_id=user.id))
+        post.view_count = (post.view_count or 0) + 1
+        db.session.commit()
+
+    return jsonify({"view_count": post.view_count or 0})
 
 
 @app.route("/api/posts/trending", methods=["GET"])

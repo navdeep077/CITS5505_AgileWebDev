@@ -577,3 +577,7 @@ select:focus {
     color: var(--caramel);
     border: 1.5px solid var(--caramel);
 }
+/* Let full-size image lightbox sit above the explore blur layer */
+#lightbox-overlay {
+    z-index: 20000 !important;
+}
