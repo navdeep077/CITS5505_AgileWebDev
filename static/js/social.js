@@ -258,7 +258,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     <div class="post-header">
         ${avatarMarkup(username, postData.avatar || "")}
         <div class="user-info">
-            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+            <div style="display:flex;align-items:center;justify-content:flex-start;gap:8px;width:auto;">
                 <a href="/user/${username}" class="post-username">
                     <strong>${username}</strong>
                 </a>

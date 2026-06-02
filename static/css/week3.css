@@ -60,7 +60,8 @@
 .post-time {
     font-size: 0.75rem;
     color: var(--muted);
-    margin-left: auto;
+    margin-left: 0;
+    white-space: nowrap;
 }
 
 /* Edit post form */
