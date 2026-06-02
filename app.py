@@ -835,6 +835,7 @@ def get_notifications():
 
 
 @app.route("/api/notifications/count", methods=["GET"])
+@limiter.limit("200 per hour")
 def notification_count():
     current = get_current_user()
     if not current:
