@@ -8,7 +8,56 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSuggestions();
     loadTrendingTags();
     loadRatedCafes();
+    loadWeather();
 });
+
+function loadWeather() {
+    const el = document.getElementById('sidebar-weather');
+    if (!el) return;
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=-31.9505&longitude=115.8605&current_weather=true&timezone=Australia%2FPerth')
+        .then(r => r.json())
+        .then(data => {
+            const w    = data.current_weather;
+            const temp = Math.round(w.temperature);
+            const code = w.weathercode;
+
+            const icon = code <= 3  ? '☀️'
+                       : code <= 48 ? '🌤️'
+                       : code <= 67 ? '🌧️'
+                       : code <= 77 ? '❄️'
+                       : '⛈️';
+
+            const desc = code <= 3  ? 'Clear'
+                       : code <= 48 ? 'Cloudy'
+                       : code <= 67 ? 'Rainy'
+                       : code <= 77 ? 'Snow'
+                       : 'Stormy';
+
+            el.innerHTML = `
+                <div class="sidebar-card" style="margin-bottom:1rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:0.75rem;color:var(--muted);
+                                font-weight:600;text-transform:uppercase;
+                                letter-spacing:0.5px;margin-bottom:4px;">
+                                Perth Weather
+                            </div>
+                            <div style="font-size:1.4rem;font-weight:700;
+                                color:var(--text);">
+                                ${temp}°C
+                            </div>
+                            <div style="font-size:0.8rem;color:var(--muted);">
+                                ${desc}
+                            </div>
+                        </div>
+                        <div style="font-size:2.5rem;">${icon}</div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(() => { el.innerHTML = ''; });
+}
 
 // ── Suggested Users ───────────────────────────────────────────────────────────
 function loadSuggestions() {
@@ -141,4 +190,100 @@ function loadRatedCafes() {
             `).join('');
         })
         .catch(() => {});
+}
+// ── Weather widget ────────────────────────────────────────────
+function loadWeather() {
+    const el = document.getElementById('sidebar-weather');
+    if (!el) return;
+
+    // Perth coordinates
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=-31.9505&longitude=115.8605&current_weather=true&timezone=Australia%2FPerth')
+        .then(r => r.json())
+        .then(data => {
+            const w    = data.current_weather;
+            const temp = Math.round(w.temperature);
+            const code = w.weathercode;
+
+            const icon = code <= 3  ? '☀️'
+                       : code <= 48 ? '🌤️'
+                       : code <= 67 ? '🌧️'
+                       : code <= 77 ? '❄️'
+                       : '⛈️';
+
+            const desc = code <= 3  ? 'Clear'
+                       : code <= 48 ? 'Cloudy'
+                       : code <= 67 ? 'Rainy'
+                       : code <= 77 ? 'Snow'
+                       : 'Stormy';
+
+            el.innerHTML = `
+                <div class="sidebar-card" style="margin-bottom:1rem;">
+                    <div style="display:flex;align-items:center;
+                        justify-content:space-between;">
+                        <div>
+                            <div style="font-size:0.75rem;color:var(--muted);
+                                font-weight:600;text-transform:uppercase;
+                                letter-spacing:0.5px;margin-bottom:4px;">
+                                Perth Weather
+                            </div>
+                            <div style="font-size:1.4rem;font-weight:700;
+                                color:var(--text);">
+                                ${temp}°C
+                            </div>
+                            <div style="font-size:0.8rem;color:var(--muted);">
+                                ${desc}
+                            </div>
+                        </div>
+                        <div style="font-size:2.5rem;">${icon}</div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(() => { el.innerHTML = ''; });
+}
+
+// ── Weather widget ────────────────────────────────────────────
+function loadWeather() {
+    const el = document.getElementById('sidebar-weather');
+    if (!el) return;
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=-31.9505&longitude=115.8605&current_weather=true&timezone=Australia%2FPerth')
+        .then(r => r.json())
+        .then(data => {
+            const w    = data.current_weather;
+            const temp = Math.round(w.temperature);
+            const code = w.weathercode;
+
+            const icon = code <= 3  ? '☀️'
+                       : code <= 48 ? '🌤️'
+                       : code <= 67 ? '🌧️'
+                       : code <= 77 ? '❄️'
+                       : '⛈️';
+
+            const desc = code <= 3  ? 'Clear'
+                       : code <= 48 ? 'Cloudy'
+                       : code <= 67 ? 'Rainy'
+                       : code <= 77 ? 'Snow'
+                       : 'Stormy';
+
+            el.innerHTML = `
+                <div class="sidebar-card" style="margin-bottom:1rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:0.75rem;color:var(--muted);
+                                font-weight:600;text-transform:uppercase;
+                                letter-spacing:0.5px;margin-bottom:4px;">
+                                Perth Weather
+                            </div>
+                            <div style="font-size:1.4rem;font-weight:700;color:var(--text);">
+                                ${temp}°C
+                            </div>
+                            <div style="font-size:0.8rem;color:var(--muted);">${desc}</div>
+                        </div>
+                        <div style="font-size:2.5rem;">${icon}</div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(() => { el.innerHTML = ''; });
 }

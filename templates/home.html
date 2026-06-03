@@ -69,6 +69,18 @@
                 <div class="preview-container">
                     <img id="image-preview">
                 </div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <label style="font-size:0.82rem;color:var(--muted);white-space:nowrap;">
+                        <i class="bi bi-clock"></i> Schedule (optional)
+                    </label>
+                    <input type="datetime-local" id="modal-schedule"
+                        style="
+                            flex:1;padding:6px 10px;border-radius:8px;
+                            border:1.5px solid rgba(196,122,43,0.2);
+                            font-family:inherit;font-size:0.82rem;
+                            background:var(--surface,#fff);color:var(--text,#1a0e00);
+                        ">
+                </div>
                 <button class="post-btn" onclick="submitModalPost()">
                     Post <i class="bi bi-cup-hot"></i>
                 </button>
@@ -79,6 +91,9 @@
 
     <!-- ── RIGHT SIDEBAR ──────────────────────────────────────── -->
     <div class="home-sidebar-col">
+
+        <!-- Weather widget -->
+        <div id="sidebar-weather"></div>
 
         <!-- Suggested users -->
         <div class="sidebar-card">

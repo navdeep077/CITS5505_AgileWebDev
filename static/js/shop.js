@@ -63,7 +63,7 @@ const reviewTextarea = document.querySelector('.review-textarea');
 if (submitBtn && reviewTextarea) {
     submitBtn.addEventListener('click', () => {
         const text     = reviewTextarea.value.trim();
-        const shopName = document.querySelector('.shop-hero-title')?.innerText || '';
+        const shopName = window.CAFE_NAME || document.querySelector('.shop-hero-title')?.innerText?.trim() || '';
 
         if (selectedRating === 0) {
             alert('Please select a star rating.');
@@ -146,7 +146,7 @@ function loadShopReviews() {
             Loading reviews...
         </div>`;
 
-    const shopName   = document.querySelector('.shop-hero-title')?.innerText || '';
+    const shopName = window.CAFE_NAME || document.querySelector('.shop-hero-title')?.innerText?.trim() || '';
     const currentUser = window.currentUser || 'guest';
 
     fetch(`/api/reviews/shop/${encodeURIComponent(shopName)}`)
@@ -248,7 +248,7 @@ window.deleteReview = function(id) {
                 alert(data.error);
                 return;
             }
-            const shopName = document.querySelector('.shop-hero-title')?.innerText || '';
+            const shopName = window.CAFE_NAME || document.querySelector('.shop-hero-title')?.innerText?.trim() || '';
             loadShopReviews();
             reloadRatingSummary(shopName);
             if (typeof showToast === 'function') {

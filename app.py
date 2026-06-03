@@ -17,6 +17,7 @@ import cloudinary.uploader
 from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timedelta
 import re
+import pytz
 
 # ── Application Factory ───────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -207,6 +208,16 @@ def send_password_reset_email(user):
 
 # ── Cafe Data ─────────────────────────────────────────────────────────────────
 
+CAFE_HOURS = {
+    'Blacklist Coffee Roasters': {'open': 7.0,  'close': 15.0, 'days': [0,1,2,3,4]},
+    'La Veen Coffee':            {'open': 6.5,  'close': 14.5, 'days': [0,1,2,3,4,5]},
+    'Venn Coffee':               {'open': 7.0,  'close': 16.0, 'days': [0,1,2,3,4,5]},
+    'Harvest Espresso':          {'open': 6.5,  'close': 14.0, 'days': [0,1,2,3,4,5,6]},
+    'Telegram Cafe':             {'open': 7.0,  'close': 14.5, 'days': [0,1,2,3,4,5]},
+    'Satchmo':                   {'open': 7.0,  'close': 15.0, 'days': [0,1,2,3,4,5,6]},
+    'Mary Street Bakery':        {'open': 7.0,  'close': 15.0, 'days': [0,1,2,3,4,5,6]},
+}
+
 CAFES = [
     {
         "name": "Blacklist Coffee Roasters",
@@ -297,8 +308,25 @@ CAFES = [
 
 @app.context_processor
 def inject_cafes():
-    trending_cafes = sorted(CAFES, key=lambda c: float(c["rating"]), reverse=True)[:3]
-    return {"cafes": CAFES, "trending_cafes": trending_cafes}
+    import pytz
+    perth = pytz.timezone('Australia/Perth')
+    now   = datetime.now(perth)
+    hour  = now.hour
+    day   = now.weekday()
+
+    cafes_with_status = []
+    for cafe in CAFES:
+        hours = CAFE_HOURS.get(cafe['name'])
+        if hours:
+            is_open = day in hours['days'] and hours['open'] <= hour < hours['close']
+        else:
+            is_open = cafe.get('open', False)
+        c = dict(cafe)
+        c['open'] = is_open
+        cafes_with_status.append(c)
+
+    trending_cafes = sorted(cafes_with_status, key=lambda c: float(c["rating"]), reverse=True)[:3]
+    return {"cafes": cafes_with_status, "trending_cafes": trending_cafes}
 
 
 # ── Auth Routes ───────────────────────────────────────────────────────────────
@@ -417,14 +445,6 @@ def public_profile(username):
         return render_template("blocked.html",
             username=username, i_blocked=False)
 
-# Check if this person blocked current user
-    they_blocked_me = Block.query.filter_by(
-        blocker_id=profile_user.id,
-        blocked_id=current.id
-).first()
-    if they_blocked_me:
-        return render_template("blocked.html", username=username)
-
     posts       = Post.query.filter_by(user_id=profile_user.id)\
         .order_by(Post.created_at.desc()).all()
     total_likes = sum(post.likes for post in posts)
@@ -446,6 +466,20 @@ def landing():
 @app.route("/home")
 @login_required
 def home():
+    try:
+        now = datetime.utcnow()
+        due = Post.query.filter(
+            Post.is_published == False,
+            Post.scheduled_at.isnot(None),
+            Post.scheduled_at <= now
+        ).all()
+        for p in due:
+            p.is_published = True
+        if due:
+            db.session.commit()
+            print(f"Auto-published {len(due)} scheduled posts")
+    except Exception as e:
+        print(f"Schedule publish error: {e}")
     return render_template("home.html")
 
 
@@ -710,12 +744,12 @@ def api_posts():
 
     if request.method == "GET":
         blocked_ids = [b.blocked_id for b in Block.query.filter_by(blocker_id=user.id).all()]
+        query = Post.query.filter(
+            (Post.is_published == True) | (Post.is_published == None)
+        )
         if blocked_ids:
-            posts = Post.query.filter(
-                ~Post.user_id.in_(blocked_ids)
-            ).order_by(Post.created_at.desc()).all()
-        else:
-            posts = Post.query.order_by(Post.created_at.desc()).all()
+            query = query.filter(~Post.user_id.in_(blocked_ids))
+        posts = query.order_by(Post.created_at.desc()).all()
         return jsonify([serialize_post(post) for post in posts])
 
     text       = request.form.get("text", "").strip()
@@ -732,14 +766,11 @@ def api_posts():
     db.session.add(post)
     db.session.commit()
 
-    # Notify mentioned users in post text
     mentions = re.findall(r'@(\w+)', text)
     for mentioned_username in set(mentions):
         if mentioned_username == user.username:
             continue
-        mentioned_user = User.query.filter_by(
-            username=mentioned_username
-        ).first()
+        mentioned_user = User.query.filter_by(username=mentioned_username).first()
         if mentioned_user:
             db.session.add(Notification(
                 user_id=mentioned_user.id,
@@ -1239,7 +1270,6 @@ def following_feed():
 
 
 @app.route("/api/suggested-users", methods=["GET"])
-@app.route("/api/suggested-users", methods=["GET"])
 def suggested_users():
     current = get_current_user()
     if not current:
@@ -1275,7 +1305,6 @@ def suggested_users():
     } for u in suggested])
 
 
-@app.route("/api/suggested-users/sidebar", methods=["GET"])
 @app.route("/api/suggested-users/sidebar", methods=["GET"])
 def suggested_users_sidebar():
     current = get_current_user()
@@ -1715,6 +1744,114 @@ def get_checkin(cafe_name):
     ).count()
 
     return jsonify({"checked_in": checked_in, "total": total})
+
+
+@app.route('/api/cafe-status')
+def cafe_status():
+    perth = pytz.timezone('Australia/Perth')
+    now   = datetime.now(perth)
+    hour  = now.hour
+    day   = now.weekday()  # 0=Monday 6=Sunday
+
+    result = {}
+    for cafe, hours in CAFE_HOURS.items():
+        now_decimal = hour + now.minute / 60
+        is_open = (
+            day in hours['days'] and
+            hours['open'] <= now_decimal < hours['close']
+        )
+        closes_in = None
+        opens_in  = None
+
+        if is_open:
+            mins_left = int((hours['close'] - now_decimal) * 60)
+            if mins_left <= 60:
+                closes_in = mins_left
+        else:
+            if day in hours['days'] and now_decimal < hours['open']:
+                opens_in = int((hours['open'] - now_decimal) * 60)
+
+        def fmt_mins(m):
+            if m is None: return None
+            if m < 60: return f"{m}m"
+            h = m // 60
+            rem = m % 60
+            return f"{h}h {rem}m" if rem else f"{h}h"
+
+        def fmt_time(h):
+            hour = int(h)
+            mins = ':30' if h % 1 else ':00'
+            period = 'PM' if hour >= 12 else 'AM'
+            display = hour - 12 if hour > 12 else hour
+            return f"{display}{mins} {period}"
+
+        open_h  = hours['open']
+        close_h = hours['close']
+        result[cafe] = {
+            'is_open':   is_open,
+            'opens':     fmt_time(open_h),
+            'closes':    fmt_time(close_h),
+            'closes_in': fmt_mins(closes_in),
+            'opens_in':  fmt_mins(opens_in),
+        }
+
+    return jsonify(result)
+
+@csrf.exempt
+@app.route('/api/posts/schedule', methods=['POST'])
+def schedule_post():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    text         = request.form.get('text', '').strip()
+    shop         = request.form.get('shop', '')
+    scheduled_at = request.form.get('scheduled_at', '')
+    image_file   = request.files.get('image')
+
+    if not text:
+        return jsonify({'error': 'Text required'}), 400
+
+    try:
+        sched_time = datetime.fromisoformat(scheduled_at.replace('T', ' '))
+    except:
+        return jsonify({'error': 'Invalid time'}), 400
+
+    from datetime import timedelta as td
+    perth_offset = td(hours=8)
+    sched_time   = sched_time - perth_offset
+
+    try:
+        image_path = save_image_cloudinary(image_file) if image_file else None
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+
+    tags = re.findall(r'#(\w+)', text)
+    post = Post(
+        user_id      = current.id,
+        text         = text,
+        shop         = shop or None,
+        image        = image_path,
+        scheduled_at = sched_time,
+        is_published = False,
+        hashtags     = ','.join(tags)
+    )
+    db.session.add(post)
+    db.session.commit()
+    return jsonify({'message': 'Post scheduled', 'id': post.id})
+
+@app.route('/api/posts/publish-scheduled')
+def publish_scheduled():
+    now = datetime.utcnow()
+    due = Post.query.filter(
+        Post.is_published == False,
+        Post.scheduled_at <= now
+    ).all()
+    for post in due:
+        post.is_published = True
+    db.session.commit()
+    return jsonify({'published': len(due)})
+
 # ── Application Entry Point ───────────────────────────────────────────────────
 
 if __name__ == "__main__":

@@ -324,11 +324,11 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     <div class="post-header">
         ${avatarMarkup(username, postData.avatar || "")}
         <div class="user-info">
-            <div style="display:flex;align-items:center;gap:8px;">
-                <a href="/user/${username}" class="post-username">
-                    <strong>${username}</strong>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:nowrap;">
+                <a href="/user/${username}" class="post-username" style="font-weight:700;text-decoration:none;color:var(--text,#1a0e00);">
+                    ${username}
                 </a>
-                <span class="post-time">${timeAgo(postData.created_at)}</span>
+                <span style="color:var(--muted);font-size:0.78rem;white-space:nowrap;">${timeAgo(postData.created_at)}</span>
             </div>
             ${postData.shop
                 ? `<a href="/cafe/${encodeURIComponent(postData.shop)}" class="cafe-link">
@@ -627,7 +627,9 @@ function resetModal() {
     if (shop) shop.selectedIndex = 0;
     if (file) file.value = "";
     if (prev) prev.src = "";
-    if (cont) cont.style.display = "none";
+     if (cont) cont.style.display = "none";
+    const sched = document.getElementById("modal-schedule");
+    if (sched) sched.value = "";
 }
 
 function previewImage(event) {
@@ -644,20 +646,31 @@ function previewImage(event) {
 }
 
 function submitModalPost() {
-    const text       = document.getElementById("modal-text").value.trim();
-    const shop       = document.getElementById("modal-shop").value;
-    const imageInput = document.getElementById("modal-image");
+    const text          = document.getElementById("modal-text").value.trim();
+    const shop          = document.getElementById("modal-shop").value;
+    const imageInput    = document.getElementById("modal-image");
+    const scheduleInput = document.getElementById("modal-schedule");
+    const scheduledAt   = scheduleInput ? scheduleInput.value : '';
 
     if (!text) { showToast('Add a caption first', 'error'); return; }
+
+    if (scheduledAt) {
+        showToast('Post scheduled ✓', 'success');
+    }
 
     const formData = new FormData();
     formData.append("text", text);
     formData.append("shop", shop || "");
+    if (scheduledAt) {
+        formData.append("scheduled_at", scheduledAt);
+    }
     if (imageInput && imageInput.files.length > 0) {
         formData.append("image", imageInput.files[0]);
     }
 
-    fetch("/api/posts", { method: "POST", body: formData })
+    const endpoint = scheduledAt ? '/api/posts/schedule' : '/api/posts';
+
+    fetch(endpoint, { method: "POST", body: formData })
         .then(async res => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Could not create post');
@@ -666,8 +679,13 @@ function submitModalPost() {
         .then(() => {
             resetModal();
             closeModal();
-            loadPosts();
-            showToast('Post created ✓', 'success');
+            if (scheduledAt) {
+                const d = new Date(scheduledAt);
+                showToast(`Post scheduled for ${d.toLocaleString()} ✓`, 'success');
+            } else {
+                loadPosts();
+                showToast('Post created ✓', 'success');
+            }
         })
         .catch(err => {
             console.error("Error creating post:", err);
