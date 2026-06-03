@@ -13,17 +13,17 @@
     <div class="container hero-shop-content">
         <div class="shop-hero-body">
             <div class="shop-identity">
-                <div class="shop-logo-badge">B</div>
+                <div class="shop-logo-badge">L</div>
                 <div>
                     <div class="shop-hero-tags">
-                        <span class="shop-badge">Cold Brew</span>
+                        <span class="shop-badge">Pour Over</span>
                         <span class="shop-badge">Dine-in</span>
-                        <span class="shop-badge shop-badge--open">Open Now</span>
+                        <span class="shop-badge" id="cafe-status-badge">Checking...</span>
                     </div>
-                    <h1 class="shop-hero-title">Blacklist Coffee Roasters</h1>
+                    <h1 class="shop-hero-title">La Veen</h1>
                     <p class="shop-hero-location">
                         <i class="bi bi-geo-alt"></i>
-                        41 Welshpool Rd, Welshpool WA 6106
+                        140 William St, Perth WA 6000
                     </p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <button class="checkin-btn" id="checkin-btn"
-                        onclick="toggleCheckin('Blacklist Coffee Roasters')">
+                        onclick="toggleCheckin('La Veen Coffee')">
                     <i class="bi bi-geo-alt"></i>
                     <span id="checkin-label">Check In</span>
                 </button>
@@ -162,8 +162,6 @@
 {% endblock %}
 
 {% block extra_js %}
-// ── Check-in ──────────────────────────────────────────────────
-
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 <script>
 const CAFE_NAME = 'La Veen Coffee';
@@ -243,5 +241,50 @@ fetch('/api/cafe-stats/La Veen Coffee')
                 </div>`;
         }).join('');
     }).catch(() => {});
+    // ── Real-time open/close status ───────────────────────────────
+fetch('/api/cafe-status')
+    .then(r => r.json())
+    .then(statuses => {
+        const status = statuses[CAFE_NAME];
+        const badge  = document.getElementById('cafe-status-badge');
+        if (!badge || !status) return;
+
+        if (status.is_open) {
+            badge.textContent = status.closes_in
+                ? `Closes in ${status.closes_in}`
+                : `Open · Closes ${status.closes}`;
+            badge.style.background = 'rgba(76,175,80,0.15)';
+            badge.style.color      = '#2e7d32';
+            badge.style.border     = '1px solid rgba(76,175,80,0.3)';
+        } else {
+            badge.textContent = status.opens_in
+                ? `Opens in ${status.opens_in}`
+                : `Closed · Opens ${status.opens}`;
+            badge.style.background = 'rgba(229,57,53,0.12)';
+            badge.style.color      = '#c62828';
+            badge.style.border     = '1px solid rgba(229,57,53,0.2)';
+        }
+    })
+    .catch(() => {});
+
+// Refresh status every 60 seconds
+setInterval(() => {
+    fetch('/api/cafe-status')
+        .then(r => r.json())
+        .then(statuses => {
+            const status = statuses[CAFE_NAME];
+            const badge  = document.getElementById('cafe-status-badge');
+            if (!badge || !status) return;
+            if (status.is_open) {
+                badge.textContent = status.closes_in
+                    ? `Closes in ${status.closes_in} min`
+                    : `Open · Closes ${status.closes}`;
+                badge.style.color = '#2e7d32';
+            } else {
+                badge.textContent = `Closed · Opens ${status.opens}`;
+                badge.style.color = '#c62828';
+            }
+        });
+}, 60000);
 </script>
 {% endblock %}

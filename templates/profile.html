@@ -468,6 +468,15 @@
         </a>
     </div>
 
+    <!-- ACTIVITY HEATMAP -->
+    <div style="margin-bottom:1.5rem;">
+        <div class="own-section-title">
+            <i class="bi bi-calendar3" style="color:var(--caramel)"></i>
+            Activity
+        </div>
+        <div id="activity-heatmap" style="overflow-x:auto;padding:4px 0;"></div>
+    </div>
+
     <!-- TWO COLUMN BODY -->
     <div class="own-profile-body">
 
@@ -507,6 +516,7 @@
         <div id="modal-post-container"></div>
     </div>
 </div>
+
 
 <!-- Create post FAB -->
 <button class="fab" onclick="openModal()">
@@ -594,6 +604,45 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('stat-views').textContent    = data.total_views;
             document.getElementById('stat-comments').textContent = data.total_comments;
         });
+    
+    // ── Activity heatmap ──────────────────────────────────────────
+fetch('/api/profile/activity')
+    .then(r => r.json())
+    .then(data => {
+        const el = document.getElementById('activity-heatmap');
+        if (!el) return;
+
+        const weeks  = 26;
+        const days   = 7;
+        const size   = 12;
+        const gap    = 3;
+        const width  = weeks * (size + gap);
+        const height = days * (size + gap);
+
+        let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;">`;
+
+        const today    = new Date();
+        const maxCount = Math.max(...Object.values(data), 1);
+
+        for (let w = 0; w < weeks; w++) {
+            for (let d = 0; d < days; d++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - ((weeks - 1 - w) * 7 + (6 - d)));
+                const key   = date.toISOString().split('T')[0];
+                const count = data[key] || 0;
+                const alpha = count === 0 ? 0.08 : 0.2 + (count / maxCount) * 0.8;
+                const x     = w * (size + gap);
+                const y     = d * (size + gap);
+                svg += `<rect x="${x}" y="${y}" width="${size}" height="${size}"
+                    rx="2" fill="rgba(196,122,43,${alpha})"
+                    title="${key}: ${count} posts"/>`;
+            }
+        }
+
+        svg += `</svg>`;
+        el.innerHTML = svg;
+    })
+    .catch(() => {});
 
     // ── Profile completion ─────────────────────────────────────
     fetch('/api/profile/completion')

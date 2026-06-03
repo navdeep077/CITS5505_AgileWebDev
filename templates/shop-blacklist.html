@@ -13,9 +13,6 @@
 <section class="hero-shop">
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
-        <a href="javascript:history.back()" class="shop-back-link">
-            <span class="shop-back-arrow">←</span> Back
-        </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
                 <div class="shop-logo-badge">B</div>
@@ -23,7 +20,7 @@
                     <div class="shop-hero-tags">
                         <span class="shop-badge">Cold Brew</span>
                         <span class="shop-badge">Dine-in</span>
-                        <span class="shop-badge shop-badge--open">Open Now</span>
+                        <span class="shop-badge" id="cafe-status-badge">Checking...</span>
                     </div>
                     <h1 class="shop-hero-title">Blacklist Coffee Roasters</h1>
                     <p class="shop-hero-location">
@@ -43,7 +40,7 @@
                     </div>
                 </div>
                 <button class="checkin-btn" id="checkin-btn"
-                        onclick="toggleCheckin('Blacklist Coffee Roasters')">
+                        onclick="toggleCheckin('Venn Coffee')">
                     <i class="bi bi-geo-alt"></i>
                     <span id="checkin-label">Check In</span>
                 </button>
@@ -56,17 +53,7 @@
 </section>
 
 
-<!-- DYNAMIC RATING SUMMARY -->
-<div class="container" style="max-width:900px;margin-top:1rem;">
-    <div class="cafe-rating-summary" id="cafe-rating-summary" style="display:none;">
-        <div style="text-align:center;">
-            <div class="cafe-avg-score" id="cafe-avg-score">—</div>
-            <div class="cafe-avg-stars" id="cafe-avg-stars"></div>
-            <div class="cafe-review-count" id="cafe-review-count"></div>
-        </div>
-        <div class="cafe-rating-bars" id="cafe-rating-bars"></div>
-    </div>
-</div>
+
 
 <!-- MAIN CONTENT -->
 <main class="container py-5">
@@ -179,11 +166,6 @@
                 </ul>
             </div>
 
-            <a href="javascript:history.back()"
-               class="btn-primary-custom w-100 text-center d-block">
-                ← Back
-            </a>
-
         </div>
     </div>
 </main>
@@ -278,5 +260,50 @@ fetch('/api/cafe-stats/Blacklist Coffee Roasters')
         }).join('');
     })
     .catch(() => {});
+  // ── Real-time open/close status ───────────────────────────────
+fetch('/api/cafe-status')
+    .then(r => r.json())
+    .then(statuses => {
+        const status = statuses[CAFE_NAME];
+        const badge  = document.getElementById('cafe-status-badge');
+        if (!badge || !status) return;
+
+        if (status.is_open) {
+           badge.textContent = status.closes_in
+                ? `Closes in ${status.closes_in}`
+                : `Open · Closes ${status.closes}`;
+            badge.style.background = 'rgba(76,175,80,0.15)';
+            badge.style.color      = '#2e7d32';
+            badge.style.border     = '1px solid rgba(76,175,80,0.3)';
+        } else {
+            badge.textContent = status.opens_in
+                ? `Opens in ${status.opens_in}`
+                : `Closed · Opens ${status.opens}`;
+            badge.style.background = 'rgba(229,57,53,0.12)';
+            badge.style.color      = '#c62828';
+            badge.style.border     = '1px solid rgba(229,57,53,0.2)';
+        }
+    })
+    .catch(() => {});
+
+// Refresh status every 60 seconds
+setInterval(() => {
+    fetch('/api/cafe-status')
+        .then(r => r.json())
+        .then(statuses => {
+            const status = statuses[CAFE_NAME];
+            const badge  = document.getElementById('cafe-status-badge');
+            if (!badge || !status) return;
+             if (status.is_open) {
+                badge.textContent = status.closes_in
+                    ? `Closes in ${status.closes_in}`
+                    : `Open · Closes ${status.closes}`;
+                badge.style.color = '#2e7d32';
+            } else {
+                badge.textContent = `Closed · Opens ${status.opens}`;
+                badge.style.color = '#c62828';
+            }
+        });
+}, 60000);  
 </script>
 {% endblock %}

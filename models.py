@@ -167,18 +167,20 @@ class User(UserMixin, db.Model):
 
 # ── POST MODEL ────────────────────────────────────────────────────────────────
 class Post(db.Model):
-    id         = db.Column(db.Integer, primary_key=True)
-    text       = db.Column(db.Text, nullable=False)
-    shop       = db.Column(db.String(120), nullable=True)
-    image      = db.Column(db.String(500), nullable=True)
-    likes      = db.Column(db.Integer, default=0)
-    liked_by   = db.Column(db.Text, default="")
-    view_count = db.Column(db.Integer, default=0)
-    hashtags   = db.Column(db.String(500), default="")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    comments   = db.relationship('Comment', backref='post', cascade='all, delete-orphan')
-    bookmarks  = db.relationship('Bookmark', backref='post', cascade='all, delete-orphan')
+    id           = db.Column(db.Integer, primary_key=True)
+    text         = db.Column(db.Text, nullable=False)
+    shop         = db.Column(db.String(120), nullable=True)
+    image        = db.Column(db.String(500), nullable=True)
+    likes        = db.Column(db.Integer, default=0)
+    liked_by     = db.Column(db.Text, default="")
+    view_count   = db.Column(db.Integer, default=0)
+    hashtags     = db.Column(db.String(500), default="")
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id      = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    scheduled_at = db.Column(db.DateTime, nullable=True)
+    is_published = db.Column(db.Boolean, default=True)
+    comments     = db.relationship('Comment', backref='post', cascade='all, delete-orphan')
+    bookmarks    = db.relationship('Bookmark', backref='post', cascade='all, delete-orphan')
 
 
 # ── POST VIEW MODEL ────────────────────────────────────────────────────────────

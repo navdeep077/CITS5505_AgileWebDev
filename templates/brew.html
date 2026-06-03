@@ -50,10 +50,17 @@
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="mb-0">{{ cafe.name }}</h5>
                     <!-- Open status badge — green pill -->
+                   {% if cafe.open %}
                     <span class="badge"
                           style="background:rgba(76,175,80,0.15);color:#4caf50;font-size:0.72rem;">
-                        Open
+                        Open Now
                     </span>
+                    {% else %}
+                    <span class="badge"
+                          style="background:rgba(229,57,53,0.12);color:#c62828;font-size:0.72rem;">
+                        Closed
+                    </span>
+                    {% endif %}
                 </div>
 
                 <!-- Cafe info rows with Bootstrap Icons -->
@@ -88,6 +95,29 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- brew.js: filter chip click handling and cafe card visibility toggling -->
 <script src="{{ url_for('static', filename='js/brew.js') }}"></script>
+<script>
+// ── Live ratings on brew map ──────────────────────────────────
+fetch('/api/cafe-ratings')
+    .then(r => r.json())
+    .then(ratings => {
+        document.querySelectorAll('.shop-item').forEach(card => {
+            const name = card.querySelector('h5')?.textContent?.trim();
+            if (!name || !ratings[name]) return;
+            const r = ratings[name];
+            // Find the star paragraph — it contains bi-star-fill
+            const paras = card.querySelectorAll('p');
+            paras.forEach(p => {
+                if (p.querySelector('.bi-star-fill')) {
+                    if (r.count === 0) {
+                        p.innerHTML = `<i class="bi bi-star" style="color:var(--caramel)"></i> No ratings yet`;
+                    } else {
+                        p.innerHTML = `<i class="bi bi-star-fill" style="color:var(--caramel)"></i> ${r.average} <span style="color:var(--muted);font-size:0.78rem;">(${r.count} reviews)</span>`;
+                    }
+                }
+            });
+        });
+    })
+    .catch(() => {});
+</script>
 {% endblock %}
