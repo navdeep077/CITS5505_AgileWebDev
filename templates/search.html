@@ -15,11 +15,12 @@
             <i class="bi bi-search" onclick="runSearch(document.getElementById('search-page-input').value.trim())"
                style="cursor:pointer;"></i>
             <input
-                type="text"
-                id="search-page-input"
-                placeholder="Search users or cafes..."
-                value="{{ query }}"
-                autocomplete="off">
+    type="text"
+    id="search-page-input"
+    placeholder="Search users or cafes..."
+    value="{{ query }}"
+    data-query="{{ query }}"
+    autocomplete="off">
         </div>
     </div>
 </div>
@@ -49,38 +50,42 @@
 
 {% block extra_js %}
 <script>
-const searchInput = document.getElementById('search-page-input');
-let searchTimer;
+const pageSearchInput = document.getElementById('search-page-input');
+let pageSearchTimer;
 
 // Track follow state per username
 const followState = {};
 
 // Works on all devices including mobile
 ['input', 'keyup', 'change'].forEach(event => {
-    searchInput.addEventListener(event, () => {
-        clearTimeout(searchTimer);
-        const q = searchInput.value.trim();
+    pageSearchInput.addEventListener(event, () => {
+        clearTimeout(pageSearchTimer);
+        const q = pageSearchInput.value.trim();
+
         if (q.length === 0) {
             document.getElementById('search-empty').style.display = 'block';
             document.getElementById('search-users-section').style.display = 'none';
             document.getElementById('search-cafes-section').style.display = 'none';
             return;
         }
-        searchTimer = setTimeout(() => runSearch(q), 400);
+
+        pageSearchTimer = setTimeout(() => runSearch(q), 400);
     });
 });
 
 // Search on Enter key
-searchInput.addEventListener('keypress', e => {
+pageSearchInput.addEventListener('keypress', e => {
     if (e.key === 'Enter') {
-        clearTimeout(searchTimer);
-        runSearch(searchInput.value.trim());
+        clearTimeout(pageSearchTimer);
+        runSearch(pageSearchInput.value.trim());
     }
 });
 
 // Run immediately if query in URL
-if ("{{ query }}") {
-    runSearch("{{ query }}");
+const initialQuery = pageSearchInput.dataset.query.trim();
+
+if (initialQuery) {
+    runSearch(initialQuery);
 }
 
 function runSearch(query) {
