@@ -8,19 +8,23 @@
 /* ── OWN PROFILE STYLES ──────────────────────────────────────── */
 
 .own-profile-wrap {
+    width: 100%;
     max-width: 960px;
     margin: 0 auto;
-    padding: 0 2rem 4rem;
+    padding: 1.5rem 2rem 4rem;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
-/* Banner */
 .own-profile-banner {
     height: 200px;
     background: linear-gradient(135deg, #1a0e00 0%, #3d1f00 50%, #c47a2b 100%);
-    border-radius: 0 0 20px 20px;
+    border-radius: 16px;
     position: relative;
     margin-bottom: 70px;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
 }
 
 /* Avatar */
@@ -39,6 +43,8 @@
     border: 4px solid white;
     object-fit: cover;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    max-width: 100px;
+    max-height: 100px;
 }
 
 .own-avatar-fallback {

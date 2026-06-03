@@ -30,12 +30,7 @@ function wireModalClose() {
 }
 
 function openExplorePost(post) {
-    if (post.image && typeof openLightbox === 'function') {
-        const allImages = exploreAllPosts.filter(p => p.image).map(p => p.image);
-        openLightbox(post.image, post.text || '', allImages);
-        return;
-    }
-
+    // Always open as modal popup — never open lightbox directly
     const modal     = document.getElementById('post-modal');
     const container = document.getElementById('modal-post-container');
     if (!modal || !container) return;
@@ -93,12 +88,35 @@ function loadExplorePosts() {
     fetch('/api/posts')
         .then(res => res.json())
         .then(posts => {
+            if (!Array.isArray(posts)) posts = [];
+
             exploreAllPosts = posts;
             explorePage     = 1;
             grid.innerHTML  = '';
+
+            if (posts.length === 0) {
+                grid.innerHTML = `
+                    <div class="explore-empty-card">
+                        <i class="bi bi-camera-fill"></i>
+                        <h5>No posts yet</h5>
+                        <p>There are no posts to explore right now. Be the first to upload one.</p>
+                    </div>
+                `;
+                return;
+            }
+
             renderExploreBatch(posts.slice(0, explorePerPage));
         })
-        .catch(err => console.error('Explore load error:', err));
+        .catch(err => {
+            console.error('Explore load error:', err);
+            grid.innerHTML = `
+                <div class="explore-empty-card">
+                    <i class="bi bi-wifi-off"></i>
+                    <h5>Could not load posts</h5>
+                    <p>Please refresh the page and try again.</p>
+                </div>
+            `;
+        });
 }
 
 function renderExploreBatch(posts) {

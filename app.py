@@ -1,5 +1,5 @@
-# app.py
 import os
+import sys
 from uuid import uuid4
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_bcrypt import Bcrypt
@@ -10,14 +10,13 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry
 from config import Config
 import cloudinary
 import cloudinary.uploader
 from itsdangerous import URLSafeTimedSerializer
 from datetime import datetime, timedelta
 import re
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry
 
 # ── Application Factory ───────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -118,49 +117,51 @@ def delete_uploaded_image(image_path):
 
 def serialize_post(post):
     return {
-        "id": post.id,
-        "username": post.author.username,
-        "owner": post.author.username,
-        "avatar": post.author.avatar or "",
-        "text": post.text,
-        "shop": post.shop or "",
-        "image": post.image or "",
-        "likes": post.likes or 0,
-        "liked_by": post.liked_by.split(",") if post.liked_by else [],
+        "id":         post.id,
+        "username":   post.author.username,
+        "owner":      post.author.username,
+        "avatar":     post.author.avatar or "",
+        "text":       post.text,
+        "shop":       post.shop or "",
+        "image":      post.image or "",
+        "likes":      post.likes or 0,
+        "liked_by":   post.liked_by.split(",") if post.liked_by else [],
         "view_count": post.view_count or 0,
-        "hashtags": post.hashtags.split(",") if post.hashtags else [],
+        "hashtags":   post.hashtags.split(",") if post.hashtags else [],
         "comments": [
             {
-                "id": c.id,
+                "id":       c.id,
                 "username": c.username,
-                "text": c.text,
-                "time": c.created_at.isoformat()
+                "text":     c.text,
+                "time":     c.created_at.isoformat()
             }
             for c in post.comments
         ],
         "created_at": post.created_at.isoformat(),
-        "time": f"post-{post.id}"
+        "time":       f"post-{post.id}"
     }
 
-# ── XP SYSTEM ─────────────────────────────────────────────────────────────────
+
+# ── XP System ─────────────────────────────────────────────────────────────────
 
 XP_VALUES = {
-    'post':        10,   # creating a post
-    'review':      15,   # submitting a review
-    'like_given':   2,   # giving a like
-    'like_received': 5,  # receiving a like on your post
-    'comment':      3,   # commenting on a post
-    'follower':     8,   # someone follows you
+    'post':          10,
+    'review':        15,
+    'like_given':     2,
+    'like_received':  5,
+    'comment':        3,
+    'follower':       8,
 }
 
+
 def award_xp(user, action):
-    """Award XP to a user for an action and check badges"""
     points = XP_VALUES.get(action, 0)
     if points == 0:
         return
     user.xp = (user.xp or 0) + points
     user.check_and_award_badges()
     db.session.commit()
+
 
 # ── Email Helpers ─────────────────────────────────────────────────────────────
 
@@ -205,6 +206,7 @@ def send_password_reset_email(user):
 
 
 # ── Cafe Data ─────────────────────────────────────────────────────────────────
+
 CAFES = [
     {
         "name": "Blacklist Coffee Roasters",
@@ -321,14 +323,13 @@ def login():
         if user and bcrypt.check_password_hash(user.password, password):
             if not user.is_verified:
                 return redirect(url_for("login", error="Please verify your email before signing in"))
-
             login_user(user)
             session["user"] = username
             return redirect(url_for("home"))
         else:
             return redirect(url_for("login", error="Invalid username or password"))
 
-    error = request.args.get("error")
+    error   = request.args.get("error")
     message = request.args.get("message")
     return render_template("login.html", error=error, message=message)
 
@@ -351,22 +352,37 @@ def signup():
             return redirect(url_for("signup", error="Email already registered"))
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        new_user = User(username=username, password=hashed_password, email=email)
+        new_user = User(
+            username=username,
+            password=hashed_password,
+            email=email,
+            is_verified=False
+        )
         db.session.add(new_user)
         db.session.commit()
 
-        if email:
-            try:
-                send_verification_email(new_user)
-                return redirect(url_for("login",
-                    message="Account created. Check your email to verify."))
-            except Exception as e:
-                print(f"Email error: {e}")
-
-        return redirect(url_for("login", message="Account created. Please log in."))
+        try:
+            send_verification_email(new_user)
+            return redirect(url_for(
+                "login",
+                message="Account created. Please check your email to verify before signing in."
+            ))
+        except Exception as e:
+            print(f"Verification email error: {e}")
+            return redirect(url_for(
+                "login",
+                error="Account created, but verification email could not be sent. Please contact admin."
+            ))
 
     error = request.args.get("error")
     return render_template("signup.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    session.pop("user", None)
+    return redirect(url_for("login"))
 
 
 @app.route("/user/<username>")
@@ -382,13 +398,31 @@ def public_profile(username):
         return "User not found", 404
 
     current = get_current_user()
-
-    # Check if current user has blocked this person
+    # Check if current user blocked this person
+    # Current user blocked this person
     is_blocked = Block.query.filter_by(
         blocker_id=current.id,
         blocked_id=profile_user.id
     ).first()
     if is_blocked:
+        return render_template("blocked.html",
+            username=username, i_blocked=True)
+
+    # This person blocked current user
+    they_blocked_me = Block.query.filter_by(
+        blocker_id=profile_user.id,
+        blocked_id=current.id
+    ).first()
+    if they_blocked_me:
+        return render_template("blocked.html",
+            username=username, i_blocked=False)
+
+# Check if this person blocked current user
+    they_blocked_me = Block.query.filter_by(
+        blocker_id=profile_user.id,
+        blocked_id=current.id
+).first()
+    if they_blocked_me:
         return render_template("blocked.html", username=username)
 
     posts       = Post.query.filter_by(user_id=profile_user.id)\
@@ -402,24 +436,17 @@ def public_profile(username):
     )
 
 
-@app.route("/logout")
-def logout():
-    logout_user()
-    session.pop("user", None)
-    return redirect(url_for("login"))
-
-
-# ── Main Routes ───────────────────────────────────────────────────────────────
+# ── Main Page Routes ──────────────────────────────────────────────────────────
 
 @app.route("/landing")
 def landing():
     return render_template("index.html")
 
 
-@app.route("/brew")
+@app.route("/home")
 @login_required
-def brew():
-    return render_template("brew.html")
+def home():
+    return render_template("home.html")
 
 
 @app.route("/profile")
@@ -434,10 +461,64 @@ def social():
     return render_template("social.html")
 
 
-@app.route("/home")
+@app.route("/brew")
 @login_required
-def home():
-    return render_template("home.html")
+def brew():
+    return render_template("brew.html")
+
+
+@app.route("/explore")
+@login_required
+def explore():
+    return render_template("explore.html")
+
+
+@app.route("/bookmarks")
+@login_required
+def bookmarks():
+    return render_template("bookmarks.html")
+
+
+@app.route("/notifications")
+@login_required
+def notifications():
+    return render_template("notifications.html")
+
+
+@app.route("/leaderboard")
+@login_required
+def leaderboard_page():
+    return render_template("leaderboard.html")
+
+
+@app.route("/journal")
+@login_required
+def journal_page():
+    return render_template("journal.html")
+
+
+@app.route("/quiz")
+@login_required
+def quiz_page():
+    return render_template("quiz.html")
+
+
+@app.route("/search")
+@login_required
+def search_page():
+    query = request.args.get("q", "").strip()
+    return render_template("search.html", query=query)
+
+
+@app.route("/hashtag/<tag>")
+@login_required
+def hashtag_page(tag):
+    return render_template("hashtag.html", tag=tag)
+
+
+@app.route("/offline")
+def offline():
+    return render_template("offline.html")
 
 
 # ── Shop Routes ───────────────────────────────────────────────────────────────
@@ -493,601 +574,54 @@ def cafe_feed(cafe_name):
     return render_template("cafe-feed.html", cafe=cafe)
 
 
-# ── Avatar API ────────────────────────────────────────────────────────────────
+# ── Admin Routes ──────────────────────────────────────────────────────────────
 
-@csrf.exempt
-@app.route("/api/avatar", methods=["GET", "POST", "DELETE"])
-def api_avatar():
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-    if request.method == "GET":
-        return jsonify({"avatar": user.avatar or ""})
-    if request.method == "DELETE":
-        delete_uploaded_image(user.avatar)
-        user.avatar = None
-        db.session.commit()
-        return jsonify({"avatar": ""})
-    file = request.files.get("avatar")
-    if not file:
-        return jsonify({"error": "No avatar file uploaded"}), 400
-    try:
-        old_avatar  = user.avatar
-        user.avatar = save_image_cloudinary(file)
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    db.session.commit()
-    delete_uploaded_image(old_avatar)
-    return jsonify({"avatar": user.avatar})
-
-
-# ── Posts API ─────────────────────────────────────────────────────────────────
-
-@csrf.exempt
-@app.route("/api/posts", methods=["GET", "POST"])
-def api_posts():
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-
-    if request.method == "GET":
-        # Filter out posts from blocked users
-        blocked_ids = [
-            b.blocked_id for b in
-            Block.query.filter_by(blocker_id=user.id).all()
-        ]
-        if blocked_ids:
-            posts = Post.query.filter(
-                ~Post.user_id.in_(blocked_ids)
-            ).order_by(Post.created_at.desc()).all()
-        else:
-            posts = Post.query.order_by(Post.created_at.desc()).all()
-        return jsonify([serialize_post(post) for post in posts])
-
-    # POST — create new post
-    text       = request.form.get("text", "").strip()
-    shop       = request.form.get("shop", "").strip()
-    image_file = request.files.get("image")
-    if not text:
-        return jsonify({"error": "Post text is required"}), 400
-    try:
-        image_path = save_image_cloudinary(image_file) if image_file else None
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-
-    tags = re.findall(r'#(\w+)', text)
-    post = Post(
-        text=text,
-        shop=shop,
-        image=image_path,
-        author=user,
-        hashtags=",".join(tags)
+@app.route("/admin")
+@login_required
+def admin_dashboard():
+    current = User.query.filter_by(username=session.get("user")).first()
+    if not current or not current.is_admin:
+        return redirect(url_for("home"))
+    reports = Report.query.order_by(Report.created_at.desc()).all()
+    report_data = []
+    for r in reports:
+        post = Post.query.get(r.post_id)
+        report_data.append({
+            "report":   r,
+            "post":     post,
+            "reporter": r.reporter
+        })
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template("admin.html",
+        reports=report_data,
+        users=users,
+        total_posts=Post.query.count(),
+        total_users=User.query.count(),
+        total_reports=Report.query.count()
     )
-    db.session.add(post)
-    db.session.commit()
-    # Award XP for creating a post
-    award_xp(user, 'post')
-    return jsonify(serialize_post(post)), 201
 
 
-@csrf.exempt
-@app.route("/api/posts/cafe/<cafe_name>", methods=["GET"])
-def api_cafe_posts(cafe_name):
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-    posts = Post.query.filter_by(shop=cafe_name).order_by(Post.created_at.desc()).all()
-    return jsonify([serialize_post(post) for post in posts])
+# ── PWA ───────────────────────────────────────────────────────────────────────
 
-
-@csrf.exempt
-@app.route("/api/posts/<int:post_id>", methods=["DELETE"])
-def api_delete_post(post_id):
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-    post = Post.query.get_or_404(post_id)
-    if post.author != user:
-        return jsonify({"error": "You can only delete your own posts"}), 403
-    image_path = post.image
-    db.session.delete(post)
-    db.session.commit()
-    delete_uploaded_image(image_path)
-    return jsonify({"deleted": True})
-
-
-@csrf.exempt
-@app.route("/api/posts/<int:post_id>/like", methods=["POST"])
-def like_post(post_id):
-    current_username = session.get("user")
-    if not current_username:
-        return jsonify({"error": "Unauthorized"}), 401
-    post    = Post.query.get_or_404(post_id)
-    current = User.query.filter_by(username=current_username).first()
-    liked_users = [u for u in post.liked_by.split(",") if u] if post.liked_by else []
-    if current_username in liked_users:
-        liked_users.remove(current_username)
-        post.likes = max(post.likes - 1, 0)
-        liked = False
-    else:
-        liked_users.append(current_username)
-        post.likes += 1
-        liked = True
-        if current and post.user_id != current.id:
-            notif = Notification(
-                user_id=post.user_id,
-                actor_id=current.id,
-                type='like',
-                post_id=post.id
-            )
-            db.session.add(notif)
-    post.liked_by = ",".join(filter(None, liked_users))
-    db.session.commit()
-    # Award XP to liker and post author
-    if liked:
-        liker = get_current_user()
-        if liker:
-            award_xp(liker, 'like_given')
-        post_author = User.query.get(post.user_id)
-        if post_author:
-            award_xp(post_author, 'like_received')
-    return jsonify({"likes": post.likes, "liked": liked})
-
-
-@csrf.exempt
-@app.route("/api/posts/<int:post_id>/comment", methods=["POST"])
-def add_comment(post_id):
-    current_username = session.get("user")
-    if not current_username:
-        return jsonify({"error": "Unauthorized"}), 401
-    data = request.json
-    text = data.get("text", "").strip()
-    if not text:
-        return jsonify({"error": "Comment cannot be empty"}), 400
-    new_comment = Comment(post_id=post_id, username=current_username, text=text)
-    db.session.add(new_comment)
-    post           = Post.query.get_or_404(post_id)
-    comment_author = User.query.filter_by(username=current_username).first()
-    if comment_author and comment_author.id != post.user_id:
-        notif = Notification(
-            user_id=post.user_id,
-            actor_id=comment_author.id,
-            type='comment',
-            post_id=post.id
-        )
-        db.session.add(notif)
-    db.session.commit()
-    return jsonify({"message": "Comment added", "comment_id": new_comment.id})
-
-
-@csrf.exempt
-@app.route("/api/comments/<int:comment_id>", methods=["DELETE"])
-def delete_comment(comment_id):
-    current_user = session.get("user")
-    if not current_user:
-        return jsonify({"error": "Unauthorized"}), 401
-    comment = Comment.query.get(comment_id)
-    if not comment:
-        return jsonify({"error": "Not found"}), 404
-    if comment.username != current_user and comment.post.author.username != current_user:
-        return jsonify({"error": "Unauthorized"}), 403
-    db.session.delete(comment)
-    db.session.commit()
-    return jsonify({"message": "Deleted"})
-
-
-@csrf.exempt
-@app.route("/api/comments/<int:comment_id>", methods=["PUT"])
-def edit_comment(comment_id):
-    current_user = session.get("user")
-    if not current_user:
-        return jsonify({"error": "Unauthorized"}), 401
-    comment = Comment.query.get(comment_id)
-    if not comment:
-        return jsonify({"error": "Not found"}), 404
-    if comment.username != current_user:
-        return jsonify({"error": "Unauthorized"}), 403
-    data         = request.get_json()
-    comment.text = data.get("text")
-    db.session.commit()
-    return jsonify({"message": "Updated"})
-
-
-# ── Reviews API ───────────────────────────────────────────────────────────────
-
-@csrf.exempt
-@app.route("/api/reviews", methods=["POST"])
-def submit_review():
-    current_user = session.get("user")
-    if not current_user:
-        return jsonify({"error": "Unauthorized"}), 401
-    data   = request.json
-    shop   = data.get("shop")
-    rating = data.get("rating")
-    text   = data.get("text")
-    if not shop or not rating or not text:
-        return jsonify({"error": "Missing fields"}), 400
-    existing = Review.query.filter_by(username=current_user, shop=shop).first()
-    if existing:
-        return jsonify({"error": "You have already reviewed this cafe"}), 400
-    review = Review(username=current_user, shop=shop, rating=rating, text=text)
-    db.session.add(review)
-    db.session.commit()
-    # Award XP for submitting a review
-    current_user_obj = get_current_user()
-    if current_user_obj:
-        award_xp(current_user_obj, 'review')
-    return jsonify({"message": "Review submitted"}), 201
-
-
-@csrf.exempt
-@app.route("/api/reviews/shop/<shop_name>", methods=["GET"])
-def get_shop_reviews(shop_name):
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-    reviews = Review.query.filter_by(shop=shop_name).order_by(Review.created_at.desc()).all()
-    return jsonify([{
-        "id": r.id,
-        "shop": r.shop,
-        "rating": r.rating,
-        "text": r.text,
-        "username": r.username,
-        "created_at": r.created_at.isoformat()
-    } for r in reviews])
-
-
-@csrf.exempt
-@app.route("/api/reviews/<username>", methods=["GET"])
-def get_user_reviews(username):
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-    reviews = Review.query.filter_by(username=username).order_by(Review.created_at.desc()).all()
-    return jsonify([{
-        "id": r.id,
-        "shop": r.shop,
-        "rating": r.rating,
-        "text": r.text,
-        "username": r.username,
-        "created_at": r.created_at.isoformat()
-    } for r in reviews])
-
-
-@csrf.exempt
-@app.route("/api/reviews/<int:review_id>", methods=["DELETE"])
-def delete_review(review_id):
-    current_user = session.get("user")
-    if not current_user:
-        return jsonify({"error": "Unauthorized"}), 401
-    review = Review.query.get(review_id)
-    if not review:
-        return jsonify({"error": "Not found"}), 404
-    if review.username != current_user:
-        return jsonify({"error": "Unauthorized"}), 403
-    db.session.delete(review)
-    db.session.commit()
-    return jsonify({"message": "Deleted"})
-
-
-# ── Follow API ────────────────────────────────────────────────────────────────
-
-@csrf.exempt
-@app.route("/api/follow/<username>", methods=["POST"])
-def follow_user(username):
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    target = User.query.filter_by(username=username).first_or_404()
-    if current.id == target.id:
-        return jsonify({"error": "Cannot follow yourself"}), 400
-    existing = Follow.query.filter_by(
-        follower_id=current.id, followed_id=target.id
-    ).first()
-    if existing:
-        db.session.delete(existing)
-        Notification.query.filter_by(
-            user_id=target.id, actor_id=current.id, type='follow'
-        ).delete()
-        db.session.commit()
-        return jsonify({"following": False, "followers": target.follower_count()})
-    else:
-        follow = Follow(follower_id=current.id, followed_id=target.id)
-        db.session.add(follow)
-        notif = Notification(user_id=target.id, actor_id=current.id, type='follow')
-        db.session.add(notif)
-        db.session.commit()
-        # Award XP to the person being followed
-        award_xp(target, 'follower')
-        return jsonify({"following": True, "followers": target.follower_count()})
-
-
-
-@app.route("/api/followers/<username>", methods=["GET"])
-def get_followers(username):
-    user      = User.query.filter_by(username=username).first_or_404()
-    followers = Follow.query.filter_by(followed_id=user.id).all()
-    return jsonify([{"username": f.follower.username, "avatar": f.follower.avatar} for f in followers])
-
-
-@app.route("/api/following/<username>", methods=["GET"])
-def get_following(username):
-    user      = User.query.filter_by(username=username).first_or_404()
-    following = Follow.query.filter_by(follower_id=user.id).all()
-    return jsonify([{"username": f.followed.username, "avatar": f.followed.avatar} for f in following])
-
-
-# ── Notifications API ─────────────────────────────────────────────────────────
-
-@app.route("/api/notifications", methods=["GET"])
-def get_notifications():
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    notifs = Notification.query.filter_by(
-        user_id=current.id
-    ).order_by(Notification.created_at.desc()).limit(20).all()
-    result = [{
-        "id": n.id,
-        "type": n.type,
-        "actor": n.actor.username,
-        "actor_avatar": n.actor.avatar,
-        "post_id": n.post_id,
-        "is_read": n.is_read,
-        "created_at": n.created_at.isoformat()
-    } for n in notifs]
-    Notification.query.filter_by(user_id=current.id, is_read=False).update({"is_read": True})
-    db.session.commit()
-    return jsonify(result)
-
-
-@app.route("/api/notifications/count", methods=["GET"])
-@limiter.limit("200 per hour")
-def notification_count():
-    current = get_current_user()
-    if not current:
-        return jsonify({"count": 0})
-    return jsonify({"count": current.unread_notifications()})
-
-
-# ── Bookmarks API ─────────────────────────────────────────────────────────────
-
-@csrf.exempt
-@app.route("/api/bookmarks/<int:post_id>", methods=["POST"])
-def toggle_bookmark(post_id):
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    existing = Bookmark.query.filter_by(user_id=current.id, post_id=post_id).first()
-    if existing:
-        db.session.delete(existing)
-        db.session.commit()
-        return jsonify({"bookmarked": False})
-    bookmark = Bookmark(user_id=current.id, post_id=post_id)
-    db.session.add(bookmark)
-    db.session.commit()
-    return jsonify({"bookmarked": True})
-
-
-@app.route("/api/bookmarks", methods=["GET"])
-def get_bookmarks():
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    bookmarks = Bookmark.query.filter_by(
-        user_id=current.id
-    ).order_by(Bookmark.created_at.desc()).all()
-    posts = []
-    for b in bookmarks:
-        post = Post.query.get(b.post_id)
-        if post:
-            posts.append(serialize_post(post))
-    return jsonify(posts)
-
-
-# ── Search API ────────────────────────────────────────────────────────────────
-
-@app.route("/api/search", methods=["GET"])
-def search():
-    query = request.args.get("q", "").strip()
-    if not query:
-        return jsonify({"users": [], "cafes": []})
-    users = User.query.filter(User.username.ilike(f"%{query}%")).limit(10).all()
-    user_results = [{
-        "username": u.username,
-        "avatar": u.avatar,
-        "bio": u.bio,
-        "followers": u.follower_count()
-    } for u in users]
-    cafe_results = [c for c in CAFES if query.lower() in c["name"].lower()]
-    return jsonify({"users": user_results, "cafes": cafe_results})
-
-
-# ── Feed API ──────────────────────────────────────────────────────────────────
-
-@app.route("/api/feed/following", methods=["GET"])
-def following_feed():
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    following_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=current.id).all()]
-    following_ids.append(current.id)
-    posts = Post.query.filter(
-        Post.user_id.in_(following_ids)
-    ).order_by(Post.created_at.desc()).limit(20).all()
-    return jsonify([serialize_post(p) for p in posts])
-
-
-@app.route("/api/suggested-users", methods=["GET"])
-def suggested_users():
-    current = get_current_user()
-    if not current:
-        return jsonify([])
-    following_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=current.id).all()]
-    following_ids.append(current.id)
-    suggested = User.query.filter(
-        ~User.id.in_(following_ids)
-    ).order_by(db.func.random()).limit(5).all()
-    return jsonify([{
-        "username": u.username,
-        "avatar": u.avatar,
-        "bio": u.bio,
-        "followers": u.follower_count()
-    } for u in suggested])
-
-
-# ── Week 2 Page Routes ────────────────────────────────────────────────────────
-
-@app.route("/explore")
-@login_required
-def explore():
-    return render_template("explore.html")
-
-
-@app.route("/bookmarks")
-@login_required
-def bookmarks():
-    return render_template("bookmarks.html")
-
-
-@app.route("/notifications")
-@login_required
-def notifications():
-    return render_template("notifications.html")
-
-
-# ── Profile Edit API ──────────────────────────────────────────────────────────
-
-@csrf.exempt
-@app.route("/api/profile/edit", methods=["POST"])
-def edit_profile():
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    data             = request.get_json()
-    email            = (data.get("email") or "").strip().lower()
-
-    if not email:
-        return jsonify({"error": "Email is required for password reset"}), 400
-
-    existing_email = User.query.filter(
-        db.func.lower(User.email) == email,
-        User.id != current.id
-    ).first()
-    if existing_email:
-        return jsonify({"error": "Email already registered"}), 400
-
-    email_changed = email != (current.email or "").lower()
-
-    current.bio      = data.get("bio", current.bio)
-    current.website  = data.get("website", current.website)
-    current.location = data.get("location", current.location)
-    current.email    = email
-
-    message = "Profile updated ✓"
-    if email_changed:
-        current.is_verified = False
-        try:
-            send_verification_email(current)
-            message = "Profile updated. Please verify the new email from your inbox."
-        except Exception as e:
-            print(f"Email verification error: {e}")
-            message = "Profile updated, but verification email could not be sent."
-
-    db.session.commit()
+@app.route("/manifest.json")
+def manifest():
     return jsonify({
-        "bio": current.bio,
-        "website": current.website,
-        "location": current.location,
-        "email": current.email,
-        "email_changed": email_changed,
-        "is_verified": current.is_verified,
-        "message": message
+        "name": "Coffee Social Hub",
+        "short_name": "CoffeeHub",
+        "description": "Perth's coffee community",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#1a0e00",
+        "theme_color": "#c47a2b",
+        "orientation": "portrait",
+        "icons": [
+            {"src": "/static/images/icon-192.png", "sizes": "192x192", "type": "image/png"},
+            {"src": "/static/images/icon-512.png",  "sizes": "512x512",  "type": "image/png"}
+        ]
     })
 
 
-# ── Week 3 Routes ─────────────────────────────────────────────────────────────
-
-@csrf.exempt
-@app.route("/api/posts/<int:post_id>/edit", methods=["PUT"])
-def edit_post(post_id):
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    post = Post.query.get_or_404(post_id)
-    if post.author.username != current.username:
-        return jsonify({"error": "You can only edit your own posts"}), 403
-    data     = request.get_json()
-    new_text = data.get("text", "").strip()
-    if not new_text:
-        return jsonify({"error": "Caption cannot be empty"}), 400
-    post.text     = new_text
-    tags          = re.findall(r'#(\w+)', new_text)
-    post.hashtags = ",".join(tags)
-    db.session.commit()
-    return jsonify({"text": post.text, "hashtags": post.hashtags})
-
-
-@csrf.exempt
-@app.route("/api/posts/<int:post_id>/view", methods=["POST"])
-def increment_view(post_id):
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Login required"}), 401
-
-    post = Post.query.get_or_404(post_id)
-    existing_view = PostView.query.filter_by(
-        post_id=post.id,
-        user_id=user.id
-    ).first()
-
-    if not existing_view:
-        db.session.add(PostView(post_id=post.id, user_id=user.id))
-        post.view_count = (post.view_count or 0) + 1
-        db.session.commit()
-
-    return jsonify({"view_count": post.view_count or 0})
-
-
-@app.route("/api/posts/trending", methods=["GET"])
-def trending_posts():
-    one_week_ago = datetime.utcnow() - timedelta(days=7)
-    posts = Post.query.filter(
-        Post.created_at >= one_week_ago
-    ).order_by(Post.likes.desc()).limit(10).all()
-    return jsonify([serialize_post(p) for p in posts])
-
-
-@app.route("/api/hashtags/trending", methods=["GET"])
-def trending_hashtags():
-    from collections import Counter
-    posts    = Post.query.filter(Post.hashtags != "", Post.hashtags != None).all()
-    all_tags = []
-    for post in posts:
-        if post.hashtags:
-            all_tags.extend(post.hashtags.split(","))
-    tag_counts = Counter(all_tags).most_common(10)
-    return jsonify([{"tag": tag, "count": count} for tag, count in tag_counts if tag])
-
-
-@app.route("/api/posts/hashtag/<tag>", methods=["GET"])
-def posts_by_hashtag(tag):
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-    posts = Post.query.filter(
-        Post.hashtags.contains(tag)
-    ).order_by(Post.created_at.desc()).all()
-    return jsonify([serialize_post(p) for p in posts])
-
-
-@app.route("/hashtag/<tag>")
-@login_required
-def hashtag_page(tag):
-    return render_template("hashtag.html", tag=tag)
-
-
-# ── Week 4 Routes ─────────────────────────────────────────────────────────────
+# ── Email Verification / Password Reset ───────────────────────────────────────
 
 @app.route("/verify/<token>")
 def verify_email(token):
@@ -1137,24 +671,376 @@ def reset_password(token):
     return render_template("reset-password.html", status='form', token=token)
 
 
+# ── Avatar API ────────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/avatar", methods=["GET", "POST", "DELETE"])
+def api_avatar():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    if request.method == "GET":
+        return jsonify({"avatar": user.avatar or ""})
+    if request.method == "DELETE":
+        delete_uploaded_image(user.avatar)
+        user.avatar = None
+        db.session.commit()
+        return jsonify({"avatar": ""})
+    file = request.files.get("avatar")
+    if not file:
+        return jsonify({"error": "No avatar file uploaded"}), 400
+    try:
+        old_avatar  = user.avatar
+        user.avatar = save_image_cloudinary(file)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    db.session.commit()
+    delete_uploaded_image(old_avatar)
+    return jsonify({"avatar": user.avatar})
+
+
+# ── Posts API ─────────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/posts", methods=["GET", "POST"])
+def api_posts():
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+
+    if request.method == "GET":
+        blocked_ids = [b.blocked_id for b in Block.query.filter_by(blocker_id=user.id).all()]
+        if blocked_ids:
+            posts = Post.query.filter(
+                ~Post.user_id.in_(blocked_ids)
+            ).order_by(Post.created_at.desc()).all()
+        else:
+            posts = Post.query.order_by(Post.created_at.desc()).all()
+        return jsonify([serialize_post(post) for post in posts])
+
+    text       = request.form.get("text", "").strip()
+    shop       = request.form.get("shop", "").strip()
+    image_file = request.files.get("image")
+    if not text:
+        return jsonify({"error": "Post text is required"}), 400
+    try:
+        image_path = save_image_cloudinary(image_file) if image_file else None
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    tags = re.findall(r'#(\w+)', text)
+    post = Post(text=text, shop=shop, image=image_path, author=user, hashtags=",".join(tags))
+    db.session.add(post)
+    db.session.commit()
+    award_xp(user, 'post')
+    return jsonify(serialize_post(post)), 201
+
+
+@csrf.exempt
+@app.route("/api/posts/cafe/<cafe_name>", methods=["GET"])
+def api_cafe_posts(cafe_name):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    posts = Post.query.filter_by(shop=cafe_name).order_by(Post.created_at.desc()).all()
+    return jsonify([serialize_post(post) for post in posts])
+
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>", methods=["DELETE"])
+def api_delete_post(post_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    post = Post.query.get_or_404(post_id)
+    if post.author != user:
+        return jsonify({"error": "You can only delete your own posts"}), 403
+    image_path = post.image
+    db.session.delete(post)
+    db.session.commit()
+    delete_uploaded_image(image_path)
+    return jsonify({"deleted": True})
+
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>/like", methods=["POST"])
+def like_post(post_id):
+    current_username = session.get("user")
+    if not current_username:
+        return jsonify({"error": "Unauthorized"}), 401
+    post        = Post.query.get_or_404(post_id)
+    current     = User.query.filter_by(username=current_username).first()
+    liked_users = [u for u in post.liked_by.split(",") if u] if post.liked_by else []
+    if current_username in liked_users:
+        liked_users.remove(current_username)
+        post.likes = max(post.likes - 1, 0)
+        liked = False
+    else:
+        liked_users.append(current_username)
+        post.likes += 1
+        liked = True
+        if current and post.user_id != current.id:
+            db.session.add(Notification(
+                user_id=post.user_id, actor_id=current.id,
+                type='like', post_id=post.id
+            ))
+    post.liked_by = ",".join(filter(None, liked_users))
+    db.session.commit()
+    if liked:
+        liker = get_current_user()
+        if liker:
+            award_xp(liker, 'like_given')
+        post_author = User.query.get(post.user_id)
+        if post_author:
+            award_xp(post_author, 'like_received')
+    return jsonify({"likes": post.likes, "liked": liked})
+
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>/comment", methods=["POST"])
+def add_comment(post_id):
+    current_username = session.get("user")
+    if not current_username:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.json
+    text = data.get("text", "").strip()
+    if not text:
+        return jsonify({"error": "Comment cannot be empty"}), 400
+    new_comment = Comment(post_id=post_id, username=current_username, text=text)
+    db.session.add(new_comment)
+    post           = Post.query.get_or_404(post_id)
+    comment_author = User.query.filter_by(username=current_username).first()
+    if comment_author and comment_author.id != post.user_id:
+        db.session.add(Notification(
+            user_id=post.user_id, actor_id=comment_author.id,
+            type='comment', post_id=post.id
+        ))
+    db.session.commit()
+    award_xp(comment_author, 'comment')
+    return jsonify({"message": "Comment added", "comment_id": new_comment.id})
+
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>/edit", methods=["PUT"])
+def edit_post(post_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    post = Post.query.get_or_404(post_id)
+    if post.author.username != current.username:
+        return jsonify({"error": "You can only edit your own posts"}), 403
+    data     = request.get_json()
+    new_text = data.get("text", "").strip()
+    if not new_text:
+        return jsonify({"error": "Caption cannot be empty"}), 400
+    post.text     = new_text
+    post.hashtags = ",".join(re.findall(r'#(\w+)', new_text))
+    db.session.commit()
+    return jsonify({"text": post.text, "hashtags": post.hashtags})
+
+
+@csrf.exempt
+@app.route("/api/posts/<int:post_id>/view", methods=["POST"])
+def increment_view(post_id):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    post          = Post.query.get_or_404(post_id)
+    existing_view = PostView.query.filter_by(post_id=post.id, user_id=user.id).first()
+    if not existing_view:
+        db.session.add(PostView(post_id=post.id, user_id=user.id))
+        post.view_count = (post.view_count or 0) + 1
+        db.session.commit()
+    return jsonify({"view_count": post.view_count or 0})
+
+
 @csrf.exempt
 @app.route("/api/posts/<int:post_id>/report", methods=["POST"])
 def report_post(post_id):
     current = get_current_user()
     if not current:
         return jsonify({"error": "Unauthorized"}), 401
-    data     = request.get_json()
-    reason   = data.get("reason", "").strip()
+    data   = request.get_json()
+    reason = data.get("reason", "").strip()
     if not reason:
         return jsonify({"error": "Reason required"}), 400
-    existing = Report.query.filter_by(post_id=post_id, reporter=current.username).first()
-    if existing:
+    if Report.query.filter_by(post_id=post_id, reporter=current.username).first():
         return jsonify({"error": "Already reported"}), 400
-    report = Report(post_id=post_id, reporter=current.username, reason=reason)
-    db.session.add(report)
+    db.session.add(Report(post_id=post_id, reporter=current.username, reason=reason))
     db.session.commit()
     return jsonify({"message": "Post reported"})
 
+
+@app.route("/api/posts/trending", methods=["GET"])
+def trending_posts():
+    one_week_ago = datetime.utcnow() - timedelta(days=7)
+    posts = Post.query.filter(
+        Post.created_at >= one_week_ago
+    ).order_by(Post.likes.desc()).limit(10).all()
+    return jsonify([serialize_post(p) for p in posts])
+
+
+@app.route("/api/posts/hashtag/<tag>", methods=["GET"])
+def posts_by_hashtag(tag):
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    posts = Post.query.filter(
+        Post.hashtags.contains(tag)
+    ).order_by(Post.created_at.desc()).all()
+    return jsonify([serialize_post(p) for p in posts])
+
+
+# ── Comments API ──────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/comments/<int:comment_id>", methods=["DELETE"])
+def delete_comment(comment_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+    comment = Comment.query.get(comment_id)
+    if not comment:
+        return jsonify({"error": "Not found"}), 404
+    if comment.username != current_user and comment.post.author.username != current_user:
+        return jsonify({"error": "Unauthorized"}), 403
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({"message": "Deleted"})
+
+
+@csrf.exempt
+@app.route("/api/comments/<int:comment_id>", methods=["PUT"])
+def edit_comment(comment_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+    comment = Comment.query.get(comment_id)
+    if not comment:
+        return jsonify({"error": "Not found"}), 404
+    if comment.username != current_user:
+        return jsonify({"error": "Unauthorized"}), 403
+    data         = request.get_json()
+    comment.text = data.get("text")
+    db.session.commit()
+    return jsonify({"message": "Updated"})
+
+
+# ── Reviews API ───────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/reviews", methods=["POST"])
+def submit_review():
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data   = request.json
+    shop   = data.get("shop")
+    rating = data.get("rating")
+    text   = data.get("text")
+    if not shop or not rating or not text:
+        return jsonify({"error": "Missing fields"}), 400
+    if Review.query.filter_by(username=current_user, shop=shop).first():
+        return jsonify({"error": "You have already reviewed this cafe"}), 400
+    db.session.add(Review(username=current_user, shop=shop, rating=rating, text=text))
+    db.session.commit()
+    current_user_obj = get_current_user()
+    if current_user_obj:
+        award_xp(current_user_obj, 'review')
+    return jsonify({"message": "Review submitted"}), 201
+
+
+@csrf.exempt
+@app.route("/api/reviews/shop/<shop_name>", methods=["GET"])
+def get_shop_reviews(shop_name):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    reviews = Review.query.filter_by(shop=shop_name).order_by(Review.created_at.desc()).all()
+    return jsonify([{
+        "id":         r.id,
+        "shop":       r.shop,
+        "rating":     r.rating,
+        "text":       r.text,
+        "username":   r.username,
+        "created_at": r.created_at.isoformat()
+    } for r in reviews])
+
+
+@csrf.exempt
+@app.route("/api/reviews/<username>", methods=["GET"])
+def get_user_reviews(username):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Login required"}), 401
+    reviews = Review.query.filter_by(username=username).order_by(Review.created_at.desc()).all()
+    return jsonify([{
+        "id":         r.id,
+        "shop":       r.shop,
+        "rating":     r.rating,
+        "text":       r.text,
+        "username":   r.username,
+        "created_at": r.created_at.isoformat()
+    } for r in reviews])
+
+
+@csrf.exempt
+@app.route("/api/reviews/<int:review_id>", methods=["DELETE"])
+def delete_review(review_id):
+    current_user = session.get("user")
+    if not current_user:
+        return jsonify({"error": "Unauthorized"}), 401
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({"error": "Not found"}), 404
+    if review.username != current_user:
+        return jsonify({"error": "Unauthorized"}), 403
+    db.session.delete(review)
+    db.session.commit()
+    return jsonify({"message": "Deleted"})
+
+
+# ── Follow API ────────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/follow/<username>", methods=["POST"])
+def follow_user(username):
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    target = User.query.filter_by(username=username).first_or_404()
+    if current.id == target.id:
+        return jsonify({"error": "Cannot follow yourself"}), 400
+    existing = Follow.query.filter_by(follower_id=current.id, followed_id=target.id).first()
+    if existing:
+        db.session.delete(existing)
+        Notification.query.filter_by(
+            user_id=target.id, actor_id=current.id, type='follow'
+        ).delete()
+        db.session.commit()
+        return jsonify({"following": False, "followers": target.follower_count()})
+    else:
+        db.session.add(Follow(follower_id=current.id, followed_id=target.id))
+        db.session.add(Notification(user_id=target.id, actor_id=current.id, type='follow'))
+        db.session.commit()
+        award_xp(target, 'follower')
+        return jsonify({"following": True, "followers": target.follower_count()})
+
+
+@app.route("/api/followers/<username>", methods=["GET"])
+def get_followers(username):
+    user      = User.query.filter_by(username=username).first_or_404()
+    followers = Follow.query.filter_by(followed_id=user.id).all()
+    return jsonify([{"username": f.follower.username, "avatar": f.follower.avatar} for f in followers])
+
+
+@app.route("/api/following/<username>", methods=["GET"])
+def get_following(username):
+    user      = User.query.filter_by(username=username).first_or_404()
+    following = Follow.query.filter_by(follower_id=user.id).all()
+    return jsonify([{"username": f.followed.username, "avatar": f.followed.avatar} for f in following])
+
+
+# ── Block API ─────────────────────────────────────────────────────────────────
 
 @csrf.exempt
 @app.route("/api/block/<username>", methods=["POST"])
@@ -1170,8 +1056,7 @@ def block_user(username):
         db.session.delete(existing)
         db.session.commit()
         return jsonify({"blocked": False})
-    block = Block(blocker_id=current.id, blocked_id=target.id)
-    db.session.add(block)
+    db.session.add(Block(blocker_id=current.id, blocked_id=target.id))
     follow = Follow.query.filter_by(follower_id=current.id, followed_id=target.id).first()
     if follow:
         db.session.delete(follow)
@@ -1185,18 +1070,275 @@ def get_blocked_users():
     if not current:
         return jsonify([])
     blocks = Block.query.filter_by(blocker_id=current.id).all()
-    blocked_users = []
-    for b in blocks:
-        blocked = User.query.get(b.blocked_id)
-        if blocked:
-            blocked_users.append({"username": blocked.username})
-    return jsonify(blocked_users)
+    return jsonify([
+        {"username": User.query.get(b.blocked_id).username}
+        for b in blocks if User.query.get(b.blocked_id)
+    ])
 
-# ── XP AND PROFILE API ────────────────────────────────────────────────────────
+
+# ── Notifications API ─────────────────────────────────────────────────────────
+
+@app.route("/api/notifications", methods=["GET"])
+def get_notifications():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    notifs = Notification.query.filter_by(
+        user_id=current.id
+    ).order_by(Notification.created_at.desc()).limit(20).all()
+    result = [{
+        "id":           n.id,
+        "type":         n.type,
+        "actor":        n.actor.username,
+        "actor_avatar": n.actor.avatar,
+        "post_id":      n.post_id,
+        "is_read":      n.is_read,
+        "created_at":   n.created_at.isoformat()
+    } for n in notifs]
+    Notification.query.filter_by(user_id=current.id, is_read=False).update({"is_read": True})
+    db.session.commit()
+    return jsonify(result)
+
+
+@app.route("/api/notifications/count", methods=["GET"])
+@limiter.limit("200 per hour")
+def notification_count():
+    current = get_current_user()
+    if not current:
+        return jsonify({"count": 0})
+    return jsonify({"count": current.unread_notifications()})
+
+
+# ── Bookmarks API ─────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/bookmarks/<int:post_id>", methods=["POST"])
+def toggle_bookmark(post_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    existing = Bookmark.query.filter_by(user_id=current.id, post_id=post_id).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({"bookmarked": False})
+    db.session.add(Bookmark(user_id=current.id, post_id=post_id))
+    db.session.commit()
+    return jsonify({"bookmarked": True})
+
+
+@app.route("/api/bookmarks", methods=["GET"])
+def get_bookmarks():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    bookmarks = Bookmark.query.filter_by(
+        user_id=current.id
+    ).order_by(Bookmark.created_at.desc()).all()
+    posts = []
+    for b in bookmarks:
+        post = Post.query.get(b.post_id)
+        if post:
+            posts.append(serialize_post(post))
+    return jsonify(posts)
+
+
+# ── Search API ────────────────────────────────────────────────────────────────
+
+@app.route("/api/search", methods=["GET"])
+def search():
+    query = request.args.get("q", "").strip()
+    if not query:
+        return jsonify({"users": [], "cafes": []})
+    users = User.query.filter(User.username.ilike(f"%{query}%")).limit(10).all()
+    return jsonify({
+        "users": [{
+            "username":  u.username,
+            "avatar":    u.avatar,
+            "bio":       u.bio,
+            "followers": u.follower_count()
+        } for u in users],
+        "cafes": [c for c in CAFES if query.lower() in c["name"].lower()]
+    })
+
+
+# ── Feed & Suggestions API ────────────────────────────────────────────────────
+
+@app.route("/api/feed/following", methods=["GET"])
+def following_feed():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    following_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=current.id).all()]
+    following_ids.append(current.id)
+    posts = Post.query.filter(
+        Post.user_id.in_(following_ids)
+    ).order_by(Post.created_at.desc()).limit(20).all()
+    return jsonify([serialize_post(p) for p in posts])
+
+
+@app.route("/api/suggested-users", methods=["GET"])
+@app.route("/api/suggested-users", methods=["GET"])
+def suggested_users():
+    current = get_current_user()
+    if not current:
+        return jsonify([])
+
+    following_ids = [
+        f.followed_id for f in
+        Follow.query.filter_by(follower_id=current.id).all()
+    ]
+    following_ids.append(current.id)
+
+    blocked_by_me = [
+        b.blocked_id for b in
+        Block.query.filter_by(blocker_id=current.id).all()
+    ]
+
+    blocked_me = [
+        b.blocker_id for b in
+        Block.query.filter_by(blocked_id=current.id).all()
+    ]
+
+    exclude_ids = list(set(following_ids + blocked_by_me + blocked_me))
+
+    suggested = User.query.filter(
+        ~User.id.in_(exclude_ids)
+    ).order_by(db.func.random()).limit(5).all()
+
+    return jsonify([{
+        "username":  u.username,
+        "avatar":    u.avatar,
+        "bio":       u.bio,
+        "followers": u.follower_count()
+    } for u in suggested])
+
+
+@app.route("/api/suggested-users/sidebar", methods=["GET"])
+@app.route("/api/suggested-users/sidebar", methods=["GET"])
+def suggested_users_sidebar():
+    current = get_current_user()
+    if not current:
+        return jsonify([])
+
+    following_ids = [
+        f.followed_id for f in
+        Follow.query.filter_by(follower_id=current.id).all()
+    ]
+    following_ids.append(current.id)
+
+    # Users current user blocked
+    blocked_by_me = [
+        b.blocked_id for b in
+        Block.query.filter_by(blocker_id=current.id).all()
+    ]
+
+    # Users who blocked current user
+    blocked_me = [
+        b.blocker_id for b in
+        Block.query.filter_by(blocked_id=current.id).all()
+    ]
+
+    exclude_ids = list(set(following_ids + blocked_by_me + blocked_me))
+
+    suggested = User.query.filter(
+        ~User.id.in_(exclude_ids)
+    ).order_by(db.func.random()).limit(5).all()
+
+    return jsonify([{
+        "username":  u.username,
+        "avatar":    u.avatar or "",
+        "bio":       u.bio or "",
+        "followers": u.follower_count(),
+        "level":     u.get_level()["title"]
+    } for u in suggested])
+
+# ── Hashtags API ──────────────────────────────────────────────────────────────
+
+@app.route("/api/hashtags/trending", methods=["GET"])
+def trending_hashtags():
+    from collections import Counter
+    posts    = Post.query.filter(Post.hashtags != "", Post.hashtags != None).all()
+    all_tags = []
+    for post in posts:
+        if post.hashtags:
+            all_tags.extend(post.hashtags.split(","))
+    tag_counts = Counter(all_tags).most_common(10)
+    return jsonify([{"tag": tag, "count": count} for tag, count in tag_counts if tag])
+
+
+# ── Profile API ───────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/profile/edit", methods=["POST"])
+def edit_profile():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    data     = request.get_json()
+    email    = (data.get("email") or "").strip().lower()
+    bio      = data.get("bio", current.bio)
+    website  = data.get("website", current.website)
+    location = data.get("location", current.location)
+
+    # Update non-email fields immediately
+    current.bio      = bio
+    current.website  = website
+    current.location = location
+
+    message = "Profile updated ✓"
+
+    # Only process email if it changed
+    if email and email != (current.email or "").lower():
+        existing = User.query.filter(
+            db.func.lower(User.email) == email,
+            User.id != current.id
+        ).first()
+        if existing:
+            db.session.commit()
+            return jsonify({"error": "Email already registered"}), 400
+
+        # Store new email in a pending field — do NOT update current.email yet
+        # Send verification to new email
+        try:
+            token = serializer.dumps(
+                f"{current.id}:{email}",
+                salt='new-email-verify'
+)
+            verify_url = url_for('verify_new_email', token=token, _external=True)
+            msg = Message(
+                subject='Verify your new email — Coffee Social Hub',
+                recipients=[email],
+                html=f'''
+                <h2>Email Change Request</h2>
+                <p>Click below to verify your new email address:</p>
+                <a href="{verify_url}" style="
+                    background:#c47a2b;color:white;padding:12px 24px;
+                    border-radius:8px;text-decoration:none;font-weight:bold;">
+                    Verify New Email
+                </a>
+                <p>Your old email remains active until you verify this one.</p>
+                <p>This link expires in 1 hour.</p>
+                '''
+            )
+            mail.send(msg)
+            message = "Profile updated. Verification email sent to new address — your email will update once verified."
+        except Exception as e:
+            print(f"Email error: {e}")
+            message = "Profile updated. Could not send verification email — email unchanged."
+
+    db.session.commit()
+    return jsonify({
+        "bio":      current.bio,
+        "website":  current.website,
+        "location": current.location,
+        "email":    current.email,
+        "message":  message
+    })
+
 
 @app.route("/api/profile/xp", methods=["GET"])
 def get_profile_xp():
-    """Returns XP, level and badges for current user"""
     current = get_current_user()
     if not current:
         return jsonify({"error": "Unauthorized"}), 401
@@ -1210,29 +1352,97 @@ def get_profile_xp():
     })
 
 
+@app.route("/api/profile/completion", methods=["GET"])
+def profile_completion():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    fields = {
+        "Avatar":   bool(current.avatar),
+        "Bio":      bool(current.bio),
+        "Website":  bool(current.website),
+        "Location": bool(current.location),
+        "Email":    bool(current.email),
+        "Post":     len(current.posts) > 0,
+        "Review":   Review.query.filter_by(username=current.username).count() > 0,
+        "Follow":   current.following_count() > 0,
+    }
+    completed = sum(1 for v in fields.values() if v)
+    total     = len(fields)
+    percent   = round((completed / total) * 100)
+    return jsonify({
+        "percent":   percent,
+        "completed": completed,
+        "total":     total,
+        "missing":   [k for k, v in fields.items() if not v]
+    })
+
+
+@app.route("/api/profile/analytics", methods=["GET"])
+def profile_analytics():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    posts          = current.posts
+    total_likes    = sum(p.likes for p in posts)
+    total_views    = sum(p.view_count or 0 for p in posts)
+    total_comments = sum(len(p.comments) for p in posts)
+    best_post      = max(posts, key=lambda p: p.likes, default=None)
+    cafe_counts    = {}
+    for post in posts:
+        if post.shop:
+            cafe_counts[post.shop] = cafe_counts.get(post.shop, 0) + 1
+    return jsonify({
+        "total_posts":    len(posts),
+        "total_likes":    total_likes,
+        "total_views":    total_views,
+        "total_comments": total_comments,
+        "avg_likes":      round(total_likes / len(posts), 1) if posts else 0,
+        "avg_views":      round(total_views / len(posts), 1) if posts else 0,
+        "best_post":      serialize_post(best_post) if best_post else None,
+        "cafe_breakdown": cafe_counts
+    })
+
+
+@app.route("/api/profile/activity", methods=["GET"])
+def profile_activity():
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+    from datetime import date, timedelta
+    today    = date.today()
+    start    = today - timedelta(weeks=52)
+    posts    = Post.query.filter(Post.user_id == current.id, Post.created_at >= start).all()
+    activity = {}
+    for post in posts:
+        day = post.created_at.strftime('%Y-%m-%d')
+        activity[day] = activity.get(day, 0) + 1
+    return jsonify(activity)
+
+
+# ── Leaderboard API ───────────────────────────────────────────────────────────
+
 @app.route("/api/leaderboard", methods=["GET"])
 def leaderboard():
-    """Returns top 20 users by XP"""
-    users = User.query.order_by(
-        (User.xp or 0).desc()
-    ).limit(20).all()
+    users  = User.query.order_by((User.xp or 0).desc()).limit(20).all()
     result = []
     for i, u in enumerate(users):
         level_info = u.get_level()
         result.append({
-            "rank":       i + 1,
-            "username":   u.username,
-            "avatar":     u.avatar or "",
-            "xp":         u.xp or 0,
-            "level":      level_info["level"],
-            "title":      level_info["title"],
-            "badges":     u.get_badges(),
-            "post_count": len(u.posts),
+            "rank":        i + 1,
+            "username":    u.username,
+            "avatar":      u.avatar or "",
+            "xp":          u.xp or 0,
+            "xp_percent":  level_info.get("percent", 0),
+            "level":       level_info["level"],
+            "title":       level_info["title"],
+            "badges":      u.get_badges(),
+            "post_count":  len(u.posts),
         })
     return jsonify(result)
 
 
-# ── COFFEE JOURNAL API ────────────────────────────────────────────────────────
+# ── Journal API ───────────────────────────────────────────────────────────────
 
 @csrf.exempt
 @app.route("/api/journal", methods=["GET", "POST"])
@@ -1240,7 +1450,6 @@ def journal():
     current = get_current_user()
     if not current:
         return jsonify({"error": "Unauthorized"}), 401
-
     if request.method == "GET":
         entries = JournalEntry.query.filter_by(
             user_id=current.id
@@ -1255,7 +1464,6 @@ def journal():
             "notes":      e.notes,
             "created_at": e.created_at.isoformat()
         } for e in entries])
-
     data  = request.get_json()
     entry = JournalEntry(
         user_id    = current.id,
@@ -1285,33 +1493,50 @@ def delete_journal_entry(entry_id):
     return jsonify({"deleted": True})
 
 
-# ── ADMIN ROUTES ──────────────────────────────────────────────────────────────
+# ── Cafe Stats & Ratings API ──────────────────────────────────────────────────
 
-@app.route("/admin")
-@login_required
-def admin_dashboard():
-    # Reload fresh from DB to get latest is_admin value
-    current = User.query.filter_by(username=session.get("user")).first()
-    if not current or not current.is_admin:
-        return redirect(url_for("home"))
-    reports = Report.query.order_by(Report.created_at.desc()).all()
-    report_data = []
-    for r in reports:
-        post = Post.query.get(r.post_id)
-        report_data.append({
-            "report":   r,
-            "post":     post,
-            "reporter": r.reporter
-        })
-    users = User.query.order_by(User.created_at.desc()).all()
-    return render_template("admin.html",
-        reports=report_data,
-        users=users,
-        total_posts=Post.query.count(),
-        total_users=User.query.count(),
-        total_reports=Report.query.count()
-    )
+@app.route("/api/cafe-stats/<cafe_name>", methods=["GET"])
+def cafe_stats(cafe_name):
+    reviews = Review.query.filter_by(shop=cafe_name).all()
+    if not reviews:
+        return jsonify({"average": 0, "count": 0, "breakdown": {}})
+    avg       = sum(r.rating for r in reviews) / len(reviews)
+    breakdown = {str(i): sum(1 for r in reviews if r.rating == i) for i in range(1, 6)}
+    return jsonify({"average": round(avg, 1), "count": len(reviews), "breakdown": breakdown})
 
+
+@app.route("/api/cafe-ratings", methods=["GET"])
+def cafe_ratings():
+    result = {}
+    for cafe in CAFES:
+        reviews = Review.query.filter_by(shop=cafe["name"]).all()
+        if reviews:
+            avg = sum(r.rating for r in reviews) / len(reviews)
+            result[cafe["name"]] = {"average": round(avg, 1), "count": len(reviews)}
+        else:
+            result[cafe["name"]] = {"average": 0, "count": 0}
+    return jsonify(result)
+
+
+@app.route("/api/cafes/rated", methods=["GET"])
+def rated_cafes():
+    result = []
+    for cafe in CAFES:
+        reviews = Review.query.filter_by(shop=cafe["name"]).all()
+        if reviews:
+            avg = round(sum(r.rating for r in reviews) / len(reviews), 1)
+            result.append({
+                "name":     cafe["name"],
+                "location": cafe["location"],
+                "rating":   avg,
+                "count":    len(reviews),
+                "route":    cafe["route"]
+            })
+    result.sort(key=lambda x: x["rating"], reverse=True)
+    return jsonify(result)
+
+
+# ── Admin API ─────────────────────────────────────────────────────────────────
 
 @csrf.exempt
 @app.route("/api/admin/delete-post/<int:post_id>", methods=["DELETE"])
@@ -1320,7 +1545,6 @@ def admin_delete_post(post_id):
     if not current or not current.is_admin:
         return jsonify({"error": "Unauthorized"}), 403
     post = Post.query.get_or_404(post_id)
-    # Delete all reports for this post
     Report.query.filter_by(post_id=post_id).delete()
     image_path = post.image
     db.session.delete(post)
@@ -1352,244 +1576,33 @@ def make_admin(username):
     db.session.commit()
     return jsonify({"message": f"{username} is now admin"})
 
+@app.route("/verify-new-email/<token>")
+def verify_new_email(token):
+    try:
+        # Token contains "user_id:new_email"
+        payload = serializer.loads(token, salt='new-email-verify', max_age=3600)
+        user_id, new_email = payload.split(":", 1)
+    except:
+        return render_template("verify.html", status='invalid')
 
-# ── PWA ROUTES ────────────────────────────────────────────────────────────────
+    user = User.query.get(int(user_id))
+    if not user:
+        return render_template("verify.html", status='invalid')
 
-@app.route("/manifest.json")
-def manifest():
-    return jsonify({
-        "name": "Coffee Social Hub",
-        "short_name": "CoffeeHub",
-        "description": "Perth's coffee community",
-        "start_url": "/",
-        "display": "standalone",
-        "background_color": "#1a0e00",
-        "theme_color": "#c47a2b",
-        "orientation": "portrait",
-        "icons": [
-            {
-                "src": "/static/images/icon-192.png",
-                "sizes": "192x192",
-                "type": "image/png"
-            },
-            {
-                "src": "/static/images/icon-512.png",
-                "sizes": "512x512",
-                "type": "image/png"
-            }
-        ]
-    })
+    # Check email not taken by someone else
+    existing = User.query.filter(
+        db.func.lower(User.email) == new_email.lower(),
+        User.id != user.id
+    ).first()
+    if existing:
+        return render_template("verify.html", status='invalid')
 
-
-@app.route("/offline")
-def offline():
-    return render_template("offline.html")
-
-
-# ── PAGE ROUTES ───────────────────────────────────────────────────────────────
-
-@app.route("/leaderboard")
-@login_required
-def leaderboard_page():
-    return render_template("leaderboard.html")
-
-
-@app.route("/journal")
-@login_required
-def journal_page():
-    return render_template("journal.html")
-
-# ── WEEK 6 API ROUTES ─────────────────────────────────────────────────────────
-
-@app.route("/api/suggested-users/sidebar", methods=["GET"])
-def suggested_users_sidebar():
-    """Returns 5 suggested users with follow status for sidebar"""
-    current = get_current_user()
-    if not current:
-        return jsonify([])
-
-    following_ids = [
-        f.followed_id for f in
-        Follow.query.filter_by(follower_id=current.id).all()
-    ]
-    following_ids.append(current.id)
-
-    # Also exclude blocked users
-    blocked_ids = [
-        b.blocked_id for b in
-        Block.query.filter_by(blocker_id=current.id).all()
-    ]
-
-    suggested = User.query.filter(
-        ~User.id.in_(following_ids + blocked_ids)
-    ).order_by(db.func.random()).limit(5).all()
-
-    return jsonify([{
-        "username":   u.username,
-        "avatar":     u.avatar or "",
-        "bio":        u.bio or "",
-        "followers":  u.follower_count(),
-        "level":      u.get_level()["title"]
-    } for u in suggested])
-
-
-@app.route("/api/cafe-ratings", methods=["GET"])
-def cafe_ratings():
-    """Returns average rating per cafe from all reviews"""
-    result = {}
-    for cafe in CAFES:
-        reviews = Review.query.filter_by(shop=cafe["name"]).all()
-        if reviews:
-            avg = sum(r.rating for r in reviews) / len(reviews)
-            result[cafe["name"]] = {
-                "average": round(avg, 1),
-                "count":   len(reviews)
-            }
-        else:
-            result[cafe["name"]] = {"average": 0, "count": 0}
-    return jsonify(result)
-
-
-@app.route("/search")
-@login_required
-def search_page():
-    """Full search results page"""
-    query = request.args.get("q", "").strip()
-    return render_template("search.html", query=query)
-
-
-@app.route("/api/profile/completion", methods=["GET"])
-def profile_completion():
-    """Returns profile completion percentage"""
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    fields = {
-        "Avatar":   bool(current.avatar),
-        "Bio":      bool(current.bio),
-        "Website":  bool(current.website),
-        "Location": bool(current.location),
-        "Email":    bool(current.email),
-        "Post":     len(current.posts) > 0,
-        "Review":   Review.query.filter_by(username=current.username).count() > 0,
-        "Follow":   current.following_count() > 0,
-    }
-
-    completed = sum(1 for v in fields.values() if v)
-    total     = len(fields)
-    percent   = round((completed / total) * 100)
-
-    missing = [k for k, v in fields.items() if not v]
-
-    return jsonify({
-        "percent":   percent,
-        "completed": completed,
-        "total":     total,
-        "missing":   missing
-    })
-
-
-@app.route("/api/profile/activity", methods=["GET"])
-def profile_activity():
-    """Returns post count per day for last 52 weeks"""
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    from datetime import date, timedelta
-    today     = date.today()
-    start     = today - timedelta(weeks=52)
-    posts     = Post.query.filter(
-        Post.user_id    == current.id,
-        Post.created_at >= start
-    ).all()
-
-    activity = {}
-    for post in posts:
-        day = post.created_at.strftime('%Y-%m-%d')
-        activity[day] = activity.get(day, 0) + 1
-
-    return jsonify(activity)
-
-
-@app.route("/quiz")
-@login_required
-def quiz_page():
-    """Coffee personality quiz page"""
-    return render_template("quiz.html")
-
-# ── WEEK 7 ROUTES ─────────────────────────────────────────────────────────────
-
-@app.route("/api/cafe-stats/<cafe_name>", methods=["GET"])
-def cafe_stats(cafe_name):
-    """Returns average rating and review count for a cafe"""
-    reviews = Review.query.filter_by(shop=cafe_name).all()
-    if not reviews:
-        return jsonify({"average": 0, "count": 0, "breakdown": {}})
-
-    avg = sum(r.rating for r in reviews) / len(reviews)
-    breakdown = {str(i): sum(1 for r in reviews if r.rating == i) for i in range(1, 6)}
-
-    return jsonify({
-        "average":   round(avg, 1),
-        "count":     len(reviews),
-        "breakdown": breakdown
-    })
-
-
-@app.route("/api/profile/analytics", methods=["GET"])
-def profile_analytics():
-    """Returns post engagement stats for current user"""
-    current = get_current_user()
-    if not current:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    posts       = current.posts
-    total_likes = sum(p.likes for p in posts)
-    total_views = sum(p.view_count or 0 for p in posts)
-    total_comments = sum(len(p.comments) for p in posts)
-
-    # Best performing post
-    best_post = max(posts, key=lambda p: p.likes, default=None)
-
-    # Posts per cafe
-    cafe_counts = {}
-    for post in posts:
-        if post.shop:
-            cafe_counts[post.shop] = cafe_counts.get(post.shop, 0) + 1
-
-    return jsonify({
-        "total_posts":    len(posts),
-        "total_likes":    total_likes,
-        "total_views":    total_views,
-        "total_comments": total_comments,
-        "avg_likes":      round(total_likes / len(posts), 1) if posts else 0,
-        "avg_views":      round(total_views / len(posts), 1) if posts else 0,
-        "best_post":      serialize_post(best_post) if best_post else None,
-        "cafe_breakdown": cafe_counts
-    })
-
-@app.route("/api/cafes/rated", methods=["GET"])
-def rated_cafes():
-    """Returns only cafes that have at least one review, sorted by avg rating"""
-    result = []
-    for cafe in CAFES:
-        reviews = Review.query.filter_by(shop=cafe["name"]).all()
-        if reviews:
-            avg = round(sum(r.rating for r in reviews) / len(reviews), 1)
-            result.append({
-                "name":     cafe["name"],
-                "location": cafe["location"],
-                "rating":   avg,
-                "count":    len(reviews),
-                "route":    cafe["route"]
-            })
-    # Sort by average rating descending
-    result.sort(key=lambda x: x["rating"], reverse=True)
-    return jsonify(result)
-
+    user.email       = new_email
+    user.is_verified = True
+    db.session.commit()
+    return render_template("verify.html", status='success')
 # ── Application Entry Point ───────────────────────────────────────────────────
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

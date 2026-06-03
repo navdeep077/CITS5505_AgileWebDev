@@ -194,11 +194,11 @@ function loadPosts() {
 
             if (posts.length === 0) {
                 feed.innerHTML = `
-                    <div class="empty-feed-card">
-                        <i class="bi bi-camera"></i>
-                        <h5>No posts yet</h5>
-                        <p>Be the first to share a coffee moment. Use the + button to upload a post.</p>
-                    </div>`;
+    <div class="empty-feed-card">
+        <i class="bi bi-camera-fill"></i>
+        <h5>No posts yet</h5>
+        <p>Be the first to share a coffee moment. Use the + button to upload a post.</p>
+    </div>`;
                 return;
             }
 
