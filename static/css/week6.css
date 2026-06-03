@@ -568,3 +568,70 @@
 .suggestion-item .avatar {
     flex-shrink: 0;
 }
+.home-layout,
+.home-feed-col,
+#feed,
+.post,
+.post-image-wrapper,
+.post-image-wrapper img {
+    box-sizing: border-box;
+}
+
+#feed {
+    width: 100%;
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.post {
+    width: 100%;
+    max-width: 100%;
+}
+
+.post-image-wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.post-image-wrapper img {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+}
+
+@media (max-width: 991px) {
+    .home-layout {
+        width: 100%;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        overflow-x: hidden;
+    }
+
+    .home-feed-col {
+        width: 100%;
+        max-width: 560px;
+        margin-left: auto;
+        margin-right: auto;
+        overflow: visible;
+    }
+
+    #feed {
+        width: 100%;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .post {
+        width: 100%;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        overflow: hidden;
+    }
+}
