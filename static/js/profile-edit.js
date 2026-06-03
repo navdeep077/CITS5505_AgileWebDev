@@ -15,7 +15,7 @@ function saveEditBio() {
     const bio      = document.getElementById('bio-input').value.trim();
     const website  = document.getElementById('website-input').value.trim();
     const location = document.getElementById('location-input').value.trim();
-    const email    = document.getElementById('email-input').value.trim().toLowerCase();
+    const email    = document.getElementById('email-input')?.value.trim().toLowerCase() || '';
 
     fetch('/api/profile/edit', {
         method: 'POST',
@@ -28,12 +28,18 @@ function saveEditBio() {
             showToast(data.error, 'error');
             return;
         }
+
+        // Update bio, website, location display
         document.getElementById('bio-text').textContent = data.bio || 'No bio yet';
 
-        const websiteEl = document.getElementById('website-display');
+        const websiteEl  = document.getElementById('website-display');
         const locationEl = document.getElementById('location-display');
-        if (websiteEl) websiteEl.textContent = data.website || '';
+        if (websiteEl)  websiteEl.textContent  = data.website  || '';
         if (locationEl) locationEl.textContent = data.location || '';
+
+        // Do NOT update email display — only changes after verification
+        const emailInput = document.getElementById('email-input');
+        if (emailInput) emailInput.value = data.email || '';
 
         cancelEditBio();
         showToast(data.message || 'Profile updated ✓', 'success');

@@ -500,3 +500,71 @@
     margin: 0;
     font-size: 0.9rem;
 }
+/* ── PYTHONANYWHERE HOME EMPTY STATE FIX ───────────────────── */
+
+.home-layout {
+    align-items: flex-start;
+}
+
+#feed,
+.feed,
+.feed-column,
+.main-feed {
+    min-height: 420px;
+}
+
+/* Make empty post message look like a proper card */
+.empty-feed-card {
+    max-width: 520px;
+    margin: 3rem auto 0;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--surface, #fff);
+    border: 1px solid rgba(196,122,43,0.18);
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(26,14,0,0.05);
+}
+
+.empty-feed-card i {
+    width: 62px;
+    height: 62px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(196,122,43,0.1);
+    color: var(--caramel);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.empty-feed-card h5 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text, #1a0e00);
+    margin-bottom: 0.45rem;
+}
+
+.empty-feed-card p {
+    max-width: 360px;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Suggested users card cleanup */
+.suggestion-card,
+.sidebar-card {
+    border-radius: 18px !important;
+}
+
+.suggested-user,
+.suggestion-item {
+    align-items: center !important;
+}
+
+.suggested-user .avatar,
+.suggestion-item .avatar {
+    flex-shrink: 0;
+}

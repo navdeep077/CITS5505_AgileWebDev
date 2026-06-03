@@ -24,62 +24,52 @@ function cafeSlug(name) {
 // Uploads to /api/avatar and updates the avatar on screen
 document.addEventListener('DOMContentLoaded', () => {
 
-    const avatarInput = document.getElementById('avatar-file-input');
-    if (avatarInput) {
-        avatarInput.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+    document.getElementById('avatar-file-input')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
 
-            const formData = new FormData();
-            formData.append('avatar', file);
-
-            try {
-                const response = await fetch('/api/avatar', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-
-                if (!response.ok) {
-                    showToast(data.error || 'Could not upload photo', 'error');
-                    return;
-                }
-
-                // Update avatar image on the profile page
-                const existingImg = document.getElementById('profile-avatar-img');
-                const fallback    = document.getElementById('profile-avatar-fallback');
-
-                if (existingImg) {
-                    // Already showing an image — just update src
-                    existingImg.src = data.avatar;
-                } else if (fallback) {
-                    // Replace the initials fallback with a real image
-                    fallback.outerHTML = `<img
-                        src="${data.avatar}"
-                        alt="avatar"
-                        class="profile-avatar"
-                        id="profile-avatar-img"
-                    >`;
-                }
-
-                // Also update the navbar avatar
-                const navAvatar = document.querySelector('[data-navbar-avatar]');
-                if (navAvatar) {
-                    navAvatar.innerHTML = `<img src="${data.avatar}"
-                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-                }
-
-                showToast('Profile photo updated ✓', 'success');
-
-            } catch (err) {
-                console.error('Avatar upload error:', err);
-                showToast('Upload failed', 'error');
-            }
-
-            // Reset input so same file can be re-selected if needed
-            e.target.value = '';
-        });
-    }
+    // Compress image before upload
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas  = document.createElement('canvas');
+            const maxSize = 400;
+            let w = img.width;
+            let h = img.height;
+            if (w > h) { if (w > maxSize) { h *= maxSize/w; w = maxSize; } }
+            else        { if (h > maxSize) { w *= maxSize/h; h = maxSize; } }
+            canvas.width  = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('avatar', blob, 'avatar.jpg');
+                fetch('/api/avatar', { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.avatar) {
+                            const imgEl = document.getElementById('profile-avatar-img');
+                            const fallback = document.getElementById('profile-avatar-fallback');
+                            if (imgEl) {
+                                imgEl.src = data.avatar;
+                            } else if (fallback) {
+                                const newImg = document.createElement('img');
+                                newImg.src       = data.avatar;
+                                newImg.id        = 'profile-avatar-img';
+                                newImg.className = 'own-avatar-wrap img';
+                                newImg.style.cssText = 'width:100px;height:100px;border-radius:50%;border:4px solid white;object-fit:cover;';
+                                fallback.replaceWith(newImg);
+                            }
+                            showToast('Avatar updated ✓', 'success');
+                        }
+                    });
+            }, 'image/jpeg', 0.85);
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+});
 
     // ── Remove Avatar ─────────────────────────────────────────────────────────
     // removeAvatar() is called from onclick in profile.html

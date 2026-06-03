@@ -1,59 +1,101 @@
 {% extends 'base.html' %}
-{% block title %}Blocked | Coffee Social Hub{% endblock %}
+{% block title %}
+    {% if i_blocked %}Blocked User{% else %}Not Available{% endif %}
+    | Coffee Social Hub
+{% endblock %}
 
 {% block content %}
 <div style="
     max-width:480px;
     margin:4rem auto;
     text-align:center;
-    padding:2rem;
+    padding:2.5rem 2rem;
     background:var(--surface,#fff);
     border-radius:16px;
     border:1px solid rgba(196,122,43,0.15);
     box-shadow:0 4px 20px rgba(26,14,0,0.08);
 ">
+
+{% if i_blocked %}
+    <!-- Navdeep visits navdeep23 — Navdeep blocked navdeep23 -->
     <div style="font-size:3rem;margin-bottom:1rem;">🚫</div>
-    <h2 style="color:var(--espresso,#1a0e00);">User Blocked</h2>
-    <p style="color:var(--muted);margin:1rem 0;">
-        You have blocked <strong>{{ username }}</strong>.
-        You cannot view their profile.
+    <h2 style="color:var(--espresso,#1a0e00);margin-bottom:0.5rem;">
+        You have blocked this user
+    </h2>
+    <p style="color:var(--muted);margin:0.75rem 0 1.5rem;font-size:0.9rem;">
+        You blocked <strong>{{ username }}</strong>.
+        Unblock them to view their profile again.
     </p>
-    <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
         <a href="{{ url_for('home') }}" style="
-            background:var(--caramel,#c47a2b);
-            color:white;
-            padding:10px 24px;
-            border-radius:8px;
+            background:none;
+            border:1.5px solid rgba(196,122,43,0.3);
+            color:var(--caramel,#c47a2b);
+            padding:10px 22px;
+            border-radius:10px;
             text-decoration:none;
             font-weight:600;
             font-size:0.9rem;
+            transition:all 0.2s;
         ">
-            Go Home
+            <i class="bi bi-house"></i> Go Home
         </a>
         <button
             onclick="unblockAndVisit('{{ username }}')"
             style="
-                background:none;
-                border:1px solid rgba(196,122,43,0.3);
-                border-radius:8px;
-                padding:10px 20px;
+                background:var(--caramel,#c47a2b);
+                color:white;
+                border:none;
+                border-radius:10px;
+                padding:10px 22px;
                 cursor:pointer;
-                color:var(--caramel,#c47a2b);
                 font-weight:600;
                 font-size:0.9rem;
+                transition:opacity 0.2s;
             ">
-            Unblock {{ username }}
+            <i class="bi bi-unlock"></i> Unblock {{ username }}
         </button>
     </div>
+
+{% else %}
+    <!-- navdeep23 visits navdeep — navdeep blocked navdeep23 -->
+    <div style="font-size:3rem;margin-bottom:1rem;">☕</div>
+    <h2 style="color:var(--espresso,#1a0e00);margin-bottom:0.5rem;">
+        This account is not available
+    </h2>
+    <p style="color:var(--muted);margin:0.75rem 0 1.5rem;font-size:0.9rem;">
+        This page is unavailable. The account may not exist
+        or may have restricted access.
+    </p>
+    <a href="{{ url_for('home') }}" style="
+        background:var(--caramel,#c47a2b);
+        color:white;
+        padding:10px 24px;
+        border-radius:10px;
+        text-decoration:none;
+        font-weight:600;
+        font-size:0.9rem;
+    ">
+        Back to Home
+    </a>
+
+{% endif %}
+
 </div>
 
 <script>
 function unblockAndVisit(username) {
     fetch(`/api/block/${username}`, { method: 'POST' })
         .then(res => res.json())
-        .then(() => {
-            window.location.href = `/user/${username}`;
+        .then(data => {
+            if (!data.blocked) {
+                showToast(`${username} unblocked`, 'success');
+                setTimeout(() => {
+                    window.location.href = `/user/${username}`;
+                }, 800);
+            }
         });
 }
 </script>
+
 {% endblock %}
