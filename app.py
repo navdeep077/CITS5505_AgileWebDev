@@ -731,6 +731,24 @@ def api_posts():
     post = Post(text=text, shop=shop, image=image_path, author=user, hashtags=",".join(tags))
     db.session.add(post)
     db.session.commit()
+
+    # Notify mentioned users in post text
+    mentions = re.findall(r'@(\w+)', text)
+    for mentioned_username in set(mentions):
+        if mentioned_username == user.username:
+            continue
+        mentioned_user = User.query.filter_by(
+            username=mentioned_username
+        ).first()
+        if mentioned_user:
+            db.session.add(Notification(
+                user_id=mentioned_user.id,
+                actor_id=user.id,
+                type='comment',
+                post_id=post.id
+            ))
+    db.session.commit()
+
     award_xp(user, 'post')
     return jsonify(serialize_post(post)), 201
 
@@ -809,13 +827,34 @@ def add_comment(post_id):
     db.session.add(new_comment)
     post           = Post.query.get_or_404(post_id)
     comment_author = User.query.filter_by(username=current_username).first()
+
+    # Notify post owner
     if comment_author and comment_author.id != post.user_id:
         db.session.add(Notification(
             user_id=post.user_id, actor_id=comment_author.id,
             type='comment', post_id=post.id
         ))
+
+    # Notify mentioned users
+    import re as _re
+    mentions = _re.findall(r'@(\w+)', text)
+    for mentioned_username in set(mentions):
+        if mentioned_username == current_username:
+            continue
+        mentioned_user = User.query.filter_by(
+            username=mentioned_username
+        ).first()
+        if mentioned_user and mentioned_user.id != post.user_id:
+            db.session.add(Notification(
+                user_id=mentioned_user.id,
+                actor_id=comment_author.id,
+                type='comment',
+                post_id=post.id
+            ))
+
     db.session.commit()
-    award_xp(comment_author, 'comment')
+    if comment_author:
+        award_xp(comment_author, 'comment')
     return jsonify({"message": "Comment added", "comment_id": new_comment.id})
 
 
@@ -832,9 +871,31 @@ def edit_post(post_id):
     new_text = data.get("text", "").strip()
     if not new_text:
         return jsonify({"error": "Caption cannot be empty"}), 400
+    old_text      = post.text or ""
     post.text     = new_text
     post.hashtags = ",".join(re.findall(r'#(\w+)', new_text))
     db.session.commit()
+
+    # Notify newly mentioned users (not already mentioned in old text)
+    old_mentions = set(re.findall(r'@(\w+)', old_text))
+    new_mentions = set(re.findall(r'@(\w+)', new_text))
+    added_mentions = new_mentions - old_mentions
+
+    for mentioned_username in added_mentions:
+        if mentioned_username == current.username:
+            continue
+        mentioned_user = User.query.filter_by(
+            username=mentioned_username
+        ).first()
+        if mentioned_user:
+            db.session.add(Notification(
+                user_id=mentioned_user.id,
+                actor_id=current.id,
+                type='mention',
+                post_id=post.id
+            ))
+    db.session.commit()
+
     return jsonify({"text": post.text, "hashtags": post.hashtags})
 
 
@@ -1601,6 +1662,59 @@ def verify_new_email(token):
     user.is_verified = True
     db.session.commit()
     return render_template("verify.html", status='success')
+
+
+    # ── WEEK 8 ROUTES ─────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route("/api/checkin/<cafe_name>", methods=["POST"])
+def cafe_checkin(cafe_name):
+    """Toggle check-in at a cafe"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    # Store checkins in a simple comma-separated field on User
+    # We reuse the badges field pattern — store as "checkin:CafeName"
+    checkins = [c for c in (current.badges or "").split(",") if c.startswith("checkin:")]
+    checkin_key = f"checkin:{cafe_name}"
+
+    badges_list = [b for b in (current.badges or "").split(",") if b]
+
+    if checkin_key in badges_list:
+        badges_list.remove(checkin_key)
+        checked_in = False
+    else:
+        badges_list.append(checkin_key)
+        checked_in = True
+
+    current.badges = ",".join(badges_list)
+    db.session.commit()
+
+    # Count total checkins for this cafe
+    total = User.query.filter(
+        User.badges.contains(checkin_key)
+    ).count()
+
+    return jsonify({"checked_in": checked_in, "total": total})
+
+
+@app.route("/api/checkin/<cafe_name>", methods=["GET"])
+def get_checkin(cafe_name):
+    """Get check-in status and count for a cafe"""
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    checkin_key = f"checkin:{cafe_name}"
+    badges_list = [b for b in (current.badges or "").split(",") if b]
+    checked_in  = checkin_key in badges_list
+
+    total = User.query.filter(
+        User.badges.contains(checkin_key)
+    ).count()
+
+    return jsonify({"checked_in": checked_in, "total": total})
 # ── Application Entry Point ───────────────────────────────────────────────────
 
 if __name__ == "__main__":

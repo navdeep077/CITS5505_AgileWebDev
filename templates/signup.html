@@ -6,6 +6,17 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- Mobile back link for login page -->
+<div class="d-flex d-lg-none align-items-center"
+     style="background:var(--espresso,#1a0e00);padding:10px 16px;">
+    <a href="{{ url_for('landing') }}"
+       style="color:var(--caramel,#c47a2b);text-decoration:none;
+              font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-arrow-left"></i> ☕ Coffee Social Hub
+    </a>
+</div>
+
 <div class="login-container">
     <div class="left">
         <h2 class="logo">Coffee Hub</h2>
