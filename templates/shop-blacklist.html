@@ -4,6 +4,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/week7.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week8.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -12,7 +13,9 @@
 <section class="hero-shop">
     <div class="hero-shop-bg-overlay"></div>
     <div class="container hero-shop-content">
-
+        <a href="javascript:history.back()" class="shop-back-link">
+            <span class="shop-back-arrow">←</span> Back
+        </a>
         <div class="shop-hero-body">
             <div class="shop-identity">
                 <div class="shop-logo-badge">B</div>
@@ -30,12 +33,22 @@
                 </div>
             </div>
 
-            <!-- Dynamic rating pill — filled by JS below -->
-            <div class="shop-rating-pill" id="hero-rating-pill" style="display:none;">
-                <span class="rating-num" id="hero-avg">—</span>
-                <div>
-                    <div class="rating-stars" id="hero-stars"></div>
-                    <div class="rating-count" id="hero-count"></div>
+            <!-- RIGHT SIDE: rating pill + check-in -->
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
+                <div class="shop-rating-pill" id="hero-rating-pill" style="display:none;">
+                    <span class="rating-num" id="hero-avg">—</span>
+                    <div>
+                        <div class="rating-stars" id="hero-stars"></div>
+                        <div class="rating-count" id="hero-count"></div>
+                    </div>
+                </div>
+                <button class="checkin-btn" id="checkin-btn"
+                        onclick="toggleCheckin('Blacklist Coffee Roasters')">
+                    <i class="bi bi-geo-alt"></i>
+                    <span id="checkin-label">Check In</span>
+                </button>
+                <div class="checkin-count" id="checkin-count-text"
+                     style="color:rgba(255,255,255,0.7);font-size:0.75rem;">
                 </div>
             </div>
         </div>
@@ -43,6 +56,17 @@
 </section>
 
 
+<!-- DYNAMIC RATING SUMMARY -->
+<div class="container" style="max-width:900px;margin-top:1rem;">
+    <div class="cafe-rating-summary" id="cafe-rating-summary" style="display:none;">
+        <div style="text-align:center;">
+            <div class="cafe-avg-score" id="cafe-avg-score">—</div>
+            <div class="cafe-avg-stars" id="cafe-avg-stars"></div>
+            <div class="cafe-review-count" id="cafe-review-count"></div>
+        </div>
+        <div class="cafe-rating-bars" id="cafe-rating-bars"></div>
+    </div>
+</div>
 
 <!-- MAIN CONTENT -->
 <main class="container py-5">
@@ -51,7 +75,6 @@
         <!-- LEFT COLUMN -->
         <div class="col-lg-8">
 
-            <!-- Info strip -->
             <div class="info-strip mb-5">
                 <div class="info-strip-item">
                     <i class="bi bi-clock"
@@ -79,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- Menu -->
             <span class="section-eyebrow">What's On Offer</span>
             <h2 class="section-title mb-4">Menu &amp; Pricing</h2>
 
@@ -120,7 +142,6 @@
                 </div>
             </div>
 
-            <!-- Dynamic community reviews — loaded by shop.js -->
             <span class="section-eyebrow">Community Takes</span>
             <h2 class="section-title mb-4">Ratings &amp; Reviews</h2>
             <div class="review-list"></div>
@@ -130,7 +151,6 @@
         <!-- RIGHT COLUMN -->
         <div class="col-lg-4">
 
-            <!-- Review form -->
             <div class="sidebar-card mb-4">
                 <span class="section-eyebrow">Your Take</span>
                 <h3 class="sidebar-title">Rate This Shop</h3>
@@ -148,7 +168,6 @@
                 </button>
             </div>
 
-            <!-- Quick facts -->
             <div class="sidebar-card sidebar-card--dark mb-4">
                 <h3 class="sidebar-title sidebar-title--light">Quick Facts</h3>
                 <ul class="quick-facts-list">
@@ -174,13 +193,54 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
 <script>
+// ── Check-in ──────────────────────────────────────────────────
+const CAFE_NAME = 'Blacklist Coffee Roasters';
+
+fetch(`/api/checkin/${encodeURIComponent(CAFE_NAME)}`)
+    .then(r => r.json())
+    .then(data => { updateCheckinUI(data.checked_in, data.total); })
+    .catch(() => { updateCheckinUI(false, 0); });
+
+function toggleCheckin(cafeName) {
+    fetch(`/api/checkin/${encodeURIComponent(cafeName)}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            updateCheckinUI(data.checked_in, data.total);
+            showToast(
+                data.checked_in
+                    ? `Checked in at ${cafeName} ✓`
+                    : `Checked out of ${cafeName}`,
+                'success'
+            );
+        });
+}
+
+function updateCheckinUI(checkedIn, total) {
+    const btn   = document.getElementById('checkin-btn');
+    const label = document.getElementById('checkin-label');
+    const count = document.getElementById('checkin-count-text');
+    if (checkedIn) {
+        btn.classList.add('checked-in');
+        label.textContent = 'Check Out';
+        btn.querySelector('i').className = 'bi bi-geo-alt-fill';
+    } else {
+        btn.classList.remove('checked-in');
+        label.textContent = 'Check In';
+        btn.querySelector('i').className = 'bi bi-geo-alt';
+    }
+    if (count) {
+        count.textContent = total > 0
+            ? `${total} person${total > 1 ? 's' : ''} here now`
+            : '';
+    }
+}
+
 // ── Dynamic rating summary ────────────────────────────────────
 fetch('/api/cafe-stats/Blacklist Coffee Roasters')
     .then(r => r.json())
     .then(data => {
         if (data.count === 0) return;
 
-        // Update hero pill
         const pill = document.getElementById('hero-rating-pill');
         pill.style.display = 'flex';
         document.getElementById('hero-avg').textContent   = data.average;
@@ -190,10 +250,8 @@ fetch('/api/cafe-stats/Blacklist Coffee Roasters')
         document.getElementById('hero-count').textContent =
             `${data.count} review${data.count > 1 ? 's' : ''}`;
 
-        // Show summary section
         const section = document.getElementById('cafe-rating-summary');
         section.style.display = 'flex';
-
         document.getElementById('cafe-avg-score').textContent = data.average;
         document.getElementById('cafe-avg-stars').textContent =
             '★'.repeat(Math.round(data.average)) +
@@ -201,7 +259,6 @@ fetch('/api/cafe-stats/Blacklist Coffee Roasters')
         document.getElementById('cafe-review-count').textContent =
             `${data.count} review${data.count > 1 ? 's' : ''}`;
 
-        // Rating bars
         const bars = document.getElementById('cafe-rating-bars');
         bars.innerHTML = [5,4,3,2,1].map(star => {
             const count = data.breakdown[star] || 0;
@@ -217,8 +274,7 @@ fetch('/api/cafe-stats/Blacklist Coffee Roasters')
                     </div>
                     <span style="color:var(--muted);min-width:24px;
                         text-align:right;">${count}</span>
-                </div>
-            `;
+                </div>`;
         }).join('');
     })
     .catch(() => {});

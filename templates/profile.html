@@ -385,6 +385,9 @@
             ">
                 ✏️ Edit Profile
             </button>
+            <button onclick="shareProfile()" class="share-profile-btn">
+    <i class="bi bi-share"></i> Share Profile
+</button>
             {% if current_user.avatar %}
             <button onclick="removeAvatar()" style="
                 background:none;
@@ -607,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-    // ── Modal close ────────────────────────────────────────────
+// ── Modal close ────────────────────────────────────────────
     document.getElementById('close-modal')?.addEventListener('click', () => {
         document.getElementById('post-modal').classList.add('hidden');
     });
@@ -615,5 +618,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('post-modal').classList.add('hidden');
     });
 });
+
+function shareProfile() {
+    const url = `${window.location.origin}/user/${window.currentUser}`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Profile link copied ✓', 'success');
+        });
+    } else {
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Profile link copied ✓', 'success');
+    }
+}
 </script>
 {% endblock %}

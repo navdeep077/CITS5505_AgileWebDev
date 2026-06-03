@@ -389,81 +389,80 @@ function loadTrending() {
         fetch('/api/posts/trending').then(res => res.json()),
         fetch('/api/cafes/rated').then(res => res.json()).catch(() => [])
     ])
-        .then(([posts, cafes]) => {
-            posts = Array.isArray(posts) ? posts : [];
-            cafes = Array.isArray(cafes) ? cafes : [];
-            let html = '';
+    .then(([posts, cafes]) => {
+        posts = Array.isArray(posts) ? posts : [];
+        cafes = Array.isArray(cafes) ? cafes : [];
+        let html = '';
 
+        html += `
+            <h5 style="font-weight:700;margin-bottom:1rem;color:var(--text);">
+                <i class="bi bi-fire" style="color:var(--caramel)"></i>
+                Most Liked This Week
+            </h5>`;
+
+        if (posts.length === 0) {
             html += `
-                <h5 style="font-weight:700;margin-bottom:1rem;color:var(--text);">
-                    <i class="bi bi-fire" style="color:var(--caramel)"></i>
-                    Most Liked This Week
-                </h5>`;
-
-            if (posts.length === 0) {
-                html += `
-                    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;">
-                        No posts this week yet
-                    </p>`;
-            } else {
-                html += `<div style="margin-bottom:1.5rem;">`;
-                html += posts.map((p, i) => `
-                    <div style="
-                        display:flex;align-items:center;gap:12px;
-                        padding:10px 0;
-                        border-bottom:1px solid rgba(196,122,43,0.1);
-                        cursor:pointer;
-                    " onclick='openExplorePost(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
-                        <span style="
-                            font-size:1rem;font-weight:700;
-                            color:var(--caramel);min-width:24px;
-                            text-align:center;">
-                            ${i + 1}
-                        </span>
-                        ${p.image
-                            ? `<img src="${p.image}"
-                                style="width:48px;height:48px;
-                                       object-fit:cover;border-radius:8px;
-                                       flex-shrink:0;">`
-                            : `<div style="
-                                width:48px;height:48px;
-                                background:linear-gradient(135deg,
-                                    var(--roast),var(--caramel));
-                                border-radius:8px;flex-shrink:0;"></div>`
-                        }
-                        <div style="flex:1;min-width:0;">
-                            <div style="
-                                font-size:0.85rem;font-weight:700;
-                                color:var(--text);">
-                                ${p.username}
-                            </div>
-                            <div style="
-                                font-size:0.8rem;color:var(--muted);
-                                white-space:nowrap;overflow:hidden;
-                                text-overflow:ellipsis;">
-                                ${p.text}
-                            </div>
+                <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;">
+                    No posts this week yet
+                </p>`;
+        } else {
+            html += `<div style="margin-bottom:1.5rem;">`;
+            html += posts.map((p, i) => `
+                <div style="
+                    display:flex;align-items:center;gap:12px;
+                    padding:10px 0;
+                    border-bottom:1px solid rgba(196,122,43,0.1);
+                    cursor:pointer;
+                " onclick='openExplorePost(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+                    <span style="
+                        font-size:1rem;font-weight:700;
+                        color:var(--caramel);min-width:24px;
+                        text-align:center;">
+                        ${i + 1}
+                    </span>
+                    ${p.image
+                        ? `<img src="${p.image}"
+                            style="width:48px;height:48px;
+                                   object-fit:cover;border-radius:8px;
+                                   flex-shrink:0;">`
+                        : `<div style="
+                            width:48px;height:48px;
+                            background:linear-gradient(135deg,var(--roast),var(--caramel));
+                            border-radius:8px;flex-shrink:0;"></div>`
+                    }
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:0.85rem;font-weight:700;color:var(--text);">
+                            ${p.username}
                         </div>
                         <div style="
-                            font-size:0.85rem;color:var(--caramel);
-                            font-weight:700;white-space:nowrap;">
-                            <i class="bi bi-heart-fill"></i> ${p.likes}
+                            font-size:0.8rem;color:var(--muted);
+                            white-space:nowrap;overflow:hidden;
+                            text-overflow:ellipsis;">
+                            ${p.text}
                         </div>
                     </div>
-                `).join('');
-                html += `</div>`;
-            }
+                    <div style="
+                        font-size:0.85rem;color:var(--caramel);
+                        font-weight:700;white-space:nowrap;">
+                        <i class="bi bi-heart-fill"></i> ${p.likes}
+                    </div>
+                </div>
+            `).join('');
+            html += `</div>`;
+        }
 
+        html += `
+            <h5 style="font-weight:700;margin:1.5rem 0 1rem;color:var(--text);">
+                <i class="bi bi-cup-hot" style="color:var(--caramel)"></i>
+                Top Cafes
+            </h5>`;
+
+        if (cafes.length === 0) {
             html += `
-                <h5 style="font-weight:700;margin:1.5rem 0 1rem;color:var(--text);">
-                    <i class="bi bi-cup-hot" style="color:var(--caramel)"></i>
-                    Top Cafes
-                </h5>`;
-
-            if (cafes.length === 0) {
-                html += `<p style="color:var(--muted);font-size:0.9rem;">No cafe reviews yet</p>`;
-            }
-
+                <p style="color:var(--muted);font-size:0.9rem;">
+                    No cafe reviews yet
+                </p>`;
+        } else {
             cafes.forEach(cafe => {
                 html += `
                     <div style="
@@ -479,52 +478,36 @@ function loadTrending() {
                                 ${cafe.name}
                             </div>
                             <div style="font-size:0.8rem;color:var(--muted);">
-                                <i class="bi bi-geo-alt"
-                                   style="color:var(--caramel)"></i>
-                                ${cafe.location}
+                                <i class="bi bi-geo-alt" style="color:var(--caramel)"></i>
+                                ${cafe.location || ''}
                                 &nbsp;•&nbsp;
-                                <i class="bi bi-star-fill"
-                                   style="color:var(--caramel)"></i>
+                                <i class="bi bi-star-fill" style="color:var(--caramel)"></i>
                                 ${cafe.rating}
-                            </div>
-                            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
-                                ${(cafe.tags || []).map(t =>
-                                    `<span style="
-                                        background:rgba(196,122,43,0.1);
-                                        color:var(--caramel);
-                                        padding:2px 8px;
-                                        border-radius:20px;
-                                        font-size:0.72rem;
-                                        font-weight:600;">
-                                        ${t}
-                                    </span>`
-                                ).join('')}
+                                &nbsp;•&nbsp;
+                                <i class="bi bi-chat-square-text" style="color:var(--caramel)"></i>
+                                ${cafe.count} review${cafe.count > 1 ? 's' : ''}
                             </div>
                         </div>
-                        <a href="/shop/${cafe.route.replace('shop_','')}"
+                        <a href="/shop/${(cafe.route || '').replace('shop_','')}"
                            style="
-                               background:var(--caramel);
-                               color:white;
-                               padding:8px 18px;
-                               border-radius:8px;
-                               text-decoration:none;
-                               font-size:0.82rem;
-                               font-weight:700;
-                               white-space:nowrap;
-                               flex-shrink:0;">
+                               background:var(--caramel);color:white;
+                               padding:8px 18px;border-radius:8px;
+                               text-decoration:none;font-size:0.82rem;
+                               font-weight:700;white-space:nowrap;flex-shrink:0;">
                             View
                         </a>
                     </div>
                 `;
             });
+        }
 
-            list.innerHTML = html;
-        })
-        .catch(err => {
-            console.error('Trending error:', err);
-            list.innerHTML = `
-                <p style="color:var(--muted);padding:1rem;">
-                    Could not load trending
-                </p>`;
-        });
+        list.innerHTML = html;
+    })
+    .catch(err => {
+        console.error('Trending error:', err);
+        list.innerHTML = `
+            <p style="color:var(--muted);padding:1rem;">
+                Could not load trending
+            </p>`;
+    });
 }

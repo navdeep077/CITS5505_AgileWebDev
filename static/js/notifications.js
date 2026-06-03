@@ -40,16 +40,18 @@ function loadNotifications() {
 
             container.innerHTML = notifs.map(n => {
                 const icon = {
-                    'like':    '❤️',
-                    'comment': '💬',
-                    'follow':  '👤'
-                }[n.type] || '🔔';
+    'like':    '❤️',
+    'comment': '💬',
+    'follow':  '👤',
+    'mention': '📢'
+}[n.type] || '🔔';
 
                 const message = {
-                    'like':    'liked your post',
-                    'comment': 'commented on your post',
-                    'follow':  'started following you'
-                }[n.type] || 'interacted with you';
+    'like':    'liked your post',
+    'comment': 'commented on your post',
+    'follow':  'started following you',
+    'mention': 'mentioned you in a post'
+}[n.type] || 'interacted with you';
 
                 const timeAgo = getTimeAgo(n.created_at);
 
