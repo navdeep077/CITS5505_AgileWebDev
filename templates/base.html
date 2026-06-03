@@ -138,6 +138,11 @@
 <div class="mobile-top-bar d-flex d-lg-none">
     <span class="mobile-brand">☕ Coffee Hub</span>
     <div class="d-flex gap-2 align-items-center">
+        {% if session.get('user') %}
+        <a href="{{ url_for('search_page') }}" class="nav-icon-btn" title="Search">
+            <i class="bi bi-search"></i>
+        </a>
+        {% endif %}
         <button class="nav-icon-btn" id="dark-mode-toggle-mobile">
             <i class="bi bi-moon"></i>
         </button>

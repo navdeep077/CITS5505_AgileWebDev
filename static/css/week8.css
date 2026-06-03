@@ -477,3 +477,8 @@
         display: none;
     }
 }
+
+    .search-result-row {
+        width: 100%;
+        box-sizing: border-box;
+    }

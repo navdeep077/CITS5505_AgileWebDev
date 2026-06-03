@@ -12,32 +12,27 @@
     <h1><i class="bi bi-search" style="color:var(--caramel)"></i> Search</h1>
     <div style="margin-top:1rem;max-width:480px;margin-left:auto;margin-right:auto;">
         <div class="search-page-bar">
-            <i class="bi bi-search"></i>
+            <i class="bi bi-search" onclick="runSearch(document.getElementById('search-page-input').value.trim())"
+               style="cursor:pointer;"></i>
             <input
                 type="text"
                 id="search-page-input"
                 placeholder="Search users or cafes..."
                 value="{{ query }}"
-                autofocus>
+                autocomplete="off">
         </div>
     </div>
 </div>
 
 <div class="container" style="max-width:720px;margin-top:2rem;">
 
-    <!-- Users results -->
+<!-- Users results -->
     <div id="search-users-section" style="display:none;">
-        <h5 style="font-weight:700;margin-bottom:1rem;">
-            <i class="bi bi-people" style="color:var(--caramel)"></i> People
-        </h5>
         <div id="search-users-list"></div>
     </div>
 
     <!-- Cafes results -->
-    <div id="search-cafes-section" style="display:none;margin-top:1.5rem;">
-        <h5 style="font-weight:700;margin-bottom:1rem;">
-            <i class="bi bi-cup-hot" style="color:var(--caramel)"></i> Cafes
-        </h5>
+    <div id="search-cafes-section" style="display:none;margin-top:1rem;">
         <div id="search-cafes-list"></div>
     </div>
 
@@ -60,9 +55,27 @@ let searchTimer;
 // Track follow state per username
 const followState = {};
 
-searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => runSearch(searchInput.value.trim()), 300);
+// Works on all devices including mobile
+['input', 'keyup', 'change'].forEach(event => {
+    searchInput.addEventListener(event, () => {
+        clearTimeout(searchTimer);
+        const q = searchInput.value.trim();
+        if (q.length === 0) {
+            document.getElementById('search-empty').style.display = 'block';
+            document.getElementById('search-users-section').style.display = 'none';
+            document.getElementById('search-cafes-section').style.display = 'none';
+            return;
+        }
+        searchTimer = setTimeout(() => runSearch(q), 400);
+    });
+});
+
+// Search on Enter key
+searchInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+        clearTimeout(searchTimer);
+        runSearch(searchInput.value.trim());
+    }
 });
 
 // Run immediately if query in URL
@@ -185,8 +198,7 @@ function runSearch(query) {
                                 <i class="bi bi-star-fill"
                                    style="color:var(--caramel);"></i>
                                 ${c.rating}
-                                &nbsp;•&nbsp;
-                                ${c.tags.join(', ')}
+                                 ${c.tags ? `&nbsp;•&nbsp;${c.tags.join(', ')}` : ''}
                             </div>
                         </div>
                         <i class="bi bi-chevron-right"
