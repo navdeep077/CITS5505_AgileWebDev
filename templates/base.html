@@ -79,6 +79,11 @@
                 <i class="bi bi-compass"></i>
             </a>
 
+            <!-- Map -->
+            <a href="{{ url_for('cafe_map') }}" class="nav-icon-btn" title="Cafe Map">
+                <i class="bi bi-map"></i>
+            </a>
+
 
             <!-- Bookmarks -->
             <a href="{{ url_for('bookmarks') }}" class="nav-icon-btn" title="Bookmarks">
@@ -198,9 +203,9 @@
         <i class="bi bi-house-fill"></i>
         <span>Home</span>
     </a>
-    <a href="{{ url_for('brew') }}" class="mobile-nav-item">
-        <i class="bi bi-cup-hot-fill"></i>
-        <span>Brew</span>
+    <a href="{{ url_for('cafe_map') }}" class="mobile-nav-item">
+        <i class="bi bi-map-fill"></i>
+        <span>Map</span>
     </a>
     <a href="{{ url_for('messages_page') }}" class="mobile-nav-item">
         <i class="bi bi-chat-dots-fill"></i>

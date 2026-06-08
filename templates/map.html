@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% block title %}Cafe Map | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+#cafe-map {
+    height: calc(100vh - 130px);
+    width: 100%;
+    z-index: 1;
+    border-radius: 0;
+}
+
+.map-wrap {
+    position: relative;
+}
+
+/* Filter bar over map */
+.map-filter-bar {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0 1rem;
+    pointer-events: none;
+}
+
+.map-filter-btn {
+    pointer-events: all;
+    background: white;
+    border: 1.5px solid rgba(196,122,43,0.3);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text, #1a0e00);
+    font-family: inherit;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: all 0.2s;
+}
+
+.map-filter-btn.active,
+.map-filter-btn:hover {
+    background: var(--caramel, #c47a2b);
+    color: white;
+    border-color: var(--caramel, #c47a2b);
+}
+
+/* Custom popup */
+.cafe-popup {
+    min-width: 200px;
+}
+
+.cafe-popup-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a0e00;
+    margin-bottom: 4px;
+}
+
+.cafe-popup-location {
+    font-size: 0.78rem;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.cafe-popup-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.cafe-popup-tag {
+    background: rgba(196,122,43,0.1);
+    color: #c47a2b;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.cafe-popup-status {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.cafe-popup-status.open { color: #2e7d32; }
+.cafe-popup-status.closed { color: #c62828; }
+
+.cafe-popup-btn {
+    display: block;
+    background: #c47a2b;
+    color: white;
+    text-align: center;
+    padding: 7px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+/* Near me button */
+.near-me-btn {
+    position: absolute;
+    bottom: 100px;
+    right: 12px;
+    z-index: 1000;
+    background: white;
+    border: 1.5px solid rgba(196,122,43,0.3);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-size: 1.1rem;
+    color: var(--caramel, #c47a2b);
+    transition: all 0.2s;
+}
+
+.near-me-btn:hover {
+    background: var(--caramel, #c47a2b);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    #cafe-map {
+        height: calc(100vh - 180px);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-wrap">
+
+    <!-- Filter chips over map -->
+    <div class="map-filter-bar">
+        <button class="map-filter-btn active" onclick="filterMap('all', this)">
+            All Cafes
+        </button>
+        <button class="map-filter-btn" onclick="filterMap('open', this)">
+            Open Now
+        </button>
+        <button class="map-filter-btn" onclick="filterMap('pet', this)">
+            Pet Friendly
+        </button>
+        <button class="map-filter-btn" onclick="filterMap('cold_brew', this)">
+            Cold Brew
+        </button>
+        <button class="map-filter-btn" onclick="filterMap('pour_over', this)">
+            Pour Over
+        </button>
+    </div>
+
+    <!-- Near me button -->
+    <button class="near-me-btn" onclick="locateMe()" title="Near me">
+        <i class="bi bi-geo-alt-fill"></i>
+    </button>
+
+    <!-- Map container -->
+    <div id="cafe-map"></div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const CAFES = {{ cafes | tojson }};
+const CAFE_STATUS = {};
+
+// ── Init map centred on Perth ─────────────────────────────────
+const map = L.map('cafe-map', {
+    center: [-31.9505, 115.8605],
+    zoom: 13,
+    zoomControl: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    maxZoom: 19
+}).addTo(map);
+
+// ── Cafe coordinates ──────────────────────────────────────────
+const CAFE_COORDS = {
+    'Blacklist Coffee Roasters': [-31.9872, 115.9441],
+    'La Veen Coffee':            [-31.9505, 115.8605],
+    'Venn Coffee':               [-31.9497, 115.8290],
+    'Harvest Espresso':          [-31.9358, 115.8445],
+    'Telegram Cafe':             [-31.9490, 115.8534],
+    'Satchmo':                   [-31.9312, 115.8697],
+    'Mary Street Bakery':        [-31.9448, 115.8543]
+};
+
+// ── Custom coffee marker ──────────────────────────────────────
+function makeIcon(isOpen) {
+    return L.divIcon({
+        className: '',
+        html: `<div style="
+            background:${isOpen ? '#c47a2b' : '#888'};
+            color:white;
+            width:36px;height:36px;
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            border:3px solid white;
+            box-shadow:0 2px 8px rgba(0,0,0,0.3);
+            display:flex;align-items:center;justify-content:center;">
+            <span style="transform:rotate(45deg);font-size:1rem;">☕</span>
+        </div>`,
+        iconSize:   [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor:[0, -36]
+    });
+}
+
+// ── Load cafe status then render markers ──────────────────────
+let allMarkers = [];
+let currentFilter = 'all';
+
+fetch('/api/cafe-status')
+    .then(r => r.json())
+    .then(statuses => {
+        Object.assign(CAFE_STATUS, statuses);
+        renderMarkers('all');
+    })
+    .catch(() => renderMarkers('all'));
+
+function renderMarkers(filter) {
+    // Remove existing markers
+    allMarkers.forEach(m => map.removeLayer(m));
+    allMarkers = [];
+
+    CAFES.forEach(cafe => {
+        const coords = CAFE_COORDS[cafe.name];
+        if (!coords) return;
+
+        const status = CAFE_STATUS[cafe.name];
+        const isOpen = status ? status.is_open : cafe.open;
+
+        // Apply filter
+        if (filter === 'open'      && !isOpen)       return;
+        if (filter === 'pet'       && !cafe.pet)      return;
+        if (filter === 'cold_brew' && !cafe.cold_brew) return;
+        if (filter === 'pour_over' && !cafe.pour_over) return;
+
+        const statusText = status
+            ? (isOpen
+                ? (status.closes_in
+                    ? `Open · Closes in ${status.closes_in}`
+                    : `Open · Closes ${status.closes}`)
+                : `Closed · Opens ${status.opens}`)
+            : (isOpen ? 'Open Now' : 'Closed');
+
+        const tagsHtml = cafe.tags.map(t =>
+            `<span class="cafe-popup-tag">${t}</span>`
+        ).join('');
+
+        const popup = L.popup({ maxWidth: 260 }).setContent(`
+            <div class="cafe-popup">
+                <div class="cafe-popup-name">${cafe.name}</div>
+                <div class="cafe-popup-location">
+                    <i class="bi bi-geo-alt" style="color:#c47a2b"></i>
+                    ${cafe.location}
+                </div>
+                <div class="cafe-popup-status ${isOpen ? 'open' : 'closed'}">
+                    <i class="bi bi-circle-fill"
+                       style="font-size:0.5rem;vertical-align:middle;"></i>
+                    ${statusText}
+                </div>
+                <div class="cafe-popup-tags">${tagsHtml}</div>
+                <div style="font-size:0.78rem;color:#666;margin-bottom:4px;">
+                    <i class="bi bi-star-fill" style="color:#c47a2b"></i>
+                    ${cafe.rating} · ${cafe.hours}
+                </div>
+                <a href="/shop/${cafe.route.replace('shop_','')}"
+                   class="cafe-popup-btn">
+                   View Cafe →
+                </a>
+            </div>
+        `);
+
+        const marker = L.marker(coords, { icon: makeIcon(isOpen) })
+            .addTo(map)
+            .bindPopup(popup);
+
+        allMarkers.push(marker);
+    });
+}
+
+function filterMap(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.map-filter-btn').forEach(b =>
+        b.classList.remove('active'));
+    btn.classList.add('active');
+    renderMarkers(filter);
+}
+
+// ── Near me / geolocation ─────────────────────────────────────
+let userMarker = null;
+
+function locateMe() {
+    if (!navigator.geolocation) {
+        showToast('Geolocation not supported', 'error');
+        return;
+    }
+    showToast('Finding your location...', 'info');
+    navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        map.setView([lat, lng], 15);
+
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: '',
+                html: `<div style="
+                    background:#2196f3;color:white;
+                    width:16px;height:16px;
+                    border-radius:50%;
+                    border:3px solid white;
+                    box-shadow:0 2px 8px rgba(33,150,243,0.5);">
+                </div>`,
+                iconSize:   [16, 16],
+                iconAnchor: [8, 8]
+            })
+        }).addTo(map).bindPopup('You are here').openPopup();
+
+        // Find nearest cafe
+        let nearest = null;
+        let minDist = Infinity;
+        CAFES.forEach(cafe => {
+            const coords = CAFE_COORDS[cafe.name];
+            if (!coords) return;
+            const d = Math.sqrt(
+                Math.pow(coords[0] - lat, 2) +
+                Math.pow(coords[1] - lng, 2)
+            );
+            if (d < minDist) { minDist = d; nearest = cafe; }
+        });
+
+        if (nearest) {
+            showToast(`Nearest cafe: ${nearest.name}`, 'success');
+        }
+
+    }, () => {
+        showToast('Could not get your location', 'error');
+    });
+}
+</script>
+{% endblock %}
