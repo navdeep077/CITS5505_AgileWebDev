@@ -403,10 +403,19 @@
     </div>
 
     <!-- STATS ROW -->
+    <!-- STATS ROW -->
     <div class="own-stats-row">
         <div class="own-stat">
             <span class="own-stat-number" id="posts-count">0</span>
             <span class="own-stat-label">Posts</span>
+        </div>
+        <div class="own-stat" style="cursor:pointer;" onclick="showFollowList('followers')">
+            <span class="own-stat-number" id="stat-followers">0</span>
+            <span class="own-stat-label">Followers</span>
+        </div>
+        <div class="own-stat" style="cursor:pointer;" onclick="showFollowList('following')">
+            <span class="own-stat-number" id="stat-following">0</span>
+            <span class="own-stat-label">Following</span>
         </div>
         <div class="own-stat">
             <span class="own-stat-number" id="stat-likes">0</span>
@@ -557,7 +566,25 @@
         </button>
     </div>
 </div>
-
+<!-- FOLLOWERS/FOLLOWING MODAL -->
+<div id="follow-list-modal" style="
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.5);z-index:2000;
+    align-items:center;justify-content:center;">
+    <div style="
+        background:var(--surface,#fff);border-radius:16px;
+        width:90%;max-width:400px;max-height:70vh;
+        overflow-y:auto;padding:1.5rem;">
+        <div style="display:flex;justify-content:space-between;
+            align-items:center;margin-bottom:1rem;">
+            <h5 id="follow-list-title" style="margin:0;font-weight:700;">Followers</h5>
+            <button onclick="closeFollowList()"
+                style="background:none;border:none;font-size:1.4rem;
+                cursor:pointer;color:var(--muted);">×</button>
+        </div>
+        <div id="follow-list-content"></div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -683,6 +710,62 @@ function shareProfile() {
         document.body.removeChild(input);
         showToast('Profile link copied ✓', 'success');
     }
+}
+
+// ── Followers/Following counts ────────────────────────────────
+fetch(`/api/followers/${window.currentUser}`)
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('stat-followers').textContent = data.length;
+    });
+fetch(`/api/following/${window.currentUser}`)
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('stat-following').textContent = data.length;
+    });
+
+function showFollowList(type) {
+    const modal   = document.getElementById('follow-list-modal');
+    const title   = document.getElementById('follow-list-title');
+    const content = document.getElementById('follow-list-content');
+    modal.style.display = 'flex';
+    title.textContent   = type === 'followers' ? 'Followers' : 'Following';
+    content.innerHTML   = '<p style="color:var(--muted);text-align:center;">Loading...</p>';
+
+    const url = type === 'followers'
+        ? `/api/followers/${window.currentUser}`
+        : `/api/following/${window.currentUser}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(users => {
+            if (users.length === 0) {
+                content.innerHTML = `<p style="color:var(--muted);text-align:center;">
+                    No ${type} yet</p>`;
+                return;
+            }
+            content.innerHTML = users.map(u => `
+                <a href="/user/${u.username}" style="
+                    display:flex;align-items:center;gap:12px;
+                    padding:10px 0;border-bottom:1px solid rgba(196,122,43,0.08);
+                    text-decoration:none;color:var(--text,#1a0e00);">
+                    ${u.avatar
+                        ? `<img src="${u.avatar}" style="width:40px;height:40px;
+                            border-radius:50%;object-fit:cover;">`
+                        : `<div style="width:40px;height:40px;border-radius:50%;
+                            background:var(--caramel);color:white;display:flex;
+                            align-items:center;justify-content:center;font-weight:700;">
+                            ${u.username.charAt(0).toUpperCase()}
+                           </div>`
+                    }
+                    <span style="font-weight:600;">${u.username}</span>
+                </a>
+            `).join('');
+        });
+}
+
+function closeFollowList() {
+    document.getElementById('follow-list-modal').style.display = 'none';
 }
 </script>
 {% endblock %}

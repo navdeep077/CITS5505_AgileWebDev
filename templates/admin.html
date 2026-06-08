@@ -133,7 +133,12 @@
                         {% if user.is_admin %}
                             <span style="color:#4caf50;font-weight:600;">✅ Admin</span>
                         {% else %}
-                            <span style="color:var(--muted);">—</span>
+                            <button onclick="banUser('{{ user.username }}')"
+                                style="background:none;border:1px solid rgba(229,57,53,0.3);
+                                border-radius:6px;padding:3px 10px;font-size:0.75rem;
+                                color:#e53935;cursor:pointer;">
+                                Ban
+                            </button>
                         {% endif %}
                     </td>
                 </tr>
@@ -159,6 +164,16 @@ function dismissReport(reportId) {
         .then(() => {
             document.getElementById(`report-${reportId}`)?.remove();
             showToast('Report dismissed', 'success');
+        });
+}
+
+function banUser(username) {
+    if (!confirm(`Ban ${username}? They will not be able to log in.`)) return;
+    fetch(`/api/admin/ban-user/${username}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            showToast(data.message || 'User banned', 'info');
+            setTimeout(() => location.reload(), 1000);
         });
 }
 </script>

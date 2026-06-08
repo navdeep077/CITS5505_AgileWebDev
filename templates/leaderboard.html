@@ -4,6 +4,17 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/week5.css') }}">
+<style>
+.search-page-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface, #fff);
+    border: 1.5px solid rgba(196,122,43,0.2);
+    border-radius: 12px;
+    padding: 10px 16px;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -18,19 +29,29 @@
 
 <div class="container" style="max-width:720px;margin-top:2rem;">
 
+    <!-- Search -->
+    <div style="max-width:600px;margin:0 auto 1.5rem;">
+        <div class="search-page-bar">
+            <i class="bi bi-search"></i>
+            <input type="text" id="leaderboard-search"
+                   placeholder="Search users..."
+                   oninput="filterLeaderboard(this.value)"
+                   style="border:none;outline:none;background:none;
+                          flex:1;font-family:inherit;font-size:0.9rem;
+                          color:var(--text,#1a0e00);">
+        </div>
+    </div>
+
     <!-- Leaderboard list -->
     <div id="leaderboard-list">
         <div class="skeleton-post">
-            <div class="skeleton skeleton-line"
-                 style="height:60px;border-radius:12px;"></div>
+            <div class="skeleton skeleton-line" style="height:60px;border-radius:12px;"></div>
         </div>
         <div class="skeleton-post">
-            <div class="skeleton skeleton-line"
-                 style="height:60px;border-radius:12px;"></div>
+            <div class="skeleton skeleton-line" style="height:60px;border-radius:12px;"></div>
         </div>
         <div class="skeleton-post">
-            <div class="skeleton skeleton-line"
-                 style="height:60px;border-radius:12px;"></div>
+            <div class="skeleton skeleton-line" style="height:60px;border-radius:12px;"></div>
         </div>
     </div>
 
@@ -60,7 +81,6 @@
             text-decoration:none;
             font-weight:700;
             font-size:0.9rem;
-            transition:opacity 0.2s;
         ">
             Take Quiz →
         </a>
@@ -72,4 +92,13 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
+<script>
+function filterLeaderboard(query) {
+    const rows = document.querySelectorAll('.leaderboard-row');
+    rows.forEach(row => {
+        const name = row.querySelector('.leaderboard-name a')?.textContent?.toLowerCase() || '';
+        row.style.display = name.includes(query.toLowerCase()) ? '' : 'none';
+    });
+}
+</script>
 {% endblock %}

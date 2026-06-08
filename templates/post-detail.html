@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Post by {{ post.author.username }} | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/week3.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;margin:2rem auto;padding:0 1rem;">
+    <a href="{{ url_for('home') }}" class="back-home-btn" style="margin-bottom:1rem;display:inline-flex;">
+        <i class="bi bi-arrow-left"></i> Back to Feed
+    </a>
+    <div id="post-container"></div>
+</div>
+
+<div id="post-modal" class="post-modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <button id="close-modal" class="close-modal">×</button>
+        <div id="modal-post-container"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.currentUser = "{{ session.get('user', '') }}";
+const postData = {
+    id:         {{ post.id }},
+    username:   "{{ post.author.username }}",
+    avatar:     "{{ post.author.avatar or '' }}",
+    text:       `{{ post.text | replace('`', '\\`') or '' }}`,
+    shop:       "{{ post.shop or '' }}",
+    image:      "{{ post.image or '' }}",
+    likes:      {{ post.likes or 0 }},
+    view_count: {{ post.view_count or 0 }},
+    liked_by:   {{ post.liked_by.split(',') | tojson if post.liked_by else '[]' }},
+    hashtags:   {{ post.hashtags.split(',') | tojson if post.hashtags else '[]' }},
+    comments:   [
+        {% for c in post.comments %}
+        {
+            id:       {{ c.id }},
+            username: "{{ c.username }}",
+            text:     `{{ c.text | replace('`', '\\`') }}`,
+            time:     "{{ c.created_at.isoformat() }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    created_at: "{{ post.created_at.isoformat() }}"
+};
+</script>
+<script src="{{ url_for('static', filename='js/social.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    renderPost(postData, 'post-container');
+    document.getElementById('close-modal')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
+});
+</script>
+{% endblock %}

@@ -550,6 +550,13 @@ def hashtag_page(tag):
     return render_template("hashtag.html", tag=tag)
 
 
+@app.route("/post/<int:post_id>")
+@login_required
+def post_detail(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template("post-detail.html", post=post)
+
+
 @app.route("/offline")
 def offline():
     return render_template("offline.html")
@@ -1851,6 +1858,19 @@ def publish_scheduled():
         post.is_published = True
     db.session.commit()
     return jsonify({'published': len(due)})
+
+@csrf.exempt
+@app.route("/api/admin/ban-user/<username>", methods=["POST"])
+def ban_user(username):
+    current = get_current_user()
+    if not current or not current.is_admin:
+        return jsonify({"error": "Unauthorized"}), 403
+    user = User.query.filter_by(username=username).first_or_404()
+    if user.is_admin:
+        return jsonify({"error": "Cannot ban admin"}), 400
+    user.is_verified = False
+    db.session.commit()
+    return jsonify({"message": f"{username} banned"})
 
 # ── Application Entry Point ───────────────────────────────────────────────────
 
