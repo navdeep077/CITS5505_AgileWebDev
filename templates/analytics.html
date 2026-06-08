@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% block title %}Analytics | Coffee Social Hub{% endblock %}
+
+{% block extra_css %}
+<style>
+.analytics-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 4rem;
+}
+
+.analytics-hero {
+    margin-bottom: 2rem;
+}
+
+.analytics-hero h2 {
+    font-weight: 700;
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+}
+
+.analytics-hero p {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(196,122,43,0.12);
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(26,14,0,0.04);
+}
+
+.stat-card-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--caramel);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-card-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Section titles */
+.section-heading {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text, #1a0e00);
+}
+
+/* Top posts table */
+.posts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    background: var(--surface, #fff);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(196,122,43,0.1);
+    margin-bottom: 2rem;
+}
+
+.posts-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: rgba(196,122,43,0.06);
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.posts-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(196,122,43,0.06);
+    color: var(--text, #1a0e00);
+}
+
+.posts-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Bar chart */
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 120px;
+    background: var(--surface, #fff);
+    border: 1px solid rgba(196,122,43,0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 20px;
+}
+
+.bar {
+    width: 100%;
+    background: rgba(196,122,43,0.2);
+    border-radius: 4px 4px 0 0;
+    transition: background 0.2s;
+    min-height: 2px;
+    cursor: pointer;
+}
+
+.bar.has-data {
+    background: var(--caramel);
+}
+
+.bar:hover {
+    background: #a06020;
+}
+
+.bar-label {
+    font-size: 0.6rem;
+    color: var(--muted);
+    white-space: nowrap;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+}
+
+/* Growth chart */
+.growth-chart {
+    background: var(--surface, #fff);
+    border: 1px solid rgba(196,122,43,0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.growth-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 100px;
+    margin-bottom: 8px;
+}
+
+.growth-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 8px;
+}
+
+.growth-bar-posts {
+    width: 100%;
+    background: var(--caramel);
+    border-radius: 2px 2px 0 0;
+    min-height: 2px;
+}
+
+.growth-bar-follows {
+    width: 100%;
+    background: rgba(196,122,43,0.3);
+    border-radius: 2px 2px 0 0;
+    min-height: 2px;
+}
+
+.best-time-card {
+    background: linear-gradient(135deg, #1a0e00, #3d1f00);
+    border-radius: 14px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.best-time-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.best-time-label {
+    font-size: 0.82rem;
+    opacity: 0.7;
+    margin-bottom: 4px;
+}
+
+.best-time-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--caramel, #c47a2b);
+}
+
+.best-time-desc {
+    font-size: 0.82rem;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .posts-table,
+[data-theme="dark"] .bar-chart,
+[data-theme="dark"] .growth-chart {
+    background: #1e1410;
+    border-color: rgba(224,144,64,0.15);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-wrap">
+
+    <div class="analytics-hero">
+        <h2>
+            <i class="bi bi-bar-chart-line" style="color:var(--caramel)"></i>
+            Analytics
+        </h2>
+        <p>Track your performance and audience growth</p>
+    </div>
+
+    <!-- Overview stats -->
+    <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+            <span class="stat-card-number" id="stat-posts">—</span>
+            <span class="stat-card-label">Posts</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-number" id="stat-likes">—</span>
+            <span class="stat-card-label">Total Likes</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-number" id="stat-views">—</span>
+            <span class="stat-card-label">Post Views</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-number" id="stat-comments">—</span>
+            <span class="stat-card-label">Comments</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-number" id="stat-followers">—</span>
+            <span class="stat-card-label">Followers</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-number" id="stat-profile-views">—</span>
+            <span class="stat-card-label">Profile Views</span>
+        </div>
+    </div>
+
+    <!-- Best time to post -->
+    <div class="section-heading">
+        <i class="bi bi-clock" style="color:var(--caramel)"></i>
+        Best Time to Post
+    </div>
+    <div class="best-time-card" id="best-time-card">
+        <div class="best-time-icon">⏰</div>
+        <div>
+            <div class="best-time-label">Your best posting hour</div>
+            <div class="best-time-value" id="best-time-value">Calculating...</div>
+            <div class="best-time-desc" id="best-time-desc">
+                Based on your post engagement
+            </div>
+        </div>
+    </div>
+
+    <!-- Engagement by hour -->
+    <div class="section-heading">
+        <i class="bi bi-clock-history" style="color:var(--caramel)"></i>
+        Avg Likes by Hour Posted
+    </div>
+    <div class="bar-chart" id="hour-chart">
+        <div style="color:var(--muted);font-size:0.85rem;margin:auto;">
+            Loading...
+        </div>
+    </div>
+
+    <!-- 30 day growth -->
+    <div class="section-heading">
+        <i class="bi bi-graph-up" style="color:var(--caramel)"></i>
+        30-Day Activity
+        <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:8px;">
+            <span style="color:var(--caramel);">■</span> Posts
+            <span style="color:rgba(196,122,43,0.4);margin-left:6px;">■</span> New Followers
+        </span>
+    </div>
+    <div class="growth-chart">
+        <div class="growth-bars" id="growth-bars">
+            <div style="color:var(--muted);font-size:0.85rem;margin:auto;">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Top posts -->
+    <div class="section-heading">
+        <i class="bi bi-trophy" style="color:var(--caramel)"></i>
+        Top Performing Posts
+    </div>
+    <table class="posts-table">
+        <thead>
+            <tr>
+                <th>Post</th>
+                <th>❤️ Likes</th>
+                <th>👁 Views</th>
+                <th>💬 Comments</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody id="top-posts-body">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;">
+                Loading...
+            </td></tr>
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadOverview();
+    loadTopPosts();
+    loadBestTime();
+    loadGrowth();
+});
+
+// ── Overview stats ────────────────────────────────────────────
+function loadOverview() {
+    fetch('/api/analytics/overview')
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('stat-posts').textContent         = d.total_posts;
+            document.getElementById('stat-likes').textContent         = d.total_likes;
+            document.getElementById('stat-views').textContent         = d.total_views;
+            document.getElementById('stat-comments').textContent      = d.total_comments;
+            document.getElementById('stat-followers').textContent     = d.followers;
+            document.getElementById('stat-profile-views').textContent = d.profile_views;
+        });
+}
+
+// ── Top posts ─────────────────────────────────────────────────
+function loadTopPosts() {
+    fetch('/api/analytics/posts')
+        .then(r => r.json())
+        .then(posts => {
+            const tbody = document.getElementById('top-posts-body');
+            if (posts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5"
+                    style="text-align:center;color:var(--muted);padding:2rem;">
+                    No posts yet</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = posts.map(p => `
+                <tr>
+                    <td>
+                        <a href="/post/${p.id}"
+                           style="color:var(--text,#1a0e00);text-decoration:none;
+                                  font-weight:500;">
+                            ${p.text}
+                        </a>
+                    </td>
+                    <td style="font-weight:700;color:var(--caramel);">${p.likes}</td>
+                    <td>${p.views}</td>
+                    <td>${p.comments}</td>
+                    <td style="color:var(--muted);">${p.created}</td>
+                </tr>
+            `).join('');
+        });
+}
+
+// ── Best time to post ─────────────────────────────────────────
+function loadBestTime() {
+    fetch('/api/analytics/best-time')
+        .then(r => r.json())
+        .then(data => {
+            const el   = document.getElementById('best-time-value');
+            const desc = document.getElementById('best-time-desc');
+
+            if (data.best_hour === null) {
+                el.textContent   = 'Not enough data';
+                desc.textContent = 'Post more to see your best time';
+                return;
+            }
+
+            const h    = data.best_hour;
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12  = h > 12 ? h - 12 : h === 0 ? 12 : h;
+            el.textContent   = `${h12}:00 ${ampm}`;
+            desc.textContent = `Posts at this hour get the most engagement`;
+
+            // Draw hour chart
+            const chart    = document.getElementById('hour-chart');
+            const maxVal   = Math.max(...Object.values(data.hours), 1);
+            const allHours = Array.from({length: 24}, (_, i) => i);
+
+            chart.innerHTML = allHours.map(h => {
+                const val = data.hours[h] || 0;
+                const pct = (val / maxVal) * 100;
+                const label = h === 0 ? '12am'
+                    : h < 12 ? `${h}am`
+                    : h === 12 ? '12pm'
+                    : `${h-12}pm`;
+                return `
+                    <div class="bar-col">
+                        <div class="bar ${val > 0 ? 'has-data' : ''}"
+                             style="height:${Math.max(pct, 2)}%"
+                             title="${label}: ${val} avg likes"></div>
+                        <div class="bar-label">${label}</div>
+                    </div>`;
+            }).join('');
+        });
+}
+
+// ── 30-day growth ─────────────────────────────────────────────
+function loadGrowth() {
+    fetch('/api/analytics/growth')
+        .then(r => r.json())
+        .then(data => {
+            const container = document.getElementById('growth-bars');
+            const maxPosts   = Math.max(...data.map(d => d.posts), 1);
+            const maxFollows = Math.max(...data.map(d => d.follows), 1);
+            const maxVal     = Math.max(maxPosts, maxFollows);
+
+            container.innerHTML = data.map(d => `
+                <div class="growth-col" title="${d.date}: ${d.posts} posts, ${d.follows} followers">
+                    <div class="growth-bar-posts"
+                         style="height:${(d.posts / maxVal) * 80}px;"></div>
+                    <div class="growth-bar-follows"
+                         style="height:${(d.follows / maxVal) * 80}px;"></div>
+                </div>
+            `).join('');
+        });
+}
+</script>
+{% endblock %}

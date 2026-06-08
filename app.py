@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView
 from config import Config
 import cloudinary
 import cloudinary.uploader
@@ -444,6 +444,18 @@ def public_profile(username):
     if they_blocked_me:
         return render_template("blocked.html",
             username=username, i_blocked=False)
+
+    # Track profile view
+    existing_view = ProfileView.query.filter_by(
+        profile_id=profile_user.id,
+        viewer_id=current.id
+    ).first()
+    if not existing_view:
+        db.session.add(ProfileView(
+            profile_id=profile_user.id,
+            viewer_id=current.id
+        ))
+        db.session.commit()
 
     posts       = Post.query.filter_by(user_id=profile_user.id)\
         .order_by(Post.created_at.desc()).all()
@@ -2021,6 +2033,125 @@ def unread_message_count():
         is_read=False
     ).count()
     return jsonify({'count': count})
+
+
+# ── Analytics API ─────────────────────────────────────────────────────────────
+
+@app.route('/analytics')
+@login_required
+def analytics_page():
+    return render_template('analytics.html')
+
+
+@app.route('/api/analytics/overview', methods=['GET'])
+def analytics_overview():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    posts         = current.posts
+    total_likes   = sum(p.likes for p in posts)
+    total_views   = sum(p.view_count or 0 for p in posts)
+    total_comments= sum(len(p.comments) for p in posts)
+    followers     = Follow.query.filter_by(followed_id=current.id).count()
+    profile_views = ProfileView.query.filter_by(profile_id=current.id).count()
+
+    return jsonify({
+        'total_posts':    len(posts),
+        'total_likes':    total_likes,
+        'total_views':    total_views,
+        'total_comments': total_comments,
+        'followers':      followers,
+        'profile_views':  profile_views,
+        'avg_likes':      round(total_likes / len(posts), 1) if posts else 0,
+        'avg_views':      round(total_views / len(posts), 1) if posts else 0,
+    })
+
+
+@app.route('/api/analytics/posts', methods=['GET'])
+def analytics_posts():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    posts = Post.query.filter_by(user_id=current.id)\
+        .order_by(Post.likes.desc()).limit(10).all()
+
+    return jsonify([{
+        'id':       p.id,
+        'text':     p.text[:60] + '...' if len(p.text) > 60 else p.text,
+        'likes':    p.likes or 0,
+        'views':    p.view_count or 0,
+        'comments': len(p.comments),
+        'created':  p.created_at.strftime('%d %b')
+    } for p in posts])
+
+
+@app.route('/api/analytics/best-time', methods=['GET'])
+def analytics_best_time():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    posts = Post.query.filter_by(user_id=current.id).all()
+    if not posts:
+        return jsonify({'hours': {}, 'best_hour': None})
+
+    hour_likes = {}
+    for p in posts:
+        h = p.created_at.hour
+        if h not in hour_likes:
+            hour_likes[h] = {'likes': 0, 'count': 0}
+        hour_likes[h]['likes'] += p.likes or 0
+        hour_likes[h]['count'] += 1
+
+    hour_avg = {
+        h: round(v['likes'] / v['count'], 1)
+        for h, v in hour_likes.items()
+    }
+
+    best_hour = max(hour_avg, key=hour_avg.get) if hour_avg else None
+
+    return jsonify({
+        'hours':     hour_avg,
+        'best_hour': best_hour
+    })
+
+
+@app.route('/api/analytics/growth', methods=['GET'])
+def analytics_growth():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    from datetime import date, timedelta
+    today = date.today()
+    data  = []
+
+    for i in range(29, -1, -1):
+        day   = today - timedelta(days=i)
+        start = datetime.combine(day, datetime.min.time())
+        end   = datetime.combine(day, datetime.max.time())
+
+        posts = Post.query.filter(
+            Post.user_id == current.id,
+            Post.created_at >= start,
+            Post.created_at <= end
+        ).count()
+
+        follows = Follow.query.filter(
+            Follow.followed_id == current.id,
+            Follow.created_at >= start,
+            Follow.created_at <= end
+        ).count()
+
+        data.append({
+            'date':    day.strftime('%d %b'),
+            'posts':   posts,
+            'follows': follows
+        })
+
+    return jsonify(data)
 
 
 # ── Application Entry Point ───────────────────────────────────────────────────
