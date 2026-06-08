@@ -501,6 +501,12 @@ def brew():
     return render_template("brew.html")
 
 
+@app.route("/map")
+@login_required
+def cafe_map():
+    return render_template("map.html")
+
+
 @app.route("/explore")
 @login_required
 def explore():
