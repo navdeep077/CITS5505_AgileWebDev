@@ -346,7 +346,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
             <button class="action-btn reaction-trigger-btn"
                     id="react-btn-${postData.id}"
                     onclick="showReactions(${postData.id}); event.stopPropagation();">
-                <span id="my-reaction-${postData.id}">☕</span>
+                <span id="my-reaction-${postData.id}">❤️</span>
                 <span id="react-count-${postData.id}" class="like-count">0</span>
             </button>
             <div class="reaction-picker" id="reactions-${postData.id}"
@@ -355,7 +355,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
                         padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.15);
                         display:none;gap:4px;z-index:100;white-space:nowrap;
                         border:1px solid rgba(196,122,43,0.15);">
-                ${['☕','❤️','😄','😮','😢'].map(e => `
+                ${['❤️','😄','😮','😢','☕'].map(e => `
                     <button onclick="sendReaction(${postData.id}, '${e}'); event.stopPropagation();"
                             style="background:none;border:none;font-size:1.3rem;
                                    cursor:pointer;padding:4px;border-radius:50%;
@@ -365,11 +365,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
                 `).join('')}
             </div>
         </div>
-        <button onclick="likePost(${postData.id}, this)" class="action-btn like-btn" data-liked="${isLiked}">
-            <i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}"
-               style="color:${isLiked ? '#e53935' : 'inherit'}"></i>
-            <span class="like-count">${postData.likes || 0}</span>
-        </button>
+    
         <button onclick="toggleBookmark(${postData.id}, this)" class="action-btn bookmark-btn">
             <i class="bi bi-bookmark"></i>
         </button>
@@ -828,7 +824,7 @@ function sendReaction(postId, emoji) {
         const btn   = document.getElementById(`my-reaction-${postId}`);
         const count = document.getElementById(`react-count-${postId}`);
         if (btn) {
-            btn.textContent = data.action === 'removed' ? '☕' : emoji;
+           btn.textContent = data.action === 'removed' ? '❤️' : emoji;
         }
         if (count) {
             const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
@@ -858,7 +854,7 @@ function loadReactions(postId) {
         .then(data => {
             const btn   = document.getElementById(`my-reaction-${postId}`);
             const count = document.getElementById(`react-count-${postId}`);
-            if (btn && data.my_reaction) btn.textContent = data.my_reaction;
+             if (btn) btn.textContent = data.my_reaction || '❤️';
             if (count) {
                 const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
                 count.textContent = total;
