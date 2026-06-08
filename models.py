@@ -181,7 +181,7 @@ class Post(db.Model):
     is_published = db.Column(db.Boolean, default=True)
     comments     = db.relationship('Comment', backref='post', cascade='all, delete-orphan')
     bookmarks    = db.relationship('Bookmark', backref='post', cascade='all, delete-orphan')
-
+    poll         = db.relationship('Poll', backref='post', cascade='all, delete-orphan', uselist=False)
 
 # ── PROFILE VIEW MODEL ────────────────────────────────────────────────────────
 class ProfileView(db.Model):
@@ -207,6 +207,32 @@ class Comment(db.Model):
     username   = db.Column(db.String(100))
     text       = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ── POLL MODELS ───────────────────────────────────────────────────────────────
+class Poll(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    post_id    = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    question   = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    options    = db.relationship('PollOption', backref='poll', cascade='all, delete-orphan')
+
+
+class PollOption(db.Model):
+    id       = db.Column(db.Integer, primary_key=True)
+    poll_id  = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
+    text     = db.Column(db.String(100), nullable=False)
+    votes    = db.relationship('PollVote', backref='option', cascade='all, delete-orphan')
+
+
+class PollVote(db.Model):
+    id        = db.Column(db.Integer, primary_key=True)
+    option_id = db.Column(db.Integer, db.ForeignKey('poll_option.id'), nullable=False)
+    user_id   = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at= db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (
+        db.UniqueConstraint('option_id', 'user_id', name='unique_poll_vote'),
+    )
 
 
 # ── REACTION MODEL ────────────────────────────────────────────────────────────

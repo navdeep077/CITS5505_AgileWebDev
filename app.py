@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView, Story, Reaction
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView, Story, Reaction, Poll, PollOption, PollVote
 from config import Config
 import cloudinary
 import cloudinary.uploader
@@ -117,6 +117,23 @@ def delete_uploaded_image(image_path):
 
 
 def serialize_post(post):
+    poll_data = None
+    if hasattr(post, 'poll') and post.poll:
+        p = post.poll[0] if isinstance(post.poll, list) else post.poll
+        if p:
+            total = sum(len(o.votes) for o in p.options)
+            poll_data = {
+                'id':       p.id,
+                'question': p.question,
+                'total':    total,
+                'options':  [{
+                    'id':    o.id,
+                    'text':  o.text,
+                    'votes': len(o.votes),
+                    'pct':   round(len(o.votes) / total * 100) if total else 0
+                } for o in p.options]
+            }
+
     return {
         "id":         post.id,
         "username":   post.author.username,
@@ -129,6 +146,7 @@ def serialize_post(post):
         "liked_by":   post.liked_by.split(",") if post.liked_by else [],
         "view_count": post.view_count or 0,
         "hashtags":   post.hashtags.split(",") if post.hashtags else [],
+        "poll":       poll_data,
         "comments": [
             {
                 "id":       c.id,
@@ -1890,6 +1908,109 @@ def ban_user(username):
     db.session.commit()
     return jsonify({"message": f"{username} banned"})
 
+# ── Polls API ─────────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route('/api/polls', methods=['POST'])
+def create_poll():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data     = request.get_json()
+    question = data.get('question', '').strip()
+    options  = data.get('options', [])
+    text     = data.get('text', question)
+
+    if not question:
+        return jsonify({'error': 'Question required'}), 400
+    if len(options) < 2:
+        return jsonify({'error': 'At least 2 options required'}), 400
+    if len(options) > 4:
+        return jsonify({'error': 'Maximum 4 options'}), 400
+
+    post = Post(
+        user_id  = current.id,
+        text     = text,
+        hashtags = ''
+    )
+    db.session.add(post)
+    db.session.flush()
+
+    poll = Poll(post_id=post.id, question=question)
+    db.session.add(poll)
+    db.session.flush()
+
+    for opt_text in options:
+        if opt_text.strip():
+            db.session.add(PollOption(poll_id=poll.id, text=opt_text.strip()))
+
+    db.session.commit()
+    award_xp(current, 'post')
+    return jsonify({'message': 'Poll created', 'post_id': post.id}), 201
+
+
+@app.route('/api/polls/<int:post_id>', methods=['GET'])
+def get_poll(post_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    poll = Poll.query.filter_by(post_id=post_id).first()
+    if not poll:
+        return jsonify({'error': 'No poll'}), 404
+
+    # Check if user voted
+    my_vote = None
+    for opt in poll.options:
+        vote = PollVote.query.filter_by(
+            option_id=opt.id, user_id=current.id
+        ).first()
+        if vote:
+            my_vote = opt.id
+            break
+
+    total_votes = sum(len(opt.votes) for opt in poll.options)
+
+    return jsonify({
+        'id':       poll.id,
+        'question': poll.question,
+        'my_vote':  my_vote,
+        'total':    total_votes,
+        'options':  [{
+            'id':    opt.id,
+            'text':  opt.text,
+            'votes': len(opt.votes),
+            'pct':   round(len(opt.votes) / total_votes * 100) if total_votes else 0
+        } for opt in poll.options]
+    })
+
+
+@csrf.exempt
+@app.route('/api/polls/vote/<int:option_id>', methods=['POST'])
+def vote_poll(option_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    option = PollOption.query.get_or_404(option_id)
+
+    # Check already voted in this poll
+    for opt in option.poll.options:
+        existing = PollVote.query.filter_by(
+            option_id=opt.id, user_id=current.id
+        ).first()
+        if existing:
+            # Remove old vote
+            db.session.delete(existing)
+            break
+
+    db.session.add(PollVote(option_id=option_id, user_id=current.id))
+    db.session.commit()
+
+    return get_poll(option.poll.post_id)
+
+
 # ── Reactions API ─────────────────────────────────────────────────────────────
 
 @csrf.exempt
@@ -2309,6 +2430,23 @@ def analytics_growth():
 
     return jsonify(data)
 
+@csrf.exempt
+@app.route('/api/posts/<int:post_id>/add-image', methods=['POST'])
+def add_post_image(post_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+    post = Post.query.get_or_404(post_id)
+    if post.user_id != current.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    image_file = request.files.get('image')
+    if image_file:
+        try:
+            post.image = save_image_cloudinary(image_file)
+            db.session.commit()
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+    return jsonify({'image': post.image or ''})
 
 # ── Application Entry Point ───────────────────────────────────────────────────
 if __name__ == "__main__":

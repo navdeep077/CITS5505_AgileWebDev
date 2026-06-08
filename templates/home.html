@@ -93,10 +93,57 @@
                     <option value="landscape">Landscape (16:9)</option>
                 </select>
                 <input type="file" id="modal-image" accept="image/*"
-                    onchange="previewImage(event)">
+            onchange="previewImage(event)"
+            style="margin-bottom:14px;">
                 <div class="preview-container">
                     <img id="image-preview">
                 </div>
+                <!-- Poll toggle -->
+                <div style="margin-bottom:12px;">
+                    <button type="button" onclick="togglePollSection()"
+                        style="background:none;border:1.5px solid rgba(196,122,43,0.2);
+                            border-radius:8px;padding:7px 14px;font-size:0.82rem;
+                            cursor:pointer;color:var(--caramel);font-family:inherit;
+                            font-weight:600;">
+                        <i class="bi bi-bar-chart-horizontal"></i> Add Poll
+                    </button>
+                </div>
+
+                <!-- Poll section -->
+                <div id="poll-section" style="display:none;margin-bottom:12px;
+                    background:rgba(196,122,43,0.04);border-radius:10px;padding:12px;
+                    border:1.5px solid rgba(196,122,43,0.15);">
+                    <div style="font-size:0.82rem;font-weight:600;
+                        color:var(--text,#1a0e00);margin-bottom:8px;">
+                        <i class="bi bi-bar-chart-horizontal" style="color:var(--caramel)"></i>
+                        Poll Options
+                    </div>
+                    <input type="text" id="poll-opt-1" placeholder="Option 1"
+                        style="width:100%;padding:6px 10px;border-radius:6px;
+                            border:1.5px solid rgba(196,122,43,0.2);
+                            font-family:inherit;font-size:0.82rem;
+                            background:var(--surface,#fff);color:var(--text,#1a0e00);
+                            margin-bottom:6px;box-sizing:border-box;">
+                    <input type="text" id="poll-opt-2" placeholder="Option 2"
+                        style="width:100%;padding:6px 10px;border-radius:6px;
+                            border:1.5px solid rgba(196,122,43,0.2);
+                            font-family:inherit;font-size:0.82rem;
+                            background:var(--surface,#fff);color:var(--text,#1a0e00);
+                            margin-bottom:6px;box-sizing:border-box;">
+                    <input type="text" id="poll-opt-3" placeholder="Option 3 (optional)"
+                        style="width:100%;padding:6px 10px;border-radius:6px;
+                            border:1.5px solid rgba(196,122,43,0.2);
+                            font-family:inherit;font-size:0.82rem;
+                            background:var(--surface,#fff);color:var(--text,#1a0e00);
+                            margin-bottom:6px;box-sizing:border-box;">
+                    <input type="text" id="poll-opt-4" placeholder="Option 4 (optional)"
+                        style="width:100%;padding:6px 10px;border-radius:6px;
+                            border:1.5px solid rgba(196,122,43,0.2);
+                            font-family:inherit;font-size:0.82rem;
+                            background:var(--surface,#fff);color:var(--text,#1a0e00);
+                            box-sizing:border-box;">
+                </div>
+
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
                     <label style="font-size:0.82rem;color:var(--muted);white-space:nowrap;">
                         <i class="bi bi-clock"></i> Schedule (optional)
