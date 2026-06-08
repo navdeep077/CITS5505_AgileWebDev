@@ -209,6 +209,18 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+# ── REACTION MODEL ────────────────────────────────────────────────────────────
+class Reaction(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    post_id    = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    emoji      = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (
+        db.UniqueConstraint('post_id', 'user_id', name='unique_reaction'),
+    )
+
+
 # ── STORY MODEL ───────────────────────────────────────────────────────────────
 class Story(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
