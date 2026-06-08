@@ -209,6 +209,18 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+# ── STORY MODEL ───────────────────────────────────────────────────────────────
+class Story(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    image      = db.Column(db.String(500), nullable=True)
+    text       = db.Column(db.Text, nullable=True)
+    bg_color   = db.Column(db.String(20), default='#c47a2b')
+    expires_at = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    author     = db.relationship('User', backref='stories')
+
+
 # ── DIRECT MESSAGE MODEL ──────────────────────────────────────────────────────
 class Message(db.Model):
     id          = db.Column(db.Integer, primary_key=True)

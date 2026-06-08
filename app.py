@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView, Story
 from config import Config
 import cloudinary
 import cloudinary.uploader
@@ -1889,6 +1889,97 @@ def ban_user(username):
     user.is_verified = False
     db.session.commit()
     return jsonify({"message": f"{username} banned"})
+
+# ── Stories API ───────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route('/api/stories', methods=['GET'])
+def get_stories():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    now = datetime.utcnow()
+
+    # Get stories from people current user follows + own stories
+    following_ids = [f.followed_id for f in
+        Follow.query.filter_by(follower_id=current.id).all()]
+    following_ids.append(current.id)
+
+    stories = Story.query.filter(
+        Story.user_id.in_(following_ids),
+        Story.expires_at > now
+    ).order_by(Story.created_at.desc()).all()
+
+    # Group by user
+    grouped = {}
+    for s in stories:
+        uname = s.author.username
+        if uname not in grouped:
+            grouped[uname] = {
+                'username': uname,
+                'avatar':   s.author.avatar or '',
+                'stories':  []
+            }
+        grouped[uname]['stories'].append({
+            'id':         s.id,
+            'image':      s.image or '',
+            'text':       s.text or '',
+            'bg_color':   s.bg_color,
+            'created_at': s.created_at.isoformat(),
+            'expires_at': s.expires_at.isoformat()
+        })
+
+    return jsonify(list(grouped.values()))
+
+
+@csrf.exempt
+@app.route('/api/stories', methods=['POST'])
+def create_story():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    image_file = request.files.get('image')
+    text       = request.form.get('text', '').strip()
+    bg_color   = request.form.get('bg_color', '#c47a2b')
+
+    if not image_file and not text:
+        return jsonify({'error': 'Story needs image or text'}), 400
+
+    image_path = None
+    if image_file:
+        try:
+            image_path = save_image_cloudinary(image_file)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+
+    from datetime import timedelta
+    story = Story(
+        user_id    = current.id,
+        image      = image_path,
+        text       = text,
+        bg_color   = bg_color,
+        expires_at = datetime.utcnow() + timedelta(hours=24)
+    )
+    db.session.add(story)
+    db.session.commit()
+    return jsonify({'message': 'Story created', 'id': story.id}), 201
+
+
+@csrf.exempt
+@app.route('/api/stories/<int:story_id>', methods=['DELETE'])
+def delete_story(story_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+    story = Story.query.get_or_404(story_id)
+    if story.user_id != current.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    db.session.delete(story)
+    db.session.commit()
+    return jsonify({'deleted': True})
+
 
 # ── Messages API ──────────────────────────────────────────────────────────────
 

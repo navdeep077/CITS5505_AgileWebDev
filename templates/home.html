@@ -16,6 +16,34 @@
     <!-- ── MAIN FEED ──────────────────────────────────────────── -->
     <div class="home-feed-col">
 
+        <!-- STORIES BAR -->
+        <div id="stories-bar" style="
+            display:flex;gap:12px;
+            overflow-x:auto;
+            padding:1rem 0 0.5rem;
+            scrollbar-width:none;
+            -webkit-overflow-scrolling:touch;
+        ">
+            <!-- Add story button -->
+            <div onclick="openStoryCreator()" style="
+                display:flex;flex-direction:column;
+                align-items:center;gap:6px;
+                cursor:pointer;flex-shrink:0;">
+                <div style="
+                    width:60px;height:60px;border-radius:50%;
+                    background:rgba(196,122,43,0.1);
+                    border:2px dashed var(--caramel);
+                    display:flex;align-items:center;
+                    justify-content:center;font-size:1.4rem;
+                    color:var(--caramel);">
+                    +
+                </div>
+                <span style="font-size:0.68rem;color:var(--muted);
+                    white-space:nowrap;">Your Story</span>
+            </div>
+            <div id="stories-list" style="display:flex;gap:12px;"></div>
+        </div>
+
         <!-- Cafe filter chips -->
         <div class="filter-bar" id="filter-bar">
             <button class="filter-chip active" onclick="filterFeed(null, this)">
@@ -148,6 +176,143 @@
 
 </div>
 
+<!-- STORY CREATOR MODAL -->
+<div id="story-creator" style="
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.8);z-index:3000;
+    align-items:center;justify-content:center;">
+    <div style="
+        background:var(--surface,#fff);border-radius:20px;
+        width:90%;max-width:400px;padding:1.5rem;
+        box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+        <div style="display:flex;justify-content:space-between;
+            align-items:center;margin-bottom:1.2rem;">
+            <h5 style="margin:0;font-weight:700;">
+                <i class="bi bi-camera" style="color:var(--caramel)"></i>
+                Add Story
+            </h5>
+            <button onclick="closeStoryCreator()"
+                style="background:none;border:none;font-size:1.4rem;
+                    cursor:pointer;color:var(--muted);">×</button>
+        </div>
+
+        <!-- Preview -->
+        <div id="story-preview" style="
+            width:100%;height:200px;border-radius:12px;
+            background:var(--caramel);
+            display:flex;align-items:center;justify-content:center;
+            margin-bottom:1rem;overflow:hidden;position:relative;">
+            <span id="story-preview-text"
+                style="color:white;font-size:1.1rem;font-weight:700;
+                    text-align:center;padding:1rem;"></span>
+            <img id="story-preview-img" src=""
+                style="display:none;width:100%;height:100%;object-fit:cover;">
+        </div>
+
+        <!-- Color picker for text stories -->
+        <div id="story-colors" style="
+            display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+            <div class="story-color-btn" data-color="#c47a2b"
+                style="width:28px;height:28px;border-radius:50%;
+                    background:#c47a2b;cursor:pointer;border:3px solid white;
+                    box-shadow:0 0 0 2px #c47a2b;"></div>
+            <div class="story-color-btn" data-color="#1a0e00"
+                style="width:28px;height:28px;border-radius:50%;
+                    background:#1a0e00;cursor:pointer;"></div>
+            <div class="story-color-btn" data-color="#2e7d32"
+                style="width:28px;height:28px;border-radius:50%;
+                    background:#2e7d32;cursor:pointer;"></div>
+            <div class="story-color-btn" data-color="#1565c0"
+                style="width:28px;height:28px;border-radius:50%;
+                    background:#1565c0;cursor:pointer;"></div>
+            <div class="story-color-btn" data-color="#6a1b9a"
+                style="width:28px;height:28px;border-radius:50%;
+                    background:#6a1b9a;cursor:pointer;"></div>
+            <div class="story-color-btn" data-color="#c62828"
+                style="width:28px;height:28px;border-radius:50%;
+                    background:#c62828;cursor:pointer;"></div>
+        </div>
+
+        <textarea id="story-text" placeholder="Add text to your story..."
+            rows="2" style="
+                width:100%;padding:8px 12px;border-radius:8px;
+                border:1.5px solid rgba(196,122,43,0.2);
+                font-family:inherit;font-size:0.88rem;
+                background:var(--surface,#fff);color:var(--text,#1a0e00);
+                resize:none;outline:none;margin-bottom:0.75rem;
+                box-sizing:border-box;"
+            oninput="updateStoryPreview()"></textarea>
+
+        <label style="
+            display:flex;align-items:center;gap:8px;
+            background:rgba(196,122,43,0.06);
+            border:1.5px dashed rgba(196,122,43,0.3);
+            border-radius:8px;padding:10px;cursor:pointer;
+            margin-bottom:1rem;font-size:0.85rem;color:var(--muted);">
+            <i class="bi bi-image" style="color:var(--caramel);font-size:1.1rem;"></i>
+            Add Photo
+            <input type="file" id="story-image-input" accept="image/*"
+                style="display:none;" onchange="previewStoryImage(event)">
+        </label>
+
+        <button onclick="submitStory()" style="
+            width:100%;background:var(--caramel);color:white;
+            border:none;border-radius:10px;padding:12px;
+            font-weight:700;font-size:0.95rem;cursor:pointer;
+            font-family:inherit;">
+            Share Story ☕
+        </button>
+    </div>
+</div>
+
+<!-- STORY VIEWER -->
+<div id="story-viewer" style="
+    display:none;position:fixed;inset:0;
+    background:black;z-index:3000;
+    align-items:center;justify-content:center;">
+    <div style="position:relative;width:100%;max-width:400px;height:100vh;
+        max-height:700px;">
+
+        <!-- Progress bar -->
+        <div style="position:absolute;top:12px;left:12px;right:12px;
+            z-index:10;display:flex;gap:4px;" id="story-progress-wrap"></div>
+
+        <!-- Header -->
+        <div style="position:absolute;top:32px;left:12px;right:12px;
+            z-index:10;display:flex;align-items:center;gap:10px;">
+            <div id="sv-avatar" style="
+                width:36px;height:36px;border-radius:50%;
+                background:var(--caramel);color:white;
+                display:flex;align-items:center;justify-content:center;
+                font-weight:700;overflow:hidden;border:2px solid white;"></div>
+            <span id="sv-username"
+                style="color:white;font-weight:700;font-size:0.9rem;"></span>
+            <span id="sv-time"
+                style="color:rgba(255,255,255,0.7);font-size:0.75rem;"></span>
+            <button onclick="closeStoryViewer()"
+                style="margin-left:auto;background:none;border:none;
+                    color:white;font-size:1.4rem;cursor:pointer;">×</button>
+        </div>
+
+        <!-- Story content -->
+        <div id="sv-content" style="
+            width:100%;height:100%;border-radius:12px;overflow:hidden;
+            display:flex;align-items:center;justify-content:center;"></div>
+
+        <!-- Nav arrows -->
+        <button onclick="prevStory()" style="
+            position:absolute;left:0;top:50%;transform:translateY(-50%);
+            background:rgba(0,0,0,0.3);border:none;color:white;
+            width:44px;height:44px;border-radius:0 8px 8px 0;
+            font-size:1.2rem;cursor:pointer;">‹</button>
+        <button onclick="nextStory()" style="
+            position:absolute;right:0;top:50%;transform:translateY(-50%);
+            background:rgba(0,0,0,0.3);border:none;color:white;
+            width:44px;height:44px;border-radius:8px 0 0 8px;
+            font-size:1.2rem;cursor:pointer;">›</button>
+    </div>
+</div>
+
 <!-- POST DETAIL MODAL -->
 <div id="post-modal" class="post-modal hidden">
     <div class="modal-overlay"></div>
@@ -162,4 +327,233 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
 <script src="{{ url_for('static', filename='js/home-sidebar.js') }}"></script>
+<script>
+// ── STORIES ───────────────────────────────────────────────────
+let storiesData    = [];
+let currentUserIdx = 0;
+let currentStoryIdx= 0;
+let storyTimer     = null;
+let selectedBg     = '#c47a2b';
+
+document.addEventListener('DOMContentLoaded', loadStories);
+
+function loadStories() {
+    fetch('/api/stories')
+        .then(r => r.json())
+        .then(data => {
+            storiesData = data;
+            renderStoriesBar(data);
+        })
+        .catch(() => {});
+}
+
+function renderStoriesBar(data) {
+    const list = document.getElementById('stories-list');
+    if (!list) return;
+
+    if (data.length === 0) {
+        list.innerHTML = '';
+        return;
+    }
+
+    list.innerHTML = data.map((u, i) => `
+        <div onclick="openStoryViewer(${i})"
+             style="display:flex;flex-direction:column;
+                    align-items:center;gap:6px;cursor:pointer;flex-shrink:0;">
+            <div style="
+                width:60px;height:60px;border-radius:50%;
+                border:3px solid var(--caramel);padding:2px;
+                background:white;">
+                <div style="
+                    width:100%;height:100%;border-radius:50%;
+                    background:${u.avatar ? 'transparent' : 'var(--caramel)'};
+                    color:white;display:flex;align-items:center;
+                    justify-content:center;font-weight:700;
+                    font-size:1.2rem;overflow:hidden;">
+                    ${u.avatar
+                        ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;">`
+                        : u.username.charAt(0).toUpperCase()}
+                </div>
+            </div>
+            <span style="font-size:0.68rem;color:var(--text,#1a0e00);
+                white-space:nowrap;max-width:64px;overflow:hidden;
+                text-overflow:ellipsis;">${u.username}</span>
+        </div>
+    `).join('');
+}
+
+// ── Story Viewer ──────────────────────────────────────────────
+function openStoryViewer(userIdx) {
+    currentUserIdx  = userIdx;
+    currentStoryIdx = 0;
+    document.getElementById('story-viewer').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    showStory();
+}
+
+function showStory() {
+    const user  = storiesData[currentUserIdx];
+    const story = user.stories[currentStoryIdx];
+    if (!story) return;
+
+    // Header
+    const avatarEl = document.getElementById('sv-avatar');
+    if (user.avatar) {
+        avatarEl.innerHTML = `<img src="${user.avatar}"
+            style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+        avatarEl.textContent = user.username.charAt(0).toUpperCase();
+    }
+    document.getElementById('sv-username').textContent = user.username;
+    document.getElementById('sv-time').textContent     =
+        timeAgoStory(story.created_at);
+
+    // Content
+    const content = document.getElementById('sv-content');
+    if (story.image) {
+        content.innerHTML = `<img src="${story.image}"
+            style="width:100%;height:100%;object-fit:cover;">`;
+    } else {
+        content.innerHTML = `
+            <div style="
+                width:100%;height:100%;
+                background:${story.bg_color};
+                display:flex;align-items:center;justify-content:center;
+                padding:2rem;">
+                <p style="color:white;font-size:1.4rem;font-weight:700;
+                    text-align:center;margin:0;">${story.text}</p>
+            </div>`;
+    }
+
+    // Progress bars
+    const wrap = document.getElementById('story-progress-wrap');
+    wrap.innerHTML = user.stories.map((_, i) => `
+        <div style="flex:1;height:3px;background:rgba(255,255,255,0.3);
+            border-radius:2px;overflow:hidden;">
+            <div style="height:100%;background:white;width:${i < currentStoryIdx ? 100 : i === currentStoryIdx ? 0 : 0}%;
+                transition:width 5s linear;"
+                id="prog-${i}"></div>
+        </div>
+    `).join('');
+
+    // Animate current bar
+    setTimeout(() => {
+        const bar = document.getElementById(`prog-${currentStoryIdx}`);
+        if (bar) bar.style.width = '100%';
+    }, 50);
+
+    // Auto-advance after 5 seconds
+    if (storyTimer) clearTimeout(storyTimer);
+    storyTimer = setTimeout(nextStory, 5000);
+}
+
+function nextStory() {
+    const user = storiesData[currentUserIdx];
+    if (currentStoryIdx < user.stories.length - 1) {
+        currentStoryIdx++;
+        showStory();
+    } else if (currentUserIdx < storiesData.length - 1) {
+        currentUserIdx++;
+        currentStoryIdx = 0;
+        showStory();
+    } else {
+        closeStoryViewer();
+    }
+}
+
+function prevStory() {
+    if (currentStoryIdx > 0) {
+        currentStoryIdx--;
+        showStory();
+    } else if (currentUserIdx > 0) {
+        currentUserIdx--;
+        currentStoryIdx = storiesData[currentUserIdx].stories.length - 1;
+        showStory();
+    }
+}
+
+function closeStoryViewer() {
+    document.getElementById('story-viewer').style.display = 'none';
+    document.body.style.overflow = '';
+    if (storyTimer) clearTimeout(storyTimer);
+}
+
+// ── Story Creator ─────────────────────────────────────────────
+function openStoryCreator() {
+    document.getElementById('story-creator').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeStoryCreator() {
+    document.getElementById('story-creator').style.display = 'none';
+    document.body.style.overflow = '';
+    document.getElementById('story-text').value = '';
+    document.getElementById('story-preview-text').textContent = '';
+    document.getElementById('story-preview-img').style.display = 'none';
+    document.getElementById('story-image-input').value = '';
+    document.getElementById('story-preview').style.background = selectedBg;
+}
+
+function updateStoryPreview() {
+    const text = document.getElementById('story-text').value;
+    document.getElementById('story-preview-text').textContent = text;
+}
+
+function previewStoryImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const img = document.getElementById('story-preview-img');
+        img.src = ev.target.result;
+        img.style.display = 'block';
+        document.getElementById('story-preview-text').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+// Color picker
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.story-color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedBg = btn.dataset.color;
+            document.getElementById('story-preview').style.background = selectedBg;
+            document.querySelectorAll('.story-color-btn').forEach(b =>
+                b.style.boxShadow = '');
+            btn.style.boxShadow = `0 0 0 3px white, 0 0 0 5px ${selectedBg}`;
+        });
+    });
+});
+
+function submitStory() {
+    const text      = document.getElementById('story-text').value.trim();
+    const imageFile = document.getElementById('story-image-input').files[0];
+
+    if (!text && !imageFile) {
+        showToast('Add text or an image to your story', 'error');
+        return;
+    }
+
+    const formData = new FormData();
+    if (text)      formData.append('text', text);
+    if (imageFile) formData.append('image', imageFile);
+    formData.append('bg_color', selectedBg);
+
+    fetch('/api/stories', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            closeStoryCreator();
+            loadStories();
+            showToast('Story shared! ☕', 'success');
+        })
+        .catch(() => showToast('Could not share story', 'error'));
+}
+
+function timeAgoStory(iso) {
+    const d    = new Date(iso + 'Z');
+    const diff = (new Date() - d) / 1000;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    return `${Math.floor(diff / 3600)}h ago`;
+}
+</script>
 {% endblock %}
