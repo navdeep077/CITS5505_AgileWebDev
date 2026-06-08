@@ -399,6 +399,40 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     <div id="reaction-summary-${postData.id}"
          style="padding:0 12px 4px;display:flex;gap:8px;flex-wrap:wrap;"></div>
 
+    ${postData.poll ? `
+    <div class="poll-container" id="poll-${postData.poll.id}"
+         style="margin:8px 12px;padding:12px;
+                background:rgba(196,122,43,0.04);
+                border:1.5px solid rgba(196,122,43,0.15);
+                border-radius:12px;">
+        <div style="font-weight:700;font-size:0.9rem;
+            color:var(--text,#1a0e00);margin-bottom:10px;">
+            <i class="bi bi-bar-chart-horizontal" style="color:var(--caramel)"></i>
+            ${postData.poll.question}
+        </div>
+        ${postData.poll.options.map(opt => `
+            <button onclick="votePoll(${opt.id}, ${postData.poll.id}, ${postData.id})"
+                style="width:100%;text-align:left;margin-bottom:6px;
+                    background:rgba(196,122,43,0.06);
+                    border:1.5px solid rgba(196,122,43,0.2);
+                    border-radius:8px;padding:8px 12px;cursor:pointer;
+                    font-family:inherit;font-size:0.85rem;
+                    color:var(--text,#1a0e00);position:relative;overflow:hidden;">
+                <div style="position:absolute;left:0;top:0;bottom:0;
+                    width:${opt.pct}%;background:rgba(196,122,43,0.12);
+                    transition:width 0.4s ease;"></div>
+                <span style="position:relative;z-index:1;">${opt.text}</span>
+                <span style="position:relative;z-index:1;float:right;
+                    color:var(--caramel);font-weight:700;font-size:0.78rem;">
+                    ${opt.pct}%
+                </span>
+            </button>
+        `).join('')}
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">
+            ${postData.poll.total} vote${postData.poll.total !== 1 ? 's' : ''}
+        </div>
+    </div>` : ''}
+
     <div class="post-caption-full"
          id="caption-${postData.id}"
          data-raw="${(postData.text || '').replace(/"/g, '&quot;')}"
@@ -656,6 +690,19 @@ function resetModal() {
     if (cont) cont.style.display = "none";
     const sched = document.getElementById("modal-schedule");
     if (sched) sched.value = "";
+    // Clear poll
+    ['poll-opt-1','poll-opt-2','poll-opt-3','poll-opt-4'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const pollSection = document.getElementById('poll-section');
+    if (pollSection) pollSection.style.display = 'none';
+}
+
+function togglePollSection() {
+    const section = document.getElementById('poll-section');
+    if (!section) return;
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
 }
 
 function previewImage(event) {
@@ -686,6 +733,54 @@ function submitModalPost() {
     if (scheduledAt) formData.append("scheduled_at", scheduledAt);
     if (imageInput && imageInput.files.length > 0) {
         formData.append("image", imageInput.files[0]);
+    }
+
+    // Check if poll options exist
+    const opt1 = document.getElementById('poll-opt-1')?.value.trim();
+    const opt2 = document.getElementById('poll-opt-2')?.value.trim();
+
+    if (opt1 && opt2) {
+        const options = [opt1, opt2];
+        const opt3 = document.getElementById('poll-opt-3')?.value.trim();
+        const opt4 = document.getElementById('poll-opt-4')?.value.trim();
+        if (opt3) options.push(opt3);
+        if (opt4) options.push(opt4);
+
+        // Use FormData so image can be included
+        const pollForm = new FormData();
+        pollForm.append('question', text);
+        pollForm.append('text', text);
+        pollForm.append('options', JSON.stringify(options));
+        if (imageInput && imageInput.files.length > 0) {
+            pollForm.append('image', imageInput.files[0]);
+        }
+
+        fetch('/api/polls', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: text, text, options })
+        })
+        .then(r => r.json())
+        .then(data => {
+            // If image was attached upload it to the post
+            if (imageInput && imageInput.files.length > 0 && data.post_id) {
+                const imgForm = new FormData();
+                imgForm.append('image', imageInput.files[0]);
+                return fetch(`/api/posts/${data.post_id}/add-image`, {
+                    method: 'POST',
+                    body: imgForm
+                }).then(() => data);
+            }
+            return data;
+        })
+        .then(() => {
+            resetModal();
+            closeModal();
+            loadPosts();
+            showToast('Poll created ✓', 'success');
+        })
+        .catch(() => showToast('Could not create poll', 'error'));
+        return;
     }
 
     const endpoint = scheduledAt ? '/api/posts/schedule' : '/api/posts';
@@ -840,9 +935,13 @@ function sendReaction(postId, emoji) {
 function updateReactionSummary(postId, counts) {
     const summaryEl = document.getElementById(`reaction-summary-${postId}`);
     if (!summaryEl) return;
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    if (total === 0) { summaryEl.innerHTML = ''; return; }
-    summaryEl.innerHTML = Object.entries(counts)
+    const entries = Object.entries(counts).filter(([e, c]) => c > 0);
+    // Only show summary if more than one emoji type
+    if (entries.length <= 1) {
+        summaryEl.innerHTML = '';
+        return;
+    }
+    summaryEl.innerHTML = entries
         .sort((a, b) => b[1] - a[1])
         .map(([e, c]) => `<span style="font-size:0.82rem;">${e} ${c}</span>`)
         .join(' ');
@@ -871,6 +970,34 @@ document.addEventListener('click', e => {
         });
     }
 });
+
+// ── POLLS ─────────────────────────────────────────────────────────────────────
+function votePoll(optionId, pollId, postId) {
+    fetch(`/api/polls/vote/${optionId}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            // Update poll UI
+            const container = document.getElementById(`poll-${pollId}`);
+            if (!container) return;
+            container.querySelectorAll('button').forEach((btn, i) => {
+                const opt = data.options[i];
+                if (!opt) return;
+                const bar = btn.querySelector('div');
+                if (bar) bar.style.width = opt.pct + '%';
+                const pctEl = btn.querySelectorAll('span')[1];
+                if (pctEl) pctEl.textContent = opt.pct + '%';
+                if (opt.id === optionId) {
+                    btn.style.borderColor = 'var(--caramel)';
+                    btn.style.background  = 'rgba(196,122,43,0.1)';
+                }
+            });
+            const totalEl = container.querySelector('div:last-child');
+            if (totalEl) totalEl.textContent =
+                `${data.total} vote${data.total !== 1 ? 's' : ''}`;
+            showToast('Vote recorded ✓', 'success');
+        })
+        .catch(() => showToast('Could not vote', 'error'));
+}
 
 // ── LOGOUT ────────────────────────────────────────────────────────────────────
 function logout() {
