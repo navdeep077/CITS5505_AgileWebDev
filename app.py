@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView, Story
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message, ProfileView, Story, Reaction
 from config import Config
 import cloudinary
 import cloudinary.uploader
@@ -1889,6 +1889,71 @@ def ban_user(username):
     user.is_verified = False
     db.session.commit()
     return jsonify({"message": f"{username} banned"})
+
+# ── Reactions API ─────────────────────────────────────────────────────────────
+
+@csrf.exempt
+@app.route('/api/posts/<int:post_id>/react', methods=['POST'])
+def react_to_post(post_id):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data  = request.get_json()
+    emoji = data.get('emoji', '').strip()
+    valid = ['☕', '❤️', '😄', '😮', '😢']
+    if emoji not in valid:
+        return jsonify({'error': 'Invalid emoji'}), 400
+
+    existing = Reaction.query.filter_by(
+        post_id=post_id, user_id=current.id
+    ).first()
+
+    if existing:
+        if existing.emoji == emoji:
+            # Remove reaction
+            db.session.delete(existing)
+            db.session.commit()
+            return jsonify({'action': 'removed', 'emoji': emoji,
+                'counts': get_reaction_counts(post_id)})
+        else:
+            # Change reaction
+            existing.emoji = emoji
+            db.session.commit()
+            return jsonify({'action': 'changed', 'emoji': emoji,
+                'counts': get_reaction_counts(post_id)})
+
+    # Add new reaction
+    db.session.add(Reaction(
+        post_id=post_id, user_id=current.id, emoji=emoji
+    ))
+    db.session.commit()
+    return jsonify({'action': 'added', 'emoji': emoji,
+        'counts': get_reaction_counts(post_id)})
+
+
+@app.route('/api/posts/<int:post_id>/reactions', methods=['GET'])
+def get_reactions(post_id):
+    current = get_current_user()
+    my_reaction = None
+    if current:
+        r = Reaction.query.filter_by(
+            post_id=post_id, user_id=current.id
+        ).first()
+        if r:
+            my_reaction = r.emoji
+    return jsonify({
+        'counts':      get_reaction_counts(post_id),
+        'my_reaction': my_reaction
+    })
+
+
+def get_reaction_counts(post_id):
+    from collections import Counter
+    reactions = Reaction.query.filter_by(post_id=post_id).all()
+    counts    = Counter(r.emoji for r in reactions)
+    return dict(counts)
+
 
 # ── Stories API ───────────────────────────────────────────────────────────────
 

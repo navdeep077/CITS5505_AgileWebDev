@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bar.style.cursor = 'grab';
 
-    // Touch scroll for mobile
     let touchStartX  = 0;
     let touchScrollL = 0;
 
@@ -324,7 +323,7 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     <div class="post-header">
         ${avatarMarkup(username, postData.avatar || "")}
         <div class="user-info">
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:nowrap;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;">
                 <a href="/user/${username}" class="post-username" style="font-weight:700;text-decoration:none;color:var(--text,#1a0e00);">
                     ${username}
                 </a>
@@ -343,6 +342,29 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
 
     ${!isModal ? `
     <div class="post-actions">
+        <div class="reaction-wrap" style="position:relative;display:inline-flex;align-items:center;">
+            <button class="action-btn reaction-trigger-btn"
+                    id="react-btn-${postData.id}"
+                    onclick="showReactions(${postData.id}); event.stopPropagation();">
+                <span id="my-reaction-${postData.id}">☕</span>
+                <span id="react-count-${postData.id}" class="like-count">0</span>
+            </button>
+            <div class="reaction-picker" id="reactions-${postData.id}"
+                 style="position:absolute;bottom:110%;left:0;
+                        background:var(--surface,#fff);border-radius:30px;
+                        padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,0.15);
+                        display:none;gap:4px;z-index:100;white-space:nowrap;
+                        border:1px solid rgba(196,122,43,0.15);">
+                ${['☕','❤️','😄','😮','😢'].map(e => `
+                    <button onclick="sendReaction(${postData.id}, '${e}'); event.stopPropagation();"
+                            style="background:none;border:none;font-size:1.3rem;
+                                   cursor:pointer;padding:4px;border-radius:50%;
+                                   transition:transform 0.15s;"
+                            onmouseenter="this.style.transform='scale(1.3)'"
+                            onmouseleave="this.style.transform='scale(1)'">${e}</button>
+                `).join('')}
+            </div>
+        </div>
         <button onclick="likePost(${postData.id}, this)" class="action-btn like-btn" data-liked="${isLiked}">
             <i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}"
                style="color:${isLiked ? '#e53935' : 'inherit'}"></i>
@@ -377,6 +399,9 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
             <span data-view-count="${postData.id}">${postData.view_count || 0}</span> views
         </span>
     </div>`}
+
+    <div id="reaction-summary-${postData.id}"
+         style="padding:0 12px 4px;display:flex;gap:8px;flex-wrap:wrap;"></div>
 
     <div class="post-caption-full"
          id="caption-${postData.id}"
@@ -420,6 +445,11 @@ function renderPost(postData, targetId = "feed", mode = "feed") {
     `;
 
     feed.appendChild(post);
+
+    // Load reactions
+    if (!isModal && postData.id) {
+        loadReactions(postData.id);
+    }
 
     if (typeof window.initLightbox === 'function') {
         setTimeout(window.initLightbox, 100);
@@ -627,7 +657,7 @@ function resetModal() {
     if (shop) shop.selectedIndex = 0;
     if (file) file.value = "";
     if (prev) prev.src = "";
-     if (cont) cont.style.display = "none";
+    if (cont) cont.style.display = "none";
     const sched = document.getElementById("modal-schedule");
     if (sched) sched.value = "";
 }
@@ -654,16 +684,10 @@ function submitModalPost() {
 
     if (!text) { showToast('Add a caption first', 'error'); return; }
 
-    if (scheduledAt) {
-        showToast('Post scheduled ✓', 'success');
-    }
-
     const formData = new FormData();
     formData.append("text", text);
     formData.append("shop", shop || "");
-    if (scheduledAt) {
-        formData.append("scheduled_at", scheduledAt);
-    }
+    if (scheduledAt) formData.append("scheduled_at", scheduledAt);
     if (imageInput && imageInput.files.length > 0) {
         formData.append("image", imageInput.files[0]);
     }
@@ -781,6 +805,76 @@ function filterFeed(cafeName, btn) {
         })
         .catch(err => console.error('Filter error:', err));
 }
+
+// ── REACTIONS ─────────────────────────────────────────────────────────────────
+function showReactions(postId) {
+    const picker = document.getElementById(`reactions-${postId}`);
+    if (!picker) return;
+    const isVisible = picker.style.display === 'flex';
+    document.querySelectorAll('.reaction-picker').forEach(p => {
+        p.style.display = 'none';
+    });
+    picker.style.display = isVisible ? 'none' : 'flex';
+}
+
+function sendReaction(postId, emoji) {
+    fetch(`/api/posts/${postId}/react`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emoji })
+    })
+    .then(r => r.json())
+    .then(data => {
+        const btn   = document.getElementById(`my-reaction-${postId}`);
+        const count = document.getElementById(`react-count-${postId}`);
+        if (btn) {
+            btn.textContent = data.action === 'removed' ? '☕' : emoji;
+        }
+        if (count) {
+            const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
+            count.textContent = total;
+        }
+        const picker = document.getElementById(`reactions-${postId}`);
+        if (picker) picker.style.display = 'none';
+        updateReactionSummary(postId, data.counts);
+    })
+    .catch(err => console.error('Reaction error:', err));
+}
+
+function updateReactionSummary(postId, counts) {
+    const summaryEl = document.getElementById(`reaction-summary-${postId}`);
+    if (!summaryEl) return;
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total === 0) { summaryEl.innerHTML = ''; return; }
+    summaryEl.innerHTML = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([e, c]) => `<span style="font-size:0.82rem;">${e} ${c}</span>`)
+        .join(' ');
+}
+
+function loadReactions(postId) {
+    fetch(`/api/posts/${postId}/reactions`)
+        .then(r => r.json())
+        .then(data => {
+            const btn   = document.getElementById(`my-reaction-${postId}`);
+            const count = document.getElementById(`react-count-${postId}`);
+            if (btn && data.my_reaction) btn.textContent = data.my_reaction;
+            if (count) {
+                const total = Object.values(data.counts).reduce((a, b) => a + b, 0);
+                count.textContent = total;
+            }
+            updateReactionSummary(postId, data.counts);
+        })
+        .catch(() => {});
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.reaction-wrap')) {
+        document.querySelectorAll('.reaction-picker').forEach(p => {
+            p.style.display = 'none';
+        });
+    }
+});
 
 // ── LOGOUT ────────────────────────────────────────────────────────────────────
 function logout() {
