@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry
+from models import db, User, Post, Comment, Review, Follow, Notification, Bookmark, Report, Block, PostView, JournalEntry, Message
 from config import Config
 import cloudinary
 import cloudinary.uploader
@@ -1872,8 +1872,152 @@ def ban_user(username):
     db.session.commit()
     return jsonify({"message": f"{username} banned"})
 
-# ── Application Entry Point ───────────────────────────────────────────────────
+# ── Messages API ──────────────────────────────────────────────────────────────
 
+@app.route('/messages')
+@login_required
+def messages_page():
+    return render_template('messages.html')
+
+
+@app.route('/messages/<username>')
+@login_required
+def message_thread(username):
+    other = User.query.filter_by(username=username).first_or_404()
+    return render_template('messages.html', other_user=other.username)
+
+
+@csrf.exempt
+@app.route('/api/messages/<username>', methods=['GET'])
+def get_messages(username):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+    other = User.query.filter_by(username=username).first_or_404()
+
+    messages = Message.query.filter(
+        db.or_(
+            db.and_(Message.sender_id == current.id,
+                    Message.receiver_id == other.id),
+            db.and_(Message.sender_id == other.id,
+                    Message.receiver_id == current.id)
+        )
+    ).order_by(Message.created_at.asc()).all()
+
+    # Mark received messages as read
+    Message.query.filter_by(
+        sender_id=other.id,
+        receiver_id=current.id,
+        is_read=False
+    ).update({'is_read': True})
+    db.session.commit()
+
+    return jsonify([{
+        'id':         m.id,
+        'sender':     m.sender.username,
+        'receiver':   m.receiver.username,
+        'text':       m.text,
+        'is_read':    m.is_read,
+        'created_at': m.created_at.isoformat(),
+        'is_mine':    m.sender_id == current.id
+    } for m in messages])
+
+
+@csrf.exempt
+@app.route('/api/messages/<username>', methods=['POST'])
+def send_message(username):
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+    other = User.query.filter_by(username=username).first_or_404()
+    data  = request.get_json()
+    text  = (data.get('text') or '').strip()
+    if not text:
+        return jsonify({'error': 'Message cannot be empty'}), 400
+
+    msg = Message(
+        sender_id   = current.id,
+        receiver_id = other.id,
+        text        = text
+    )
+    db.session.add(msg)
+    db.session.commit()
+    return jsonify({
+        'id':         msg.id,
+        'sender':     current.username,
+        'receiver':   other.username,
+        'text':       msg.text,
+        'is_read':    False,
+        'created_at': msg.created_at.isoformat(),
+        'is_mine':    True
+    }), 201
+
+
+@app.route('/api/messages/conversations', methods=['GET'])
+def get_conversations():
+    current = get_current_user()
+    if not current:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    # Get all users current user has messaged or received messages from
+    sent = db.session.query(Message.receiver_id).filter_by(
+        sender_id=current.id
+    ).distinct()
+    received = db.session.query(Message.sender_id).filter_by(
+        receiver_id=current.id
+    ).distinct()
+
+    user_ids = set()
+    for row in sent:
+        user_ids.add(row[0])
+    for row in received:
+        user_ids.add(row[0])
+
+    conversations = []
+    for uid in user_ids:
+        other = User.query.get(uid)
+        if not other:
+            continue
+        last_msg = Message.query.filter(
+            db.or_(
+                db.and_(Message.sender_id == current.id,
+                        Message.receiver_id == uid),
+                db.and_(Message.sender_id == uid,
+                        Message.receiver_id == current.id)
+            )
+        ).order_by(Message.created_at.desc()).first()
+
+        unread = Message.query.filter_by(
+            sender_id=uid,
+            receiver_id=current.id,
+            is_read=False
+        ).count()
+
+        conversations.append({
+            'username':   other.username,
+            'avatar':     other.avatar or '',
+            'last_msg':   last_msg.text if last_msg else '',
+            'last_time':  last_msg.created_at.isoformat() if last_msg else '',
+            'unread':     unread
+        })
+
+    conversations.sort(key=lambda x: x['last_time'], reverse=True)
+    return jsonify(conversations)
+
+
+@app.route('/api/messages/unread-count', methods=['GET'])
+def unread_message_count():
+    current = get_current_user()
+    if not current:
+        return jsonify({'count': 0})
+    count = Message.query.filter_by(
+        receiver_id=current.id,
+        is_read=False
+    ).count()
+    return jsonify({'count': count})
+
+
+# ── Application Entry Point ───────────────────────────────────────────────────
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

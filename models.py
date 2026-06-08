@@ -201,6 +201,18 @@ class Comment(db.Model):
     text       = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+# ── DIRECT MESSAGE MODEL ──────────────────────────────────────────────────────
+class Message(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    sender_id   = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    text        = db.Column(db.Text, nullable=False)
+    is_read     = db.Column(db.Boolean, default=False)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    sender      = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+    receiver    = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages')
+
 # ── REVIEW MODEL ──────────────────────────────────────────────────────────────
 class Review(db.Model):
     id         = db.Column(db.Integer, primary_key=True)

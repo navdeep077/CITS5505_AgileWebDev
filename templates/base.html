@@ -85,6 +85,12 @@
                 <i class="bi bi-bookmark"></i>
             </a>
 
+            <!-- Messages -->
+            <a href="{{ url_for('messages_page') }}" class="nav-icon-btn position-relative" title="Messages">
+                <i class="bi bi-chat-dots"></i>
+                <span class="notif-badge" id="msg-count" style="display:none"></span>
+            </a>
+
             <!-- Notifications -->
             <a href="{{ url_for('notifications') }}" class="nav-icon-btn position-relative"
                title="Notifications">
@@ -193,9 +199,13 @@
         <span>Home</span>
     </a>
     <a href="{{ url_for('brew') }}" class="mobile-nav-item">
-    <i class="bi bi-cup-hot-fill"></i>
-    <span>Brew</span>
-</a>
+        <i class="bi bi-cup-hot-fill"></i>
+        <span>Brew</span>
+    </a>
+    <a href="{{ url_for('messages_page') }}" class="mobile-nav-item">
+        <i class="bi bi-chat-dots-fill"></i>
+        <span>Messages</span>
+    </a>
     <a href="{{ url_for('leaderboard_page') }}" class="mobile-nav-item">
         <i class="bi bi-trophy-fill"></i>
         <span>Ranks</span>
@@ -257,6 +267,26 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/search.js') }}"></script>
 <script src="{{ url_for('static', filename='js/notifications-count.js') }}"></script>
+<script>
+// Poll unread message count every 10 seconds
+(function pollMessageCount() {
+    fetch('/api/messages/unread-count')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('msg-count');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count > 9 ? '9+' : data.count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(() => {});
+    setTimeout(pollMessageCount, 10000);
+})();
+</script>
 <script src="{{ url_for('static', filename='js/hashtag-autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lightbox.js') }}"></script>
 
