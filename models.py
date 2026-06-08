@@ -183,6 +183,13 @@ class Post(db.Model):
     bookmarks    = db.relationship('Bookmark', backref='post', cascade='all, delete-orphan')
 
 
+# ── PROFILE VIEW MODEL ────────────────────────────────────────────────────────
+class ProfileView(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    profile_id  = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    viewer_id   = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
 # ── POST VIEW MODEL ────────────────────────────────────────────────────────────
 class PostView(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
