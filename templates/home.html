@@ -289,8 +289,16 @@
                 style="color:white;font-weight:700;font-size:0.9rem;"></span>
             <span id="sv-time"
                 style="color:rgba(255,255,255,0.7);font-size:0.75rem;"></span>
+            <button id="sv-delete-btn"
+                onclick="deleteCurrentStory()"
+                style="display:none;background:rgba(229,57,53,0.8);
+                    border:none;color:white;border-radius:6px;
+                    padding:4px 10px;font-size:0.75rem;font-weight:700;
+                    cursor:pointer;margin-left:auto;margin-right:8px;">
+                🗑 Delete
+            </button>
             <button onclick="closeStoryViewer()"
-                style="margin-left:auto;background:none;border:none;
+                style="background:none;border:none;
                     color:white;font-size:1.4rem;cursor:pointer;">×</button>
         </div>
 
@@ -407,6 +415,13 @@ function showStory() {
     document.getElementById('sv-username').textContent = user.username;
     document.getElementById('sv-time').textContent     =
         timeAgoStory(story.created_at);
+
+    // Show delete button only for own stories
+    const deleteBtn = document.getElementById('sv-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.style.display =
+            user.username === window.currentUser ? 'inline-block' : 'none';
+    }
 
     // Content
     const content = document.getElementById('sv-content');
@@ -547,6 +562,36 @@ function submitStory() {
             showToast('Story shared! ☕', 'success');
         })
         .catch(() => showToast('Could not share story', 'error'));
+}
+
+function deleteCurrentStory() {
+    const user  = storiesData[currentUserIdx];
+    const story = user.stories[currentStoryIdx];
+    if (!story) return;
+    if (!confirm('Delete this story?')) return;
+
+    fetch(`/api/stories/${story.id}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(() => {
+            showToast('Story deleted', 'info');
+            // Remove from local data
+            user.stories.splice(currentStoryIdx, 1);
+            if (user.stories.length === 0) {
+                storiesData.splice(currentUserIdx, 1);
+                if (storiesData.length === 0) {
+                    closeStoryViewer();
+                    loadStories();
+                    return;
+                }
+                currentUserIdx  = Math.min(currentUserIdx, storiesData.length - 1);
+                currentStoryIdx = 0;
+            } else {
+                currentStoryIdx = Math.min(currentStoryIdx, user.stories.length - 1);
+            }
+            renderStoriesBar(storiesData);
+            showStory();
+        })
+        .catch(() => showToast('Could not delete story', 'error'));
 }
 
 function timeAgoStory(iso) {
