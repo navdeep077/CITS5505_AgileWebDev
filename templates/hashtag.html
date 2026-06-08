@@ -7,20 +7,15 @@
 {% endblock %}
 
 {% block content %}
-
-<!-- HERO -->
-<div class="hashtag-hero">
+<div class="leaderboard-hero">
     <h1><i class="bi bi-hash"></i>{{ tag }}</h1>
     <p>All posts tagged with #{{ tag }}</p>
 </div>
 
-
-<!-- FEED -->
 <div class="container" style="max-width:680px;margin-top:1rem;">
     <div id="hashtag-feed"></div>
 </div>
 
-<!-- POST MODAL -->
 <div id="post-modal" class="post-modal hidden">
     <div class="modal-overlay"></div>
     <div class="modal-content">
@@ -28,13 +23,53 @@
         <div id="modal-post-container"></div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    const hashTag = "{{ tag }}";
-</script>
 <script src="{{ url_for('static', filename='js/social.js') }}"></script>
-<script src="{{ url_for('static', filename='js/hashtag.js') }}"></script>
+<script>
+window.currentUser = "{{ session.get('user', '') }}";
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tag  = {{ tag | tojson }};
+    const feed = document.getElementById('hashtag-feed');
+
+    feed.innerHTML = `
+        <div class="skeleton-post">
+            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1;">
+                    <div class="skeleton skeleton-line" style="width:40%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-image"></div>
+        </div>`;
+
+    fetch(`/api/posts/hashtag/${encodeURIComponent(tag)}`)
+        .then(r => r.json())
+        .then(posts => {
+            feed.innerHTML = '';
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div style="text-align:center;padding:3rem;color:var(--muted);">
+                        <i class="bi bi-hash" style="font-size:2.5rem;display:block;margin-bottom:1rem;"></i>
+                        <h5>No posts with #${tag} yet</h5>
+                        <p>Be the first to use this hashtag</p>
+                    </div>`;
+                return;
+            }
+            posts.forEach(post => renderPost(post, 'hashtag-feed'));
+        })
+        .catch(() => {
+            feed.innerHTML = `<p style="color:var(--muted);text-align:center;padding:2rem;">Could not load posts</p>`;
+        });
+
+    document.getElementById('close-modal')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
+    document.querySelector('#post-modal .modal-overlay')?.addEventListener('click', () => {
+        document.getElementById('post-modal').classList.add('hidden');
+    });
+});
+</script>
 {% endblock %}

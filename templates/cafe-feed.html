@@ -48,14 +48,13 @@
                 <i class="bi bi-clock" style="color:var(--caramel)"></i>
                 {{ cafe.hours }}
             </div>
-            <div class="cafe-info-row">
+             <div class="cafe-info-row" id="cafe-rating-row">
                 <i class="bi bi-star-fill" style="color:var(--caramel)"></i>
-                {{ cafe.rating }} stars
+                <span id="cafe-rating-text">{{ cafe.rating }} stars</span>
             </div>
-            <div class="cafe-info-row">
-                <!-- Green dot indicating the cafe is currently open -->
-                <i class="bi bi-circle-fill" style="color:#4caf50;font-size:0.6rem"></i>
-                Open Now
+            <div class="cafe-info-row" id="cafe-open-status">
+                <i class="bi bi-circle-fill" style="color:#888;font-size:0.6rem"></i>
+                Checking...
             </div>
 
             <!-- Feature tags from the cafe data (e.g. Cold Brew, Pour Over) -->
@@ -99,11 +98,47 @@
 
 {% block extra_js %}
 <script>
-    /* Expose the landing route for JS logout redirect */
     window.routes = { landing: "{{ url_for('landing') }}" };
-
-    /* Expose the cafe name as a JS variable used by cafe-feed.js to fetch posts */
     const cafeName = {{ cafe.name | tojson }};
+
+    // ── Real-time open/close status ───────────────────────────
+    fetch('/api/cafe-status')
+        .then(r => r.json())
+        .then(statuses => {
+            const status = statuses[cafeName];
+            const el     = document.getElementById('cafe-open-status');
+            if (!el || !status) return;
+            if (status.is_open) {
+                el.innerHTML = `
+                    <i class="bi bi-circle-fill"
+                       style="color:#4caf50;font-size:0.6rem"></i>
+                    ${status.closes_in
+                        ? `Open · Closes in ${status.closes_in}`
+                        : `Open · Closes ${status.closes}`}`;
+            } else {
+                el.innerHTML = `
+                    <i class="bi bi-circle-fill"
+                       style="color:#e53935;font-size:0.6rem"></i>
+                    ${status.opens_in
+                        ? `Closed · Opens in ${status.opens_in}`
+                        : `Closed · Opens ${status.opens}`}`;
+            }
+        })
+        .catch(() => {});
+
+    // ── Real-time rating ──────────────────────────────────────
+    fetch(`/api/cafe-stats/${encodeURIComponent(cafeName)}`)
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById('cafe-rating-text');
+            if (!el) return;
+            if (data.count === 0) {
+                el.textContent = 'No ratings yet';
+            } else {
+                el.textContent = `${data.average} stars (${data.count} review${data.count > 1 ? 's' : ''})`;
+            }
+        })
+        .catch(() => {});
 </script>
 
 <!-- social.js: provides renderPost() used by cafe-feed.js -->

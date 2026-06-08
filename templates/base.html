@@ -228,9 +228,34 @@
 <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/delete.js') }}"></script>
 <script src="{{ url_for('static', filename='js/darkmode.js') }}"></script>
+<script>
+(function() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+        document.body.dataset.theme = 'dark';
+    }
+})();
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#dark-mode-toggle, #dark-mode-toggle-mobile')
+        .forEach(btn => {
+            btn?.addEventListener('click', () => {
+                const isDark = document.body.dataset.theme === 'dark';
+                const next   = isDark ? '' : 'dark';
+                document.body.dataset.theme = next;
+                document.documentElement.dataset.theme = next;
+                localStorage.setItem('theme', next);
+                document.querySelectorAll(
+                    '#dark-mode-toggle i, #dark-mode-toggle-mobile i'
+                ).forEach(i => {
+                    i.className = next === 'dark' ? 'bi bi-sun' : 'bi bi-moon';
+                });
+            });
+        });
+});
+</script>
 <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/search.js') }}"></script>
-<script src="{{ url_for('static', filename='js/notifications-count.js') }}"></script>
 <script src="{{ url_for('static', filename='js/notifications-count.js') }}"></script>
 <script src="{{ url_for('static', filename='js/hashtag-autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lightbox.js') }}"></script>
